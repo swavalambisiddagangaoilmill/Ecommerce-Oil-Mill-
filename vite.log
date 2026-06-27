@@ -1,0 +1,82 @@
+
+> cold-pressed-oil-store@1.0.0 dev
+> vite --host 127.0.0.1 --port 5174
+
+Port 5174 is in use, trying another one...
+
+  [32m[1mVITE[22m v6.4.3[39m  [2mready in [0m[1m1628[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5175[22m/[39m
+[2m5:16:07 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/Navbar.jsx, /src/index.css[22m
+[2m5:31:06 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:31:06 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:35:06 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:35:06 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:35:15 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:36:03 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:36:30 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:37:00 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:37:49 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:38:30 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:39:40 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:39:40 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:41:07 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:41:41 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:42:20 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:43:36 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:44:16 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:45:02 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:45:53 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:46:59 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:46:59 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m5:47:11 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m6:08:39 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/providers/AppProviders.jsx, /src/index.css[22m
+[2m6:08:42 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m6:08:45 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/feedback/IntroLoader.jsx, /src/index.css[22m
+[2m6:08:48 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m6:09:49 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msrc/components/widgets/ChatWidget.jsx[22m
+[2m6:09:51 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msrc/components/widgets/WishlistWidget.jsx[22m
+[2m6:10:31 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/WishlistWidget.jsx, /src/index.css[22m
+[2m6:11:08 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/feedback/ToastProvider.jsx, /src/index.css[22m
+[2m6:11:08 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/components/feedback/ToastProvider.jsx[22m Could not Fast Refresh ("useToast" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+[2m6:11:08 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/providers/AppProviders.jsx, /src/index.css, /src/components/product/ProductCard.jsx, /src/pages/ProductDetails.jsx[22m
+[2m6:11:10 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/product/ProductCard.jsx, /src/index.css[22m
+[2m6:11:51 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/product/ProductCard.jsx, /src/index.css[22m
+[2m6:11:53 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/ProductDetails.jsx, /src/index.css[22m
+[2m6:12:20 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/Navbar.jsx, /src/index.css[22m
+[2m6:12:23 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/MobileDrawer.jsx, /src/index.css[22m
+[2m6:12:25 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/Shop.jsx, /src/index.css[22m
+[2m6:12:27 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ui/Input.jsx, /src/index.css[22m
+[2m6:12:46 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/MegaMenu.jsx, /src/index.css[22m
+[2m6:12:48 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/DesktopMenu.jsx, /src/index.css[22m
+[2m6:13:02 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/feedback/ScrollToTop.jsx, /src/index.css[22m
+[2m6:16:36 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/WishlistWidget.jsx, /src/index.css[22m
+[2m6:30:20 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/cart/CheckoutForm.jsx, /src/index.css[22m
+[2m6:30:24 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m6:47:25 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/providers/AppProviders.jsx, /src/index.css[22m
+[2m6:47:29 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/Navbar.jsx, /src/index.css[22m
+[2m6:47:33 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/MobileDrawer.jsx, /src/index.css[22m
+[2m6:48:33 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/WishlistWidget.jsx, /src/index.css[22m
+[2m6:48:37 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/WishlistWidget.jsx[22m
+[2m6:50:00 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m
+[2m6:50:03 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx[22m
+[2m6:54:28 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/WishlistWidget.jsx, /src/index.css[22m
+[2m6:54:32 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m
+[2m6:54:35 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/Navbar.jsx, /src/index.css[22m
+[2m6:54:39 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/MobileDrawer.jsx, /src/index.css[22m
+[2m7:16:58 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/Navbar.jsx, /src/index.css[22m
+[2m7:17:04 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/MobileDrawer.jsx, /src/index.css[22m
+[2m7:17:10 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m
+[2m7:19:31 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/WishlistWidget.jsx, /src/index.css[22m
+[2m7:19:36 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m
+[2m7:31:31 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m7:31:44 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m7:33:28 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/feedback/IntroLoader.jsx, /src/index.css[22m
+[2m7:40:19 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/home/Testimonials.jsx, /src/index.css[22m
+[2m7:40:24 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/About.jsx, /src/index.css[22m
+[2m7:40:30 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/AnnouncementBar.jsx, /src/index.css, /src/components/layout/DesktopMenu.jsx, /src/components/layout/MobileDrawer.jsx, /src/components/home/BrandStrip.jsx, /src/components/home/Testimonials.jsx, /src/components/home/ExtractionProcess.jsx, /src/components/home/Categories.jsx, /src/components/home/InstagramGallery.jsx, /src/components/home/Benefits.jsx, /src/components/home/FAQ.jsx, /src/pages/FAQ.jsx[22m
+[2m7:46:26 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ui/Input.jsx, /src/index.css[22m
+[2m7:46:30 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/home/Newsletter.jsx, /src/index.css[22m
+[2m7:53:53 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/Shop.jsx, /src/index.css[22m
+[2m8:01:10 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m
+[2m8:05:18 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m

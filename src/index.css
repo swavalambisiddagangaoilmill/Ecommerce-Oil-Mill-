@@ -1,0 +1,123 @@
+/* Global Tailwind layers and base storefront styles. */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  overflow-x: hidden;
+  @apply bg-cream font-serif;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Cormorant Garamond", serif;
+}
+img {
+  max-width: 100%;
+}
+
+::selection {
+  @apply bg-leaf text-white;
+}
+
+.marquee-track {
+  animation: marquee 24s linear infinite;
+}
+
+.hero-progress {
+  animation: hero-progress 5.6s linear forwards;
+}
+
+.hero-banner {
+  height: 280px;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-33.333%);
+  }
+}
+
+@keyframes hero-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes loader-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.01) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes confetti-soft {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.8);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(34px) scale(1);
+  }
+}
+
+.section-padding {
+  @apply py-16 md:py-20 xl:py-24;
+}
+
+@media (min-width: 640px) {
+  .hero-banner {
+    height: 300px;
+  }
+}
+
+@media (min-width: 768px) {
+  .hero-banner {
+    height: 420px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-banner {
+    height: 560px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .hero-banner {
+    height: 620px;
+  }
+}

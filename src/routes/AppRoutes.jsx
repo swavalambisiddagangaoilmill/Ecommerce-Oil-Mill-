@@ -1,0 +1,54 @@
+// Defines all public storefront routes.
+import { lazy, Suspense } from "react";
+import { Route, Routes } from "react-router-dom";
+import PageLoader from "../components/feedback/PageLoader.jsx";
+import About from "../pages/About.jsx";
+import Home from "../pages/Home.jsx";
+import StatusPage from "../pages/StatusPage.jsx";
+
+const Cart = lazy(() => import("../pages/Cart.jsx"));
+const Checkout = lazy(() => import("../pages/Checkout.jsx"));
+const Contact = lazy(() => import("../pages/Contact.jsx"));
+const FAQ = lazy(() => import("../pages/FAQ.jsx"));
+const LegalPage = lazy(() => import("../pages/LegalPage.jsx"));
+const Login = lazy(() => import("../pages/Login.jsx"));
+const NotFound = lazy(() => import("../pages/NotFound.jsx"));
+const OurProcess = lazy(() => import("../pages/OurProcess.jsx"));
+const OurStory = lazy(() => import("../pages/OurStory.jsx"));
+const ProductDetails = lazy(() => import("../pages/ProductDetails.jsx"));
+const Shop = lazy(() => import("../pages/Shop.jsx"));
+
+export default function AppRoutes() {
+  return (
+    <Suspense fallback={<PageLoader label="Loading page" />}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/product/:slug" element={<ProductDetails />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/about/faq" element={<FAQ />} />
+        <Route path="/about/story" element={<OurStory />} />
+        <Route path="/about/process" element={<OurProcess />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/legal/:slug" element={<LegalPage />} />
+        <Route path="/auth/login-required" element={<StatusPage code="401" retry />} />
+        <Route path="/auth/access-denied" element={<StatusPage code="403" />} />
+        <Route path="/auth/session-expired" element={<StatusPage code="session-expired" retry />} />
+        <Route path="/auth/email-not-verified" element={<StatusPage code="email-not-verified" />} />
+        <Route path="/errors/500" element={<StatusPage code="500" retry />} />
+        <Route path="/errors/503" element={<StatusPage code="503" retry />} />
+        <Route path="/errors/429" element={<StatusPage code="429" retry />} />
+        <Route path="/offline" element={<StatusPage code="offline" retry />} />
+        <Route path="/promotion-expired" element={<StatusPage code="expired" />} />
+        <Route path="/payment/success" element={<StatusPage code="payment-success" />} />
+        <Route path="/payment/failure" element={<StatusPage code="payment-failure" retry />} />
+        <Route path="/payment/pending" element={<StatusPage code="payment-pending" />} />
+        <Route path="/order/cancelled" element={<StatusPage code="order-cancelled" />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
+  );
+}

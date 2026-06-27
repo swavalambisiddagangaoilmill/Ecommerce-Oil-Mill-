@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>http://127.0.0.1:5174/</loc></url>
+  <url><loc>http://127.0.0.1:5174/shop</loc></url>
+  <url><loc>http://127.0.0.1:5174/about</loc></url>
+  <url><loc>http://127.0.0.1:5174/about/story</loc></url>
+  <url><loc>http://127.0.0.1:5174/about/process</loc></url>
+  <url><loc>http://127.0.0.1:5174/about/faq</loc></url>
+  <url><loc>http://127.0.0.1:5174/contact</loc></url>
+  <url><loc>http://127.0.0.1:5174/legal/privacy</loc></url>
+  <url><loc>http://127.0.0.1:5174/legal/terms</loc></url>
+  <url><loc>http://127.0.0.1:5174/legal/shipping</loc></url>
+  <url><loc>http://127.0.0.1:5174/legal/refund</loc></url>
+  <url><loc>http://127.0.0.1:5174/legal/cookies</loc></url>
+</urlset>

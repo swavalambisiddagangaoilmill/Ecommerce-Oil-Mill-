@@ -1,0 +1,28 @@
+
+> cold-pressed-oil-store@1.0.0 dev
+> vite --host 127.0.0.1 --port 5176
+
+
+  [32m[1mVITE[22m v6.4.3[39m  [2mready in [0m[1m981[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5176[22m/[39m
+[2m7:16:59 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/Navbar.jsx, /src/index.css[22m
+[2m7:17:04 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/MobileDrawer.jsx, /src/index.css[22m
+[2m7:17:10 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m
+[2m7:19:31 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/WishlistWidget.jsx, /src/index.css[22m
+[2m7:19:36 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m
+[2m7:31:31 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m7:31:44 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mtailwind.config.js[22m
+[2m7:33:28 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/feedback/IntroLoader.jsx, /src/index.css[22m
+[2m7:40:19 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/home/Testimonials.jsx, /src/index.css[22m
+[2m7:40:19 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/home/Testimonials.jsx, /src/index.css[22m
+[2m7:40:24 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/About.jsx, /src/index.css[22m
+[2m7:40:30 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/layout/AnnouncementBar.jsx, /src/index.css, /src/components/layout/MobileDrawer.jsx, /src/components/layout/DesktopMenu.jsx, /src/components/home/Benefits.jsx, /src/components/home/FAQ.jsx, /src/components/home/InstagramGallery.jsx, /src/components/home/Testimonials.jsx, /src/components/home/BrandStrip.jsx, /src/components/home/Categories.jsx, /src/components/home/ExtractionProcess.jsx, /src/pages/About.jsx[22m
+[2m7:46:26 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ui/Input.jsx, /src/index.css[22m
+[2m7:46:26 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/ui/Input.jsx, /src/index.css[22m
+[2m7:46:30 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/home/Newsletter.jsx, /src/index.css[22m
+[2m7:53:53 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/Shop.jsx, /src/index.css[22m
+[2m8:01:10 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m
+[2m8:01:10 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m
+[2m8:05:18 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m
+[2m8:05:18 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/widgets/ChatWidget.jsx, /src/index.css[22m

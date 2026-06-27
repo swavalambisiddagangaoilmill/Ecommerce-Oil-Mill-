@@ -1,0 +1,31 @@
+// Renders the Checkout page experience.
+import Breadcrumb from "../components/common/Breadcrumb.jsx";
+import CheckoutForm from "../components/cart/CheckoutForm.jsx";
+import OrderSummary from "../components/cart/OrderSummary.jsx";
+import Container from "../components/ui/Container.jsx";
+import { useCart } from "../hooks/useCart.jsx";
+import Button from "../components/ui/Button.jsx";
+
+export default function Checkout() {
+  const { items } = useCart();
+  return (
+    <>
+      <Breadcrumb items={[{ label: "Checkout" }]} />
+      <section className="section-padding">
+        <Container>
+          {items.length === 0 ? (
+            <div className="rounded-3xl bg-white p-10 text-center">
+              <h1 className="font-serif text-4xl font-semibold">Your cart is empty</h1>
+              <Button to="/shop" className="mt-6">Return to Shop</Button>
+            </div>
+          ) : (
+            <div className="grid gap-8 lg:grid-cols-[1fr_420px]">
+              <CheckoutForm />
+              <OrderSummary />
+            </div>
+          )}
+        </Container>
+      </section>
+    </>
+  );
+}
