@@ -1,41 +1,62 @@
-// Provides lightweight toast notifications for storefront feedback.
-import { createContext, useContext, useMemo, useState } from "react";
+﻿// Provides unified toast notifications for storefront feedback.
+import { AnimatePresence, motion } from "framer-motion";
+import { AlertCircle, CheckCircle, Heart, ShoppingBag } from "lucide-react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 const ToastContext = createContext(null);
+const icons = { success: CheckCircle, error: AlertCircle, wishlist: Heart, cart: ShoppingBag };
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
-  const showToast = (message, tone = "success", action = null) => {
-    const id = crypto.randomUUID();
-    setToasts((current) => [...current, { id, message, tone, action }]);
-    window.setTimeout(() => {
-      setToasts((current) => current.filter((toast) => toast.id !== id));
-    }, 3200);
-  };
+  const dismissToast = useCallback((id) => {
+    setToasts((current) => current.filter((toast) => toast.id !== id));
+  }, []);
 
-  const value = useMemo(() => ({ showToast }), []);
+  const showToast = useCallback((message, tone = "success", action = null, options = {}) => {
+    const id = options.id || `${tone}-${message}`;
+    setToasts((current) => {
+      const next = current.filter((toast) => toast.id !== id).slice(-2);
+      return [...next, { id, message, tone, action }];
+    });
+    window.setTimeout(() => dismissToast(id), options.duration || 3200);
+  }, [dismissToast]);
+
+  const value = useMemo(() => ({ showToast, dismissToast }), [dismissToast, showToast]);
 
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="fixed bottom-5 right-5 z-[120] grid w-[min(92vw,360px)] gap-3" aria-live="polite">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`rounded-2xl border p-4 text-sm font-semibold shadow-soft ${
-              toast.tone === "error" ? "border-danger/20 bg-white text-danger" : "border-leaf/20 bg-white text-ink"
-            }`}
-          >
-            {toast.message}
-            {toast.action && (
-              <Link to={toast.action.to} className="mt-3 inline-flex rounded-full bg-linen px-3 py-1 text-xs font-bold text-ink transition hover:text-leaf">
-                {toast.action.label}
-              </Link>
-            )}
-          </div>
-        ))}
+      <div className="fixed bottom-5 right-5 z-[140] grid w-[min(92vw,380px)] gap-3" aria-live="polite" aria-relevant="additions">
+        <AnimatePresence initial={false}>
+          {toasts.map((toast) => {
+            const Icon = icons[toast.tone] || icons.success;
+            return (
+              <motion.div
+                key={toast.id}
+                layout
+                initial={{ opacity: 0, y: 18, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 12, scale: 0.96 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                className="rounded-[1.35rem] border border-ink/10 bg-white p-4 text-ink shadow-soft"
+              >
+                <div className="flex items-start gap-3">
+                  <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ${toast.tone === "error" ? "bg-danger/10 text-danger" : "bg-linen text-leaf"}`}><Icon size={19} /></span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold leading-6">{toast.message}</p>
+                    {toast.action && (
+                      <Link to={toast.action.to} onClick={() => dismissToast(toast.id)} className="mt-3 inline-flex rounded-full bg-ink px-4 py-2 text-xs font-bold text-white transition hover:bg-leaf">
+                        {toast.action.label}
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
     </ToastContext.Provider>
   );

@@ -1,4 +1,4 @@
-// Serves product catalog data and marks where catalog APIs should connect.
+﻿// Serves product catalog data and marks where catalog APIs should connect.
 import { API_ENDPOINTS } from "../config/apiConfig.js";
 import {
   bestSellerProducts,
@@ -22,8 +22,11 @@ export function getProductBySlug(slug) {
   return products.find((product) => product.slug === slug);
 }
 
-export function getRelatedProducts(currentProduct, limit = 3) {
-  return products.filter((product) => product.category === currentProduct.category && product.id !== currentProduct.id).slice(0, limit);
+export function getRelatedProducts(currentProduct, limit = 6) {
+  const safeLimit = Math.min(Math.max(limit, 4), 8);
+  const sameCategory = products.filter((product) => product.category === currentProduct.category && product.id !== currentProduct.id);
+  const fallback = products.filter((product) => product.category !== currentProduct.category && product.id !== currentProduct.id);
+  return [...sameCategory, ...fallback].slice(0, safeLimit);
 }
 
 export function getEverydayEssentials() {

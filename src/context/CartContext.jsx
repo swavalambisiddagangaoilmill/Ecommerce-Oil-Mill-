@@ -1,10 +1,15 @@
-// Provides cart state until cart APIs are connected through the backend.
-import { createContext, useContext, useMemo, useState } from "react";
+﻿// Provides cart state with 48-hour guest-session persistence.
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { readGuestSession, writeGuestSession } from "../utils/guestSession.js";
 
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(() => readGuestSession().data.cart);
+
+  useEffect(() => {
+    writeGuestSession({ cart: items });
+  }, [items]);
 
   const addItem = (product, quantity = 1) => {
     setItems((current) => {
@@ -38,7 +43,10 @@ export function CartProvider({ children }) {
     return { subtotal, mrpTotal, discount, shipping, tax, total: subtotal + shipping + tax };
   }, [items]);
 
-  const value = { items, addItem, updateQuantity, removeItem, clearCart, totals };
+  const isInCart = (id) => items.some((item) => item.id === id);
+  const getItemQuantity = (id) => items.find((item) => item.id === id)?.quantity || 0;
+
+  const value = { items, addItem, updateQuantity, removeItem, clearCart, totals, isInCart, getItemQuantity };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
@@ -50,3 +58,4 @@ export function useCartContext() {
   }
   return context;
 }
+

@@ -1,4 +1,4 @@
-// Defines all public storefront routes.
+﻿// Defines all public storefront routes.
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import PageLoader from "../components/feedback/PageLoader.jsx";
@@ -12,6 +12,8 @@ const Contact = lazy(() => import("../pages/Contact.jsx"));
 const FAQ = lazy(() => import("../pages/FAQ.jsx"));
 const LegalPage = lazy(() => import("../pages/LegalPage.jsx"));
 const Login = lazy(() => import("../pages/Login.jsx"));
+const Signup = lazy(() => import("../pages/Signup.jsx"));
+const OrderSuccess = lazy(() => import("../pages/OrderSuccess.jsx"));
 const NotFound = lazy(() => import("../pages/NotFound.jsx"));
 const OurProcess = lazy(() => import("../pages/OurProcess.jsx"));
 const OurStory = lazy(() => import("../pages/OurStory.jsx"));
@@ -33,6 +35,8 @@ export default function AppRoutes() {
         <Route path="/about/process" element={<OurProcess />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/order/success" element={<OrderSuccess />} />
         <Route path="/legal/:slug" element={<LegalPage />} />
         <Route path="/auth/login-required" element={<StatusPage code="401" retry />} />
         <Route path="/auth/access-denied" element={<StatusPage code="403" />} />
@@ -52,3 +56,7 @@ export default function AppRoutes() {
     </Suspense>
   );
 }
+
+
+
+

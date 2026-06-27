@@ -1,4 +1,4 @@
-// Floating frontend-only AI chat placeholder ready for backend integration.
+﻿// Floating frontend-only AI chat placeholder ready for backend integration.
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, Mic, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -140,13 +140,11 @@ export default function ChatWidget() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 18, scale: 0.97 }}
               transition={{ duration: 0.24, ease: "easeOut" }}
-            className="fixed bottom-24 right-4 z-[126] flex max-h-[min(78dvh,640px)] w-[calc(100vw-2rem)] max-w-[400px] flex-col overflow-hidden rounded-[1.5rem] border border-ink/10 bg-white shadow-soft sm:right-6"
+            className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-4 z-[126] flex max-h-[min(82dvh,640px)] w-[calc(100vw-2rem)] max-w-[400px] flex-col overflow-hidden rounded-[1.5rem] border border-ink/10 bg-white shadow-soft sm:right-6"
             >
               <div className="flex items-start justify-between gap-4 bg-ink px-5 py-4 text-white">
                 <div className="flex items-center gap-3">
-                  <span className="grid h-11 w-11 place-items-center rounded-full bg-white/10">
-                    <Bot size={20} />
-                  </span>
+                  <span className="grid h-11 w-11 place-items-center rounded-full bg-white/10"><Bot size={20} /></span>
                   <div>
                     <p className="font-serif text-2xl font-semibold leading-none">Velora Assist</p>
                     <p className="mt-1 text-xs text-white/55">AI unavailable fallback enabled</p>
@@ -157,7 +155,7 @@ export default function ChatWidget() {
                 </button>
               </div>
 
-              <div className="relative h-[clamp(220px,42dvh,360px)] min-h-0">
+              <div className="relative h-[clamp(220px,45dvh,360px)] min-h-0">
                 <div ref={messagesRef} onScroll={updateScrollState} className="h-full space-y-3 overflow-y-auto p-4">
                   {messages.map((message, index) => (
                     <div key={`${message.role}-${index}`} className={`max-w-[88%] rounded-2xl p-3 text-sm leading-6 ${message.role === "user" ? "ml-auto bg-ink text-white" : "bg-cream text-ink/75"}`}>
@@ -179,7 +177,7 @@ export default function ChatWidget() {
                 )}
               </div>
 
-              <div className="border-t border-ink/10 p-4">
+              <div className="border-t border-ink/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
                 <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
                   {quickReplies.map((reply) => (
                     <button key={reply} type="button" onClick={() => ask(reply)} className="shrink-0 rounded-full bg-linen px-4 py-2 text-xs font-bold text-ink/65 transition hover:text-leaf">
@@ -208,9 +206,14 @@ export default function ChatWidget() {
           </motion.aside>
         )}
       </AnimatePresence>
-      <button type="button" data-popup-trigger="chat" onClick={() => togglePopup("chat")} className="fixed bottom-5 right-5 z-[130] grid h-14 w-14 place-items-center rounded-full bg-ink text-white shadow-soft transition hover:bg-leaf" aria-label="Open chat">
+      <button type="button" data-popup-trigger="chat" onClick={() => togglePopup("chat")} className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-[calc(1.25rem+env(safe-area-inset-right))] z-[130] grid h-14 w-14 place-items-center rounded-full bg-ink text-white shadow-soft transition hover:bg-leaf" aria-label="Open chat">
         <Bot size={22} />
       </button>
     </>
   );
 }
+
+
+
+
+

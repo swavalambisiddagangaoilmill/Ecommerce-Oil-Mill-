@@ -1,4 +1,5 @@
-// Shows a short skeleton during route changes so loading states are visible.
+﻿// Shows a delayed top progress line without shifting the header.
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -7,19 +8,27 @@ export default function RouteTransitionLoader() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setVisible(true);
-    const timer = window.setTimeout(() => setVisible(false), 380);
-    return () => window.clearTimeout(timer);
+    let hideTimer;
+    const showTimer = window.setTimeout(() => {
+      setVisible(true);
+      hideTimer = window.setTimeout(() => setVisible(false), 320);
+    }, 120);
+    return () => {
+      window.clearTimeout(showTimer);
+      window.clearTimeout(hideTimer);
+      setVisible(false);
+    };
   }, [location.pathname, location.search]);
 
-  if (!visible) return null;
-
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-[110] bg-cream/90 px-4 py-3 backdrop-blur">
-      <div className="mx-auto flex max-w-screen-2xl gap-3">
-        <span className="h-2 flex-1 animate-pulse rounded-full bg-linen" />
-        <span className="h-2 w-24 animate-pulse rounded-full bg-linen" />
-      </div>
-    </div>
+    <motion.div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[120] h-0.5 overflow-hidden bg-transparent"
+      initial={false}
+      animate={{ opacity: visible ? 1 : 0 }}
+      transition={{ duration: 0.18 }}
+    >
+      <motion.span className="block h-full origin-left bg-leaf" initial={{ scaleX: 0 }} animate={{ scaleX: visible ? 1 : 0 }} transition={{ duration: 0.32, ease: "easeOut" }} />
+    </motion.div>
   );
 }
