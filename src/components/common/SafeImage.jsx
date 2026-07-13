@@ -1,4 +1,4 @@
-// Renders images with a consistent fallback if remote assets fail.
+﻿// Renders images with a consistent fallback if remote assets fail.
 import { useState } from "react";
 
 export default function SafeImage({ src, alt, className = "", fallbackClassName = "", ...props }) {
@@ -14,3 +14,5 @@ export default function SafeImage({ src, alt, className = "", fallbackClassName 
 
   return <img src={src} alt={alt} className={className} onError={() => setFailed(true)} {...props} />;
 }
+
+

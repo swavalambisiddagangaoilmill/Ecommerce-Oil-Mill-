@@ -1,4 +1,4 @@
-// Shared CinematicHero component used across pages.
+﻿// Shared CinematicHero component used across pages.
 import { motion } from "framer-motion";
 
 export default function CinematicHero({ eyebrow, title, text, image, posterLabel }) {
@@ -28,3 +28,5 @@ export default function CinematicHero({ eyebrow, title, text, image, posterLabel
     </section>
   );
 }
+
+

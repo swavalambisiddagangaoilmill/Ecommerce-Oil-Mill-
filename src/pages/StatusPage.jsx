@@ -1,4 +1,4 @@
-// Renders production error, auth, offline, and reliability state pages.
+﻿// Renders production error, auth, offline, and reliability state pages.
 import { Copy, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
@@ -70,3 +70,5 @@ export default function StatusPage({ code = "404", title, message, retry = false
     </>
   );
 }
+
+

@@ -1,4 +1,4 @@
-// Coordinates floating popups so only one overlay is open at a time.
+﻿// Coordinates floating popups so only one overlay is open at a time.
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -32,3 +32,5 @@ export function usePopup() {
   }
   return context;
 }
+
+

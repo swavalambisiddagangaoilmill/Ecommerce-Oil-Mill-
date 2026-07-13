@@ -1,13 +1,13 @@
 ﻿// Renders the global storefront shell.
 import { useLocation } from "react-router-dom";
-import ErrorBoundary from "./components/feedback/ErrorBoundary.jsx";
-import GuestSessionNotice from "./components/feedback/GuestSessionNotice.jsx";
-import NetworkStatusBanner from "./components/feedback/NetworkStatusBanner.jsx";
-import RouteTransitionLoader from "./components/feedback/RouteTransitionLoader.jsx";
-import ScrollToTop from "./components/feedback/ScrollToTop.jsx";
-import SecurityAwareness from "./components/feedback/SecurityAwareness.jsx";
-import ChatWidget from "./components/widgets/ChatWidget.jsx";
-import WishlistWidget from "./components/widgets/WishlistWidget.jsx";
+import ErrorBoundary from "./components/features/feedback/ErrorBoundary.jsx";
+import GuestSessionNotice from "./components/features/feedback/GuestSessionNotice.jsx";
+import NetworkStatusBanner from "./components/features/feedback/NetworkStatusBanner.jsx";
+import RouteTransitionLoader from "./components/features/feedback/RouteTransitionLoader.jsx";
+import ScrollToTop from "./components/features/feedback/ScrollToTop.jsx";
+import SecurityAwareness from "./components/features/feedback/SecurityAwareness.jsx";
+import ChatWidget from "./components/features/widgets/ChatWidget.jsx";
+import WishlistWidget from "./components/features/widgets/WishlistWidget.jsx";
 import AnnouncementBar from "./components/layout/AnnouncementBar.jsx";
 import Navbar from "./components/layout/Navbar.jsx";
 import Footer from "./components/layout/Footer.jsx";
@@ -37,3 +37,5 @@ export default function App() {
     </div>
   );
 }
+
+

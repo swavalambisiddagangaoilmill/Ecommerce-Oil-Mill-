@@ -1,4 +1,4 @@
-// Renders the Navbar layout element.
+﻿// Renders the Navbar layout element.
 import { Heart, Menu, Search, ShoppingBag, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -123,3 +123,5 @@ export default function Navbar() {
     </>
   );
 }
+
+

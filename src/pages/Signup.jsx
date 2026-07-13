@@ -3,6 +3,7 @@ import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button.jsx";
+import { registerAccount } from "../services/authService.js";
 import Container from "../components/ui/Container.jsx";
 import Input from "../components/ui/Input.jsx";
 
@@ -12,6 +13,7 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
 
   const strength = useMemo(() => {
@@ -31,15 +33,21 @@ export default function Signup() {
 
   const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (loading || Object.values(errors).some(Boolean) || strength < 2) return;
-    // Connect registration endpoint here.
     setLoading(true);
-    window.setTimeout(() => {
-      setLoading(false);
+    setSubmitError("");
+    try {
+      await registerAccount({ name: form.name, email: form.email, phone: form.phone, password: form.password });
       setSuccess(true);
-    }, 700);
+      navigate("/", { replace: true });
+    } catch (err) {
+      setSuccess(false);
+      setSubmitError(err.message || "Unable to create account. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,7 +58,8 @@ export default function Signup() {
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-clay">Create account</p>
           <h1 className="mt-3 font-serif text-5xl font-semibold">Sign Up</h1>
           <p className="mt-4 leading-7 text-ink/60">Save your cart, wishlist, addresses, and order history permanently.</p>
-          {success && <p className="mt-5 rounded-2xl bg-linen p-4 text-sm font-semibold text-leaf">Account created successfully. Backend verification can be connected here.</p>}
+          {success && <p className="mt-5 rounded-2xl bg-linen p-4 text-sm font-semibold text-leaf">Account created successfully.</p>}
+          {submitError && <p className="mt-5 rounded-2xl bg-linen p-4 text-sm font-semibold text-danger">{submitError}</p>}
           <div className="mt-7 grid gap-5">
             <Input inputRef={firstFieldRef} label="Full Name" value={form.name} onChange={update("name")} required autoFocus aria-invalid={!!errors.name} />
             {errors.name && <p className="-mt-3 text-sm font-semibold text-danger">{errors.name}</p>}
@@ -75,3 +84,8 @@ export default function Signup() {
     </section>
   );
 }
+
+
+
+
+

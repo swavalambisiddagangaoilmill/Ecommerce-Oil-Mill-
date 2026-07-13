@@ -1,4 +1,4 @@
-// Renders the AnnouncementBar layout element.
+﻿// Renders the AnnouncementBar layout element.
 import { announcementMessages } from "../../data/siteData.js";
 
 export default function AnnouncementBar() {
@@ -16,3 +16,5 @@ export default function AnnouncementBar() {
     </div>
   );
 }
+
+

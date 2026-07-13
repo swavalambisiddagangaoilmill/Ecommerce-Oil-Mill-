@@ -1,4 +1,4 @@
-// Renders the MenuItem layout element.
+﻿// Renders the MenuItem layout element.
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -55,3 +55,5 @@ export default function MenuItem({
     </Link>
   );
 }
+
+

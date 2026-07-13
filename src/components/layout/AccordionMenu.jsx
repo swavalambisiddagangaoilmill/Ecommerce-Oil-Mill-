@@ -1,4 +1,4 @@
-// Renders the AccordionMenu layout element.
+﻿// Renders the AccordionMenu layout element.
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -45,3 +45,5 @@ export default function AccordionMenu({ title, links, onClose }) {
     </div>
   );
 }
+
+

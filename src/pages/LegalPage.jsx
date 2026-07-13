@@ -1,4 +1,4 @@
-// Renders required legal policy pages.
+﻿// Renders required legal policy pages.
 import { Navigate, useParams } from "react-router-dom";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
 import Container from "../components/ui/Container.jsx";
@@ -30,3 +30,5 @@ export default function LegalPage() {
     </>
   );
 }
+
+

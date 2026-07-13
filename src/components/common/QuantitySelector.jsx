@@ -1,4 +1,4 @@
-// Shared QuantitySelector component used across pages.
+﻿// Shared QuantitySelector component used across pages.
 import { Minus, Plus } from "lucide-react";
 
 export default function QuantitySelector({ value, onChange }) {
@@ -24,3 +24,5 @@ export default function QuantitySelector({ value, onChange }) {
     </div>
   );
 }
+
+

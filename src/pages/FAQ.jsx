@@ -1,9 +1,9 @@
-// Renders the FAQ page experience.
+﻿// Renders the FAQ page experience.
 import { motion } from "framer-motion";
 import { Mail, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
-import FaqAccordion from "../components/faq/FaqAccordion.jsx";
+import FaqAccordion from "../components/features/faq/FaqAccordion.jsx";
 import Button from "../components/ui/Button.jsx";
 import Container from "../components/ui/Container.jsx";
 import Input from "../components/ui/Input.jsx";
@@ -109,3 +109,5 @@ export default function FAQ() {
     </>
   );
 }
+
+

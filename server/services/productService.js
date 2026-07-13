@@ -51,6 +51,20 @@ export async function getProductsByCategory(categoryId, query) {
   return listProducts({ ...query, category: categoryId });
 }
 
+export async function getRelatedProducts(productId, limit = 6) {
+  const current = await Product.findById(productId);
+  if (!current) throw new ApiError("Product not found.", 404);
+  const safeLimit = Math.min(Math.max(Number(limit) || 6, 4), 8);
+  const sameCategory = await Product.find({ _id: { $ne: current._id }, category: current.category, isActive: true })
+    .populate("category", "name slug")
+    .limit(safeLimit);
+  if (sameCategory.length >= safeLimit) return sameCategory;
+  const fallback = await Product.find({ _id: { $ne: current._id }, category: { $ne: current.category }, isActive: true })
+    .populate("category", "name slug")
+    .limit(safeLimit - sameCategory.length);
+  return [...sameCategory, ...fallback];
+}
+
 export async function createProduct(payload) {
   const slug = payload.slug || slugify(payload.title);
   return Product.create({ ...payload, slug });

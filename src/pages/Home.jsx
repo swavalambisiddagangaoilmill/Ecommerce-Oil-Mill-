@@ -1,15 +1,15 @@
-// Renders the Home page experience.
-import BrandStrip from "../components/home/BrandStrip.jsx";
-import Categories from "../components/home/Categories.jsx";
-import EverydayEssentials from "../components/home/EverydayEssentials.jsx";
-import ExtractionProcess from "../components/home/ExtractionProcess.jsx";
-import FAQ from "../components/home/FAQ.jsx";
-import FeaturedProducts from "../components/home/FeaturedProducts.jsx";
-import Hero from "../components/home/Hero.jsx";
-import InstagramGallery from "../components/home/InstagramGallery.jsx";
-import Newsletter from "../components/home/Newsletter.jsx";
-import StorySection from "../components/home/StorySection.jsx";
-import Testimonials from "../components/home/Testimonials.jsx";
+﻿// Renders the Home page experience.
+import BrandStrip from "../components/features/home/BrandStrip.jsx";
+import Categories from "../components/features/home/Categories.jsx";
+import EverydayEssentials from "../components/features/home/EverydayEssentials.jsx";
+import ExtractionProcess from "../components/features/home/ExtractionProcess.jsx";
+import FAQ from "../components/features/home/FAQ.jsx";
+import FeaturedProducts from "../components/features/home/FeaturedProducts.jsx";
+import Hero from "../components/features/home/Hero.jsx";
+import InstagramGallery from "../components/features/home/InstagramGallery.jsx";
+import Newsletter from "../components/features/home/Newsletter.jsx";
+import StorySection from "../components/features/home/StorySection.jsx";
+import Testimonials from "../components/features/home/Testimonials.jsx";
 import Button from "../components/ui/Button.jsx";
 import Container from "../components/ui/Container.jsx";
 
@@ -56,3 +56,5 @@ export default function Home() {
     </>
   );
 }
+
+

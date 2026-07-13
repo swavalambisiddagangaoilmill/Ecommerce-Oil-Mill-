@@ -1,7 +1,9 @@
 ﻿// Renders the premium footer layout element.
 import { Facebook, Instagram, Mail, MapPin, Phone, Send, Youtube } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Container from "../ui/Container.jsx";
+import { subscribeToNewsletter } from "../../services/contactService.js";
 
 const footerColumns = [
   { title: "Navigation", links: [{ label: "Home", href: "/" }, { label: "Shop Oils", href: "/shop" }, { label: "Best Sellers", href: "/shop" }, { label: "Contact", href: "/contact" }] },
@@ -17,9 +19,23 @@ const socialLinks = [
 ];
 
 export default function Footer() {
-  const handleNewsletterSubmit = (event) => {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleNewsletterSubmit = async (event) => {
     event.preventDefault();
-    // Backend: call subscribeToNewsletter with the email value here.
+    const email = new FormData(event.currentTarget).get("email");
+    setLoading(true);
+    setMessage("");
+    try {
+      await subscribeToNewsletter({ email });
+      setMessage("Subscribed successfully.");
+      event.currentTarget.reset();
+    } catch (err) {
+      setMessage(err.message || "Unable to subscribe. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,8 +70,9 @@ export default function Footer() {
               <p className="mt-3 leading-7 text-ink/62">Seasonal recipes, batch notes, and quiet guides for caring for cold pressed oils.</p>
               <form className="mt-6 grid gap-3 sm:grid-cols-[1fr_150px]" onSubmit={handleNewsletterSubmit}>
                 <label className="sr-only" htmlFor="footer-email">Email address</label>
-                <input id="footer-email" type="email" placeholder="Email address" className="h-12 min-w-0 rounded-full border border-ink/10 bg-white px-5 text-sm outline-none placeholder:text-ink/35 focus:border-leaf" />
-                <button type="submit" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-ink px-6 text-sm font-semibold text-white transition hover:bg-leaf"><Send size={16} /> Subscribe</button>
+                <input id="footer-email" name="email" type="email" required placeholder="Email address" className="h-12 min-w-0 rounded-full border border-ink/10 bg-white px-5 text-sm outline-none placeholder:text-ink/35 focus:border-leaf" />
+                <button type="submit" disabled={loading} className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-ink px-6 text-sm font-semibold text-white transition hover:bg-leaf disabled:cursor-wait disabled:opacity-70"><Send size={16} /> Subscribe</button>
+                {message && <p className="text-sm font-semibold text-ink/65 sm:col-span-2">{message}</p>}
               </form>
             </div>
 
@@ -80,3 +97,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+

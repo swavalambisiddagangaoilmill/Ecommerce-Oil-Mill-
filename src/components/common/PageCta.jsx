@@ -1,4 +1,4 @@
-// Shared PageCta component used across pages.
+﻿// Shared PageCta component used across pages.
 import Button from "../ui/Button.jsx";
 import Container from "../ui/Container.jsx";
 
@@ -20,3 +20,5 @@ export default function PageCta({ eyebrow, title, text, action = "Shop Oils", to
     </section>
   );
 }
+
+

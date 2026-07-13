@@ -1,4 +1,4 @@
-// Renders the NotFound page experience.
+﻿// Renders the NotFound page experience.
 import Button from "../components/ui/Button.jsx";
 import Container from "../components/ui/Container.jsx";
 
@@ -16,3 +16,5 @@ export default function NotFound() {
     </section>
   );
 }
+
+

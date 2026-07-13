@@ -27,7 +27,7 @@ export function errorHandler(error, req, res, next) {
     message = "Authentication token expired.";
   }
 
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== "production" && statusCode >= 500) {
     console.error(error);
   }
 

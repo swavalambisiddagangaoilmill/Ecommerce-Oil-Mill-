@@ -1,4 +1,4 @@
-// Shared Breadcrumb component used across pages.
+﻿// Shared Breadcrumb component used across pages.
 import { ChevronRight, Home } from "lucide-react";
 import { Link } from "react-router-dom";
 import Container from "../ui/Container.jsx";
@@ -26,3 +26,5 @@ export default function Breadcrumb({ items = [] }) {
     </Container>
   );
 }
+
+

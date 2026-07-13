@@ -1,8 +1,8 @@
-// Renders the Cart page experience.
+﻿// Renders the Cart page experience.
 import { Trash2 } from "lucide-react";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
 import QuantitySelector from "../components/common/QuantitySelector.jsx";
-import CartSummary from "../components/cart/CartSummary.jsx";
+import CartSummary from "../components/features/cart/CartSummary.jsx";
 import Button from "../components/ui/Button.jsx";
 import Container from "../components/ui/Container.jsx";
 import { useCart } from "../hooks/useCart.jsx";
@@ -29,7 +29,7 @@ export default function Cart() {
                     <img src={item.image} alt={item.name} className="h-32 w-full rounded-2xl object-cover sm:w-32" />
                     <div className="min-w-0">
                       <h2 className="font-serif text-2xl font-semibold">{item.name}</h2>
-                      <p className="mt-2 text-sm text-ink/55">{item.volume} · {item.category}</p>
+                      <p className="mt-2 text-sm text-ink/55">{item.volume} Â· {item.category}</p>
                       <p className="mt-3 font-bold">{formatCurrency(item.price)}</p>
                     </div>
                     <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
@@ -47,3 +47,5 @@ export default function Cart() {
     </>
   );
 }
+
+

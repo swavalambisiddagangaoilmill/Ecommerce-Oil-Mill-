@@ -9,16 +9,24 @@ export async function createOrder(userId, payload) {
   const productMap = new Map(products.map((product) => [product._id.toString(), product]));
 
   const orderItems = payload.products.map((item) => {
-    const product = productMap.get(item.product);
+    const product = productMap.get(item.product.toString());
     if (!product) throw new ApiError("One or more products are unavailable.", 400);
     if (product.stock < item.quantity) throw new ApiError(`${product.title} does not have enough stock.`, 400);
     const price = product.discountPrice || product.price;
     return { product: product._id, title: product.title, image: product.images?.[0]?.url, quantity: item.quantity, price };
   });
 
+  const stockUpdates = await Promise.all(
+    orderItems.map((item) =>
+      Product.updateOne({ _id: item.product, stock: { $gte: item.quantity }, isActive: true }, { $inc: { stock: -item.quantity } })
+    )
+  );
+  if (stockUpdates.some((result) => result.modifiedCount !== 1)) {
+    throw new ApiError("One or more products do not have enough stock.", 400);
+  }
+
   const totalAmount = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const order = await Order.create({ user: userId, products: orderItems, shippingAddress: payload.shippingAddress, paymentMethod: payload.paymentMethod || "cod", totalAmount });
-  await Promise.all(orderItems.map((item) => Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } })));
   return order;
 }
 

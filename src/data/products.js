@@ -1,4 +1,4 @@
-// Mock product catalog payloads used until catalog APIs are connected.
+﻿// Local catalog seed data retained for reference and seeding.
 export const products = [
   {
     id: 1,
@@ -190,3 +190,6 @@ const withHomeDetails = (product) => ({
 export const everydayEssentials = [products[0], products[1], products[2], products[3], products[5]].map(withHomeDetails);
 
 export const bestSellerProducts = [products[0], products[1], products[3], products[5], products[7]].map(withHomeDetails);
+
+
+

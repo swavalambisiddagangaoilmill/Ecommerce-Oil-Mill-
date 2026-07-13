@@ -25,7 +25,19 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, trim: true },
     role: { type: String, enum: ["user", "admin"], default: "user" },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
+    cart: [
+      {
+        product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+        quantity: { type: Number, required: true, min: 1, default: 1 },
+      },
+    ],
     addresses: [addressSchema],
+    emailVerified: { type: Boolean, default: false },
+    emailVerificationToken: { type: String, select: false },
+    emailVerificationExpires: { type: Date, select: false },
+    passwordResetToken: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false },
+    refreshToken: { type: String, select: false },
   },
   { timestamps: true }
 );

@@ -1,42 +1,70 @@
-﻿// Serves product catalog data and marks where catalog APIs should connect.
-import { API_ENDPOINTS } from "../config/apiConfig.js";
-import {
-  bestSellerProducts,
-  categories,
-  everydayEssentials,
-  products,
-} from "../data/products.js";
-import { apiRequest } from "./apiClient.js";
+﻿// Serves catalog data from backend APIs and normalizes it for existing UI components.
+import { API_ENDPOINTS } from "../constants/apiConfig.js";
+import { apiRequest } from "../api/apiClient.js";
 
-export function getProducts() {
-  // Backend: replace with apiRequest(API_ENDPOINTS.products) when the catalog endpoint is ready.
-  return products;
+function normalizeProduct(product) {
+  if (!product) return null;
+  const categoryName = typeof product.category === "object" ? product.category?.name : product.category;
+  const price = product.discountPrice || product.price || 0;
+  const mrp = product.discountPrice ? product.price : product.mrp || product.price;
+  return {
+    id: product._id || product.id,
+    _id: product._id || product.id,
+    slug: product.slug,
+    name: product.name || product.title,
+    title: product.title || product.name,
+    description: product.description || "",
+    price,
+    mrp,
+    discountPrice: product.discountPrice,
+    category: categoryName || "Oils",
+    categoryId: typeof product.category === "object" ? product.category?._id : product.category,
+    image: product.image || product.images?.[0]?.url || "",
+    images: product.images?.length ? product.images : [{ url: product.image || "" }],
+    stock: product.stock ?? 0,
+    rating: product.rating || 4.8,
+    reviews: product.reviews || 84,
+    volume: product.volume || "1L",
+    tags: product.tags || [categoryName || "Oil"],
+    benefits: product.benefits || ["Cold pressed", "Chemical-free", "Small batch", "Fresh aroma"],
+    specifications: product.specifications || { Volume: product.volume || "1L", Method: "Cold pressed", Category: categoryName || "Oil", Storage: "Cool, dry place" },
+  };
 }
 
-export function getCategories() {
-  return categories;
+function productListFrom(data) {
+  const list = data.products || data.items || [];
+  return list.map(normalizeProduct).filter(Boolean);
 }
 
-export function getProductBySlug(slug) {
-  // Backend: replace with apiRequest(API_ENDPOINTS.product(slug)) for live product details.
-  return products.find((product) => product.slug === slug);
+export async function getProducts(params = {}) {
+  const query = new URLSearchParams(Object.entries(params).filter(([, value]) => value !== undefined && value !== "" && value !== "All"));
+  const data = await apiRequest(`${API_ENDPOINTS.products}${query.toString() ? `?${query}` : ""}`);
+  return { products: productListFrom(data), pagination: data.pagination };
 }
 
-export function getRelatedProducts(currentProduct, limit = 6) {
-  const safeLimit = Math.min(Math.max(limit, 4), 8);
-  const sameCategory = products.filter((product) => product.category === currentProduct.category && product.id !== currentProduct.id);
-  const fallback = products.filter((product) => product.category !== currentProduct.category && product.id !== currentProduct.id);
-  return [...sameCategory, ...fallback].slice(0, safeLimit);
+export async function getCategories() {
+  const data = await apiRequest(API_ENDPOINTS.categories);
+  return (data.categories || []).map((category) => ({ id: category._id, name: category.name, slug: category.slug }));
 }
 
-export function getEverydayEssentials() {
-  return everydayEssentials;
+export async function getProductBySlug(slug) {
+  const data = await apiRequest(API_ENDPOINTS.product(slug));
+  return normalizeProduct(data.product);
 }
 
-export function getBestSellerProducts() {
-  return bestSellerProducts;
+export async function getRelatedProducts(current, limit = 6) {
+  const id = current?._id || current?.id;
+  if (!id) return [];
+  const data = await apiRequest(API_ENDPOINTS.relatedProducts(id, limit));
+  return productListFrom(data);
 }
 
-export async function fetchProductsFromBackend() {
-  return apiRequest(API_ENDPOINTS.products);
+export async function getEverydayEssentials() {
+  const data = await apiRequest(`${API_ENDPOINTS.products}?limit=5&sort=featured`);
+  return productListFrom(data).slice(0, 5);
+}
+
+export async function getBestSellerProducts() {
+  const data = await apiRequest(API_ENDPOINTS.featuredProducts);
+  return productListFrom(data).slice(0, 10);
 }

@@ -1,4 +1,4 @@
-// Static story, process, and FAQ content used until CMS APIs are connected.
+﻿// Static story, process, and FAQ content used until CMS APIs are connected.
 import { BadgeCheck, HeartHandshake, Leaf, PackageCheck, Recycle, SearchCheck, ShieldCheck, Sprout, Truck, Wheat } from "lucide-react";
 
 export const faqGroups = [
@@ -97,3 +97,5 @@ export const sustainabilityPoints = [
   { icon: Sprout, title: "Responsible sourcing", text: "Trusted farm networks and smaller batches help reduce wasteful overproduction." },
   { icon: Leaf, title: "Minimal intervention", text: "Natural settling and clean extraction keep the production footprint thoughtful." },
 ];
+
+

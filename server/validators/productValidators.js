@@ -23,3 +23,16 @@ export const productValidator = [
   body("featured").optional().isBoolean().withMessage("Featured must be boolean."),
   body("isActive").optional().isBoolean().withMessage("isActive must be boolean."),
 ];
+
+export const productUpdateValidator = [
+  body("title").optional().trim().notEmpty().withMessage("Product title cannot be empty."),
+  body("slug").optional().trim().isSlug().withMessage("Slug must be URL friendly."),
+  body("description").optional().trim().notEmpty().withMessage("Description cannot be empty."),
+  body("price").optional().isFloat({ min: 0 }).withMessage("Price must be positive."),
+  body("discountPrice").optional().isFloat({ min: 0 }).withMessage("Discount price must be positive."),
+  body("stock").optional().isInt({ min: 0 }).withMessage("Stock cannot be negative."),
+  body("category").optional().isMongoId().withMessage("Valid category is required."),
+  body("images").optional().isArray().withMessage("Images must be an array."),
+  body("featured").optional().isBoolean().withMessage("Featured must be boolean."),
+  body("isActive").optional().isBoolean().withMessage("isActive must be boolean."),
+];

@@ -1,4 +1,4 @@
-// Reusable rotating testimonials carousel with manual controls.
+﻿// Reusable rotating testimonials carousel with manual controls.
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -93,3 +93,5 @@ export default function TestimonialCarousel({ items, interval = 4500 }) {
     </div>
   );
 }
+
+

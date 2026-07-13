@@ -1,4 +1,4 @@
-// Formats INR currency values for product and order UI.
+﻿// Formats INR currency values for product and order UI.
 export function formatCurrency(value) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -6,3 +6,5 @@ export function formatCurrency(value) {
     maximumFractionDigits: 0,
   }).format(value);
 }
+
+

@@ -63,3 +63,5 @@ export default function OrderSuccess() {
 function Info({ label, value }) {
   return <div className="rounded-2xl bg-cream p-4"><p className="text-xs font-bold uppercase tracking-[0.16em] text-ink/45">{label}</p><p className="mt-2 font-semibold">{value}</p></div>;
 }
+
+

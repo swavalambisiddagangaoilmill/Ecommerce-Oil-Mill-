@@ -8,6 +8,10 @@ export const protect = asyncHandler(async (req, res, next) => {
   const bearer = req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.split(" ")[1] : null;
   const token = bearer || req.cookies?.token;
   if (!token) throw new ApiError("Authentication required.", 401);
+  if (!bearer && ["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
+    const csrfHeader = req.get("x-csrf-token");
+    if (!csrfHeader || csrfHeader !== req.cookies?.csrfToken) throw new ApiError("CSRF validation failed.", 403);
+  }
 
   const decoded = verifyToken(token);
   const user = await User.findById(decoded.id);

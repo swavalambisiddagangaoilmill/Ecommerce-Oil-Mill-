@@ -1,4 +1,4 @@
-// Reusable Button UI primitive.
+﻿// Reusable Button UI primitive.
 import { Link } from "react-router-dom";
 
 const variants = {
@@ -25,3 +25,5 @@ export default function Button({ children, to, type = "button", variant = "prima
     </button>
   );
 }
+
+

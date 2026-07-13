@@ -1,35 +1,35 @@
-// Provides required legal page copy until CMS/legal APIs are connected.
+﻿// Provides required legal page copy.
 export const legalPages = {
   privacy: {
     title: "Privacy Policy",
     sections: [
       ["Information we collect", "We collect only the information needed to process orders, support requests, account access, and newsletter subscriptions."],
       ["How it is used", "Customer details are used for order fulfillment, communication, fraud prevention, and service improvement."],
-      ["Backend integration required here", "Connect this copy to your legal CMS or backend-managed policy endpoint before launch if policies change frequently."],
+      ["Data protection", "Account, order, and payment information is handled through protected application services and trusted payment providers."],
     ],
   },
   terms: {
     title: "Terms & Conditions",
     sections: [
       ["Use of storefront", "By using Velora, customers agree to provide accurate order and account information."],
-      ["Product information", "Product availability, prices, delivery estimates, and offers may change based on backend inventory and promotions."],
-      ["Backend integration required here", "Connect dynamic pricing, stock, and account terms to backend services before accepting live orders."],
+      ["Product information", "Product availability, prices, delivery estimates, and offers may change based on inventory and promotions."],
+      ["Account responsibility", "Customers are responsible for maintaining the confidentiality of account credentials and order information."],
     ],
   },
   shipping: {
     title: "Shipping Policy",
     sections: [
       ["Delivery estimate", "Orders are prepared for fresh batch delivery, typically within 2 to 5 business days after confirmation."],
-      ["Shipping updates", "Customers should receive dispatch and tracking updates once the backend order system is connected."],
-      ["Backend integration required here", "Connect courier rates, serviceability, tracking, and delivery ETA APIs here."],
+      ["Shipping updates", "Customers receive order status updates as orders move from confirmation to dispatch and delivery."],
+      ["Serviceability", "Delivery availability may vary by address, courier coverage, and seasonal operating conditions."],
     ],
   },
   refund: {
     title: "Refund & Cancellation Policy",
     sections: [
       ["Cancellations", "Orders may be cancelled before dispatch, subject to order status and payment confirmation."],
-      ["Refunds", "Refunds for eligible cancellations or damaged shipments should be processed through the payment provider."],
-      ["Backend integration required here", "Connect payment refund, cancellation, and support ticket endpoints here."],
+      ["Refunds", "Refunds for eligible cancellations or damaged shipments are processed through the original payment channel where possible."],
+      ["Support", "Customers should contact support with order details for cancellation, refund, or replacement assistance."],
     ],
   },
   cookies: {
@@ -37,7 +37,7 @@ export const legalPages = {
     sections: [
       ["Cookie usage", "Cookies may be used for session continuity, cart persistence, analytics, and consent preferences."],
       ["Customer control", "Customers can manage browser settings and consent choices where applicable."],
-      ["Backend integration required here", "Connect consent storage and analytics preferences before enabling production tracking."],
+      ["Essential storage", "Some storage is required to keep carts, sessions, and security preferences working correctly."],
     ],
   },
 };

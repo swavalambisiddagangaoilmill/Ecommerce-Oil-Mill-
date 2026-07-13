@@ -1,7 +1,7 @@
-// Renders the Checkout page experience.
+﻿// Renders the Checkout page experience.
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
-import CheckoutForm from "../components/cart/CheckoutForm.jsx";
-import OrderSummary from "../components/cart/OrderSummary.jsx";
+import CheckoutForm from "../components/features/cart/CheckoutForm.jsx";
+import OrderSummary from "../components/features/cart/OrderSummary.jsx";
 import Container from "../components/ui/Container.jsx";
 import { useCart } from "../hooks/useCart.jsx";
 import Button from "../components/ui/Button.jsx";
@@ -29,3 +29,5 @@ export default function Checkout() {
     </>
   );
 }
+
+

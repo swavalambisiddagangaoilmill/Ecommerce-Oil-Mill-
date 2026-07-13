@@ -1,6 +1,6 @@
-// Keeps contact and newsletter submissions isolated from forms.
-import { API_ENDPOINTS } from "../config/apiConfig.js";
-import { apiRequest } from "./apiClient.js";
+﻿// Keeps contact and newsletter submissions isolated from forms.
+import { API_ENDPOINTS } from "../constants/apiConfig.js";
+import { apiRequest } from "../api/apiClient.js";
 
 export async function submitContactMessage(payload) {
   // Backend: POST contact form payload to the support endpoint here.
@@ -17,3 +17,5 @@ export async function subscribeToNewsletter(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+

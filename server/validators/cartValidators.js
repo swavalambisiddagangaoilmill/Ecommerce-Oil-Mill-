@@ -1,0 +1,18 @@
+﻿// Validation chains for cart routes.
+import { body, param } from "express-validator";
+
+export const cartItemValidator = [
+  body("productId").isMongoId().withMessage("Valid product id is required."),
+  body("quantity").optional().isInt({ min: 1 }).withMessage("Quantity must be at least 1."),
+];
+
+export const cartSyncValidator = [
+  body("items").isArray().withMessage("Items must be an array."),
+  body("items.*.productId").optional().isMongoId().withMessage("Valid product id is required."),
+  body("items.*.product").optional().isMongoId().withMessage("Valid product id is required."),
+  body("items.*.id").optional().isMongoId().withMessage("Valid product id is required."),
+  body("items.*.quantity").optional().isInt({ min: 1 }).withMessage("Quantity must be at least 1."),
+];
+
+export const cartParamValidator = [param("productId").isMongoId().withMessage("Valid product id is required.")];
+export const cartQuantityValidator = [body("quantity").isInt({ min: 1 }).withMessage("Quantity must be at least 1.")];

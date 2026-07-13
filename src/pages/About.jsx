@@ -1,8 +1,8 @@
-// Renders the About page experience.
+﻿// Renders the About page experience.
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
 import TestimonialCarousel from "../components/common/TestimonialCarousel.jsx";
-import Benefits from "../components/home/Benefits.jsx";
-import ExtractionProcess from "../components/home/ExtractionProcess.jsx";
+import Benefits from "../components/features/home/Benefits.jsx";
+import ExtractionProcess from "../components/features/home/ExtractionProcess.jsx";
 import Container from "../components/ui/Container.jsx";
 import SectionHeading from "../components/ui/SectionHeading.jsx";
 import { testimonials } from "../data/siteData.js";
@@ -32,3 +32,5 @@ export default function About() {
     </>
   );
 }
+
+

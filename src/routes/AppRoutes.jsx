@@ -1,7 +1,7 @@
 ﻿// Defines all public storefront routes.
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
-import PageLoader from "../components/feedback/PageLoader.jsx";
+import PageLoader from "../components/features/feedback/PageLoader.jsx";
 import About from "../pages/About.jsx";
 import Home from "../pages/Home.jsx";
 import StatusPage from "../pages/StatusPage.jsx";
@@ -56,6 +56,8 @@ export default function AppRoutes() {
     </Suspense>
   );
 }
+
+
 
 
 

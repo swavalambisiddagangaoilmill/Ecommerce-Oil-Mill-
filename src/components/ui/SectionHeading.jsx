@@ -1,4 +1,4 @@
-// Reusable SectionHeading UI primitive.
+﻿// Reusable SectionHeading UI primitive.
 import { motion } from "framer-motion";
 
 export default function SectionHeading({ eyebrow, title, text, align = "center" }) {
@@ -17,3 +17,5 @@ export default function SectionHeading({ eyebrow, title, text, align = "center" 
     </motion.div>
   );
 }
+
+

@@ -1,4 +1,4 @@
-// Reusable Input UI primitive.
+﻿// Reusable Input UI primitive.
 export default function Input({ label, className = "", inputRef, ...props }) {
   return (
     <label className="block w-full">
@@ -11,3 +11,5 @@ export default function Input({ label, className = "", inputRef, ...props }) {
     </label>
   );
 }
+
+

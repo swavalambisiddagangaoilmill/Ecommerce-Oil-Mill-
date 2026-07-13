@@ -1,19 +1,18 @@
-// Renders the Shop page experience.
-import { useEffect, useMemo, useState } from "react";
-import { useRef } from "react";
+﻿// Renders the Shop page experience.
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
-import ProductCard from "../components/product/ProductCard.jsx";
+import ProductCard from "../components/features/product/ProductCard.jsx";
 import Container from "../components/ui/Container.jsx";
 import Input from "../components/ui/Input.jsx";
 import SectionHeading from "../components/ui/SectionHeading.jsx";
 import { getCategories, getProducts } from "../services/catalogService.js";
 
 const perPage = 6;
-const products = getProducts();
-const categories = getCategories();
 
 export default function Shop() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([{ name: "All" }]);
   const [category, setCategory] = useState("All");
   const [sort, setSort] = useState("featured");
   const [search, setSearch] = useState("");
@@ -24,34 +23,28 @@ export default function Shop() {
   const invalidSearch = search.trim().length === 1;
 
   useEffect(() => {
-    if (!search) {
-      setSearchLoading(false);
-      return undefined;
-    }
-    setSearchLoading(true);
-    const timer = window.setTimeout(() => setSearchLoading(false), 250);
-    return () => window.clearTimeout(timer);
-  }, [search]);
+    getCategories().then((items) => setCategories([{ name: "All" }, ...items])).catch(() => setCategories([{ name: "All" }]));
+  }, []);
 
   useEffect(() => {
-    if (searchParams.get("focus") === "search") {
-      window.setTimeout(() => searchInputRef.current?.focus(), 150);
-    }
+    if (invalidSearch) return undefined;
+    setSearchLoading(true);
+    const timer = window.setTimeout(() => {
+      const categoryId = categories.find((item) => item.name === category)?.id;
+      getProducts({ page, limit: perPage, search, category: category === "All" ? undefined : categoryId, sort: sort === "featured" ? "featured" : sort === "price-low" ? "priceAsc" : sort === "price-high" ? "priceDesc" : "newest" })
+        .then((data) => setProducts(data.products))
+        .catch(() => setProducts([]))
+        .finally(() => setSearchLoading(false));
+    }, search ? 300 : 0);
+    return () => window.clearTimeout(timer);
+  }, [categories, category, invalidSearch, page, search, sort]);
+
+  useEffect(() => {
+    if (searchParams.get("focus") === "search") window.setTimeout(() => searchInputRef.current?.focus(), 150);
   }, [searchParams]);
 
-  const filtered = useMemo(() => {
-    const list = products
-      .filter((product) => !invalidSearch)
-      .filter((product) => category === "All" || product.category === category)
-      .filter((product) => product.name.toLowerCase().includes(search.toLowerCase()) || product.tags.join(" ").toLowerCase().includes(search.toLowerCase()));
-    if (sort === "price-low") return [...list].sort((a, b) => a.price - b.price);
-    if (sort === "price-high") return [...list].sort((a, b) => b.price - a.price);
-    if (sort === "rating") return [...list].sort((a, b) => b.rating - a.rating);
-    return list;
-  }, [category, invalidSearch, search, sort]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  const visible = filtered.slice((page - 1) * perPage, page * perPage);
+  const visible = useMemo(() => products.filter(() => !invalidSearch), [invalidSearch, products]);
+  const totalPages = Math.max(1, page + (visible.length === perPage ? 1 : 0));
 
   const changeCategory = (next) => {
     setCategory(next);
@@ -68,7 +61,7 @@ export default function Shop() {
           <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_180px_180px] lg:gap-4">
             <Input inputRef={searchInputRef} placeholder="Search oils, tags, or use cases" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} aria-label="Search products" className="h-11 text-xs sm:h-[52px] sm:text-sm" />
             <select value={category} onChange={(event) => changeCategory(event.target.value)} className="h-11 min-w-0 rounded-xl border border-ink/10 bg-white px-3 text-sm font-semibold outline-none sm:h-[52px] sm:px-4">
-              {categories.map((item) => <option key={item}>{item}</option>)}
+              {categories.map((item) => <option key={item.id || item.name}>{item.name}</option>)}
             </select>
             <select value={sort} onChange={(event) => setSort(event.target.value)} className="h-11 min-w-0 rounded-xl border border-ink/10 bg-white px-3 text-sm font-semibold outline-none sm:h-[52px] sm:px-4">
               <option value="featured">Featured</option>
@@ -82,12 +75,10 @@ export default function Shop() {
           <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {visible.map((product) => <ProductCard key={product.id} product={product} />)}
           </div>
-          {visible.length === 0 && <p className="rounded-3xl bg-white p-10 text-center text-ink/60">No oils match your search.</p>}
+          {visible.length === 0 && !searchLoading && <p className="rounded-3xl bg-white p-10 text-center text-ink/60">No oils match your search.</p>}
           <div className="mt-10 flex justify-center gap-2">
             {Array.from({ length: totalPages }, (_, index) => (
-              <button key={index + 1} type="button" onClick={() => setPage(index + 1)} className={`h-11 w-11 rounded-full text-sm font-bold transition ${page === index + 1 ? "bg-ink text-white" : "bg-white hover:bg-linen"}`}>
-                {index + 1}
-              </button>
+              <button key={index + 1} type="button" onClick={() => setPage(index + 1)} className={`h-11 w-11 rounded-full text-sm font-bold transition ${page === index + 1 ? "bg-ink text-white" : "bg-white hover:bg-linen"}`}>{index + 1}</button>
             ))}
           </div>
         </Container>

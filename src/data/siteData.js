@@ -1,4 +1,4 @@
-// Static site navigation and marketing content used across layout sections.
+﻿// Static site navigation and marketing content used across layout sections.
 import { Leaf, ShieldCheck, Sprout, Truck, Wheat, BadgeCheck } from "lucide-react";
 
 export const announcementMessages = [
@@ -147,3 +147,5 @@ export const brandValues = [
   { icon: Leaf, label: "Naturally settled" },
   { icon: ShieldCheck, label: "Purity checked" },
 ];
+
+

@@ -7,6 +7,7 @@ import {
   getFeaturedProducts,
   getProductBySlug,
   getProductsByCategory,
+  getRelatedProducts,
   listProducts,
   updateProduct,
 } from "../services/productService.js";
@@ -27,8 +28,13 @@ export const getProduct = asyncHandler(async (req, res) => {
 });
 
 export const getCategoryProducts = asyncHandler(async (req, res) => {
-  const products = await getProductsByCategory(req.params.categoryId);
-  sendSuccess(res, 200, "Category products fetched successfully", { products });
+  const data = await getProductsByCategory(req.params.categoryId, req.query);
+  sendSuccess(res, 200, "Category products fetched successfully", data);
+});
+
+export const getRelated = asyncHandler(async (req, res) => {
+  const products = await getRelatedProducts(req.params.id, req.query.limit);
+  sendSuccess(res, 200, "Related products fetched successfully", { products });
 });
 
 export const createProductHandler = asyncHandler(async (req, res) => {
@@ -45,3 +51,6 @@ export const deleteProductHandler = asyncHandler(async (req, res) => {
   const product = await deleteProduct(req.params.id);
   sendSuccess(res, 200, "Product removed successfully", { product });
 });
+
+
+
