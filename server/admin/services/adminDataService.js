@@ -1,0 +1,212 @@
+﻿// Admin data services backed by existing Velora models.
+import AdminAuditLog from "../../models/AdminAuditLog.js";
+import Category from "../../models/Category.js";
+import ContactMessage from "../../models/ContactMessage.js";
+import Coupon from "../../models/Coupon.js";
+import NewsletterSubscriber from "../../models/NewsletterSubscriber.js";
+import Offer from "../../models/Offer.js";
+import Order from "../../models/Order.js";
+import Product from "../../models/Product.js";
+import SiteContent from "../../models/SiteContent.js";
+import StoreSettings from "../../models/StoreSettings.js";
+import User from "../../models/User.js";
+import { createReadyToShipShipment, advanceMockShipment } from "../../services/shiprocketService.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { slugify } from "../../utils/slugify.js";
+
+const orderTransitions = {
+  placed: ["confirmed", "cancelled"],
+  confirmed: ["packed", "cancelled"],
+  packed: ["shipped", "cancelled"],
+  shipped: ["delivered"],
+  delivered: [],
+  cancelled: [],
+};
+
+export async function getSettings() {
+  return StoreSettings.findOneAndUpdate({ key: "store" }, { $setOnInsert: { key: "store" } }, { upsert: true, new: true });
+}
+
+export async function updateSettings(payload) {
+  const allowed = ["storeName", "currency", "supportEmail", "supportPhone", "whatsappNumber", "minimumOrderAmount", "orderPrefix", "lowStockThreshold", "allowOutOfStockVisibility", "preventOutOfStockCheckout", "freeDeliveryThreshold", "defaultPackagingWeight", "defaultPackageLength", "defaultPackageWidth", "defaultPackageHeight", "codEnabled", "onlinePaymentEnabled", "maintenanceMode", "announcementBarEnabled", "customerRegistrationEnabled", "newsletterEnabled", "factoryAddress", "businessHours", "googleMapsLink"];
+  const updates = Object.fromEntries(Object.entries(payload).filter(([key]) => allowed.includes(key)));
+  return StoreSettings.findOneAndUpdate({ key: "store" }, updates, { upsert: true, new: true, runValidators: true });
+}
+
+export async function dashboardData() {
+  const settings = await getSettings();
+  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const end = new Date(start); end.setDate(end.getDate() + 1);
+  const validRevenue = { createdAt: { $gte: start, $lt: end }, $or: [{ paymentStatus: "paid" }, { paymentMethod: "cod", orderStatus: { $ne: "cancelled" } }] };
+  const [todayOrders, revenueAgg, pendingOrders, readyToShip, lowStock, totalCustomers, recentOrders, failedPayments, sales] = await Promise.all([
+    Order.countDocuments({ createdAt: { $gte: start, $lt: end } }),
+    Order.aggregate([{ $match: validRevenue }, { $group: { _id: null, total: { $sum: "$totalAmount" } } }]),
+    Order.countDocuments({ orderStatus: "placed" }),
+    Order.countDocuments({ shippingStatus: { $in: ["ready_for_pickup", "awb_assigned", "pickup_generated"] } }),
+    Product.countDocuments({ stock: { $lte: settings.lowStockThreshold }, isArchived: { $ne: true } }),
+    User.countDocuments({ role: "user" }),
+    Order.find().populate("user", "name email").sort({ createdAt: -1 }).limit(8),
+    Order.countDocuments({ paymentStatus: "failed" }),
+    Order.aggregate([{ $match: { createdAt: { $gte: new Date(Date.now() - 7 * 86400000) }, paymentStatus: { $in: ["paid"] } } }, { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, total: { $sum: "$totalAmount" }, orders: { $sum: 1 } } }, { $sort: { _id: 1 } }]),
+  ]);
+  return { summary: { todayOrders, todayRevenue: revenueAgg[0]?.total || 0, pendingOrders, readyToShip, lowStock, totalCustomers }, recentOrders, needsAttention: { waitingConfirmation: pendingOrders, readyToShip, lowStock, failedPayments }, sales };
+}
+
+export async function listOrders(query) {
+  const page = Number(query.page) || 1; const limit = Math.min(Number(query.limit) || 20, 100);
+  const filter = {};
+  if (query.status) filter.orderStatus = query.status;
+  if (query.payment) filter.paymentStatus = query.payment;
+  if (query.shippingStatus) filter.shippingStatus = query.shippingStatus;
+  if (query.search) filter.$or = [{ _id: query.search.match(/^[a-f\d]{24}$/i) ? query.search : undefined }, { "shippingAddress.fullName": new RegExp(query.search, "i") }].filter((item) => Object.values(item)[0]);
+  const [items, total] = await Promise.all([Order.find(filter).populate("user", "name email phone").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit), Order.countDocuments(filter)]);
+  return { items, pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
+}
+
+export async function updateOrderStatus(id, nextStatus) {
+  const order = await Order.findById(id);
+  if (!order) throw new ApiError("Order not found.", 404);
+  if (!orderTransitions[order.orderStatus]?.includes(nextStatus)) throw new ApiError("Invalid order status transition.", 400);
+  order.orderStatus = nextStatus;
+  await order.save();
+  return order;
+}
+
+export async function readyToShip(id) { return createReadyToShipShipment(id); }
+export async function nextMockShipping(id) { return advanceMockShipment(id); }
+
+export async function listProducts(query) {
+  const page = Number(query.page) || 1; const limit = Math.min(Number(query.limit) || 20, 100);
+  const filter = { isArchived: { $ne: true } };
+  if (query.category) filter.category = query.category;
+  if (query.active) filter.isActive = query.active === "true";
+  if (query.featured) filter.featured = query.featured === "true";
+  if (query.stock === "low") filter.stock = { $gt: 0, $lte: 10 };
+  if (query.stock === "out") filter.stock = 0;
+  if (query.search) filter.$text = { $search: query.search };
+  const [items, total] = await Promise.all([Product.find(filter).populate("category", "name slug").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit), Product.countDocuments(filter)]);
+  return { items, pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
+}
+
+export async function saveProduct(payload, id) {
+  const allowed = ["title", "description", "sku", "price", "discountPrice", "stock", "category", "images", "featured", "isActive", "weight", "dimensions"];
+  const data = Object.fromEntries(Object.entries(payload).filter(([key]) => allowed.includes(key)));
+  if (data.title) data.slug = slugify(data.title);
+  return id ? Product.findByIdAndUpdate(id, data, { new: true, runValidators: true }) : Product.create(data);
+}
+
+export async function archiveProduct(id) {
+  const product = await Product.findByIdAndUpdate(id, { isArchived: true, isActive: false }, { new: true });
+  if (!product) throw new ApiError("Product not found.", 404);
+  return product;
+}
+
+function buildBulkFilter(target) {
+  const filter = { isArchived: { $ne: true } };
+  if (target.productIds?.length) filter._id = { $in: target.productIds };
+  if (target.category) filter.category = target.category;
+  if (target.featured !== undefined) filter.featured = Boolean(target.featured);
+  if (target.active !== undefined) filter.isActive = Boolean(target.active);
+  if (target.stockStatus === "low") filter.stock = { $gt: 0, $lte: 10 };
+  if (target.stockStatus === "out") filter.stock = 0;
+  return filter;
+}
+
+function calculatePrice(product, operation, value) {
+  const amount = Number(value) || 0;
+  if (operation === "increase_percentage") return Math.round(product.price * (1 + amount / 100));
+  if (operation === "decrease_percentage") return Math.max(0, Math.round(product.price * (1 - amount / 100)));
+  if (operation === "increase_fixed") return Math.round(product.price + amount);
+  if (operation === "decrease_fixed") return Math.max(0, Math.round(product.price - amount));
+  return product.price;
+}
+
+export async function bulkPricePreview(payload) {
+  const products = await Product.find(buildBulkFilter(payload.target || {})).limit(20);
+  return { count: products.length, examples: products.slice(0, 5).map((product) => ({ id: product._id, title: product.title, before: product.price, after: calculatePrice(product, payload.operation, payload.value) })) };
+}
+
+export async function bulkPriceApply(payload) {
+  const products = await Product.find(buildBulkFilter(payload.target || {}));
+  await Promise.all(products.map((product) => {
+    const value = Number(payload.value) || 0;
+    if (payload.operation === "set_exact_price") product.price = Math.max(0, Math.round(value));
+    else if (payload.operation === "set_discount_percentage") product.discountPrice = Math.max(0, Math.round(product.price * (1 - value / 100)));
+    else if (payload.operation === "set_exact_discount") product.discountPrice = Math.max(0, Math.round(value));
+    else if (payload.operation === "remove_discount") product.discountPrice = undefined;
+    else if (payload.operation === "add_stock") product.stock += Math.max(0, Math.trunc(value));
+    else if (payload.operation === "reduce_stock") product.stock = Math.max(0, product.stock - Math.max(0, Math.trunc(value)));
+    else if (payload.operation === "set_stock") product.stock = Math.max(0, Math.trunc(value));
+    else if (payload.operation === "activate") product.isActive = true;
+    else if (payload.operation === "deactivate") product.isActive = false;
+    else if (payload.operation === "archive") { product.isArchived = true; product.isActive = false; }
+    else if (payload.operation === "mark_featured") product.featured = true;
+    else if (payload.operation === "remove_featured") product.featured = false;
+    else if (payload.operation === "move_category" && payload.category) product.category = payload.category;
+    else if (payload.operation === "set_weight") product.weight = Math.max(0, value);
+    else if (payload.operation === "set_dimensions") product.dimensions = { length: Number(payload.length) || 0, width: Number(payload.width) || 0, height: Number(payload.height) || 0 };
+    else product.price = calculatePrice(product, payload.operation, value);
+    return product.save();
+  }));
+  return { updated: products.length };
+}
+
+export async function updateInventory(id, { mode, quantity }) {
+  const product = await Product.findById(id);
+  if (!product) throw new ApiError("Product not found.", 404);
+  const qty = Number(quantity) || 0;
+  product.stock = mode === "set" ? qty : mode === "reduce" ? Math.max(0, product.stock - qty) : product.stock + qty;
+  await product.save();
+  return product;
+}
+
+export async function listCategories() { return Category.find().sort({ name: 1 }); }
+export async function saveCategory(payload, id) { const data = { name: payload.name, slug: payload.slug || slugify(payload.name), description: payload.description, image: payload.image, isActive: payload.isActive !== false }; return id ? Category.findByIdAndUpdate(id, data, { new: true, runValidators: true }) : Category.create(data); }
+
+export const listOffers = () => Offer.find().populate("category", "name").populate("products", "title").sort({ createdAt: -1 });
+export const saveOffer = (payload, userId, id) => id ? Offer.findByIdAndUpdate(id, payload, { new: true, runValidators: true }) : Offer.create({ ...payload, createdBy: userId });
+export const listCoupons = () => Coupon.find().populate("categories", "name").populate("products", "title").sort({ createdAt: -1 });
+export const saveCoupon = (payload, userId, id) => {
+  const data = { ...payload, code: payload.code?.toUpperCase() };
+  return id ? Coupon.findByIdAndUpdate(id, data, { new: true, runValidators: true }) : Coupon.create({ ...data, createdBy: userId });
+};
+export const listContent = () => SiteContent.find().sort({ key: 1 });
+export const upsertContent = (key, value, userId) => SiteContent.findOneAndUpdate({ key }, { value, updatedBy: userId }, { upsert: true, new: true });
+export const listMessages = () => ContactMessage.find({ status: { $ne: "ARCHIVED" } }).sort({ createdAt: -1 });
+export const updateMessage = (id, status) => ContactMessage.findByIdAndUpdate(id, { status }, { new: true, runValidators: true });
+export const listNewsletter = () => NewsletterSubscriber.find().sort({ subscribedAt: -1 });
+export const unsubscribe = (id) => NewsletterSubscriber.findByIdAndUpdate(id, { status: "UNSUBSCRIBED" }, { new: true });
+export const listAuditLogs = (query) => AdminAuditLog.find(query.search ? { summary: new RegExp(query.search, "i") } : {}).populate("admin", "name email adminRole").sort({ createdAt: -1 }).limit(100);
+
+export async function listCustomers() {
+  return User.aggregate([{ $match: { role: "user" } }, { $lookup: { from: "orders", localField: "_id", foreignField: "user", as: "orders" } }, { $project: { name: 1, email: 1, phone: 1, isDisabled: 1, createdAt: 1, orderCount: { $size: "$orders" }, totalSpent: { $sum: "$orders.totalAmount" }, lastOrder: { $max: "$orders.createdAt" } } }]);
+}
+
+export async function listPayments(query) {
+  const filter = {};
+  if (query.status) filter.paymentStatus = query.status;
+  return Order.find(filter).populate("user", "name email").select("user paymentMethod paymentStatus razorpayPaymentId totalAmount createdAt").sort({ createdAt: -1 }).limit(100);
+}
+
+export async function reports(type = "sales") {
+  const start = new Date(Date.now() - 30 * 86400000);
+  if (type === "products") return Product.find().populate("category", "name").sort({ stock: 1 }).limit(50);
+  return Order.aggregate([{ $match: { createdAt: { $gte: start } } }, { $group: { _id: "$paymentStatus", orders: { $sum: 1 }, total: { $sum: "$totalAmount" } } }]);
+}
+
+export async function listAdmins() { return User.find({ role: "admin" }).select("name email adminRole isDisabled createdAt updatedAt").sort({ createdAt: -1 }); }
+export async function updateAdminRole(id, adminRole) { return User.findByIdAndUpdate(id, { role: "admin", adminRole }, { new: true, runValidators: true }).select("name email adminRole isDisabled"); }
+
+export async function globalAdminSearch(term, user, hasPermission) {
+  const q = String(term || "").trim();
+  if (q.length < 2) return { pages: [], products: [], orders: [], customers: [], categories: [] };
+  const pageMap = ["Dashboard", "Orders", "Products", "Inventory", "Categories", "Offers", "Coupons", "Shipping", "Customers", "Payments", "Content", "Media", "Messages", "Newsletter", "Reports", "Admin Users", "Audit Logs", "Settings"];
+  const pages = pageMap.filter((label) => label.toLowerCase().includes(q.toLowerCase())).slice(0, 5).map((label) => ({ label, path: `/admin/${label.toLowerCase().replaceAll(" ", "-").replace("dashboard", "")}`.replace(/\/$/, "") || "/admin" }));
+  const [products, categories, orders, customers] = await Promise.all([
+    hasPermission(user, "products.read") ? Product.find({ $or: [{ title: new RegExp(q, "i") }, { sku: new RegExp(q, "i") }] }).select("title sku slug").limit(5) : [],
+    hasPermission(user, "categories.read") ? Category.find({ name: new RegExp(q, "i") }).select("name slug").limit(5) : [],
+    hasPermission(user, "orders.read") && q.length >= 3 ? Order.find(q.match(/^[a-f\d]{24}$/i) ? { _id: q } : { "shippingAddress.fullName": new RegExp(q, "i") }).select("shippingAddress totalAmount orderStatus").limit(5) : [],
+    hasPermission(user, "customers.read") ? User.find({ role: "user", $or: [{ name: new RegExp(q, "i") }, { email: new RegExp(q, "i") }] }).select("name email").limit(5) : [],
+  ]);
+  return { pages, products, categories, orders, customers };
+}

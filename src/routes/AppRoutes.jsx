@@ -7,6 +7,8 @@ import About from "../pages/About.jsx";
 import Home from "../pages/Home.jsx";
 import StatusPage from "../pages/StatusPage.jsx";
 
+const AdminProtectedRoute = lazy(() => import("../admin/routes/AdminProtectedRoute.jsx"));
+const AdminRoutes = lazy(() => import("../admin/routes/AdminRoutes.jsx"));
 const Account = lazy(() => import("../pages/Account.jsx"));
 const Cart = lazy(() => import("../pages/Cart.jsx"));
 const Checkout = lazy(() => import("../pages/Checkout.jsx"));
@@ -22,11 +24,13 @@ const OurProcess = lazy(() => import("../pages/OurProcess.jsx"));
 const OurStory = lazy(() => import("../pages/OurStory.jsx"));
 const ProductDetails = lazy(() => import("../pages/ProductDetails.jsx"));
 const Shop = lazy(() => import("../pages/Shop.jsx"));
+const TrackOrder = lazy(() => import("../pages/TrackOrder.jsx"));
 
 export default function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader label="Loading page" />}>
       <Routes>
+        <Route path="/admin/*" element={<AdminProtectedRoute><AdminRoutes /></AdminProtectedRoute>} />
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/product/:slug" element={<ProductDetails />} />
@@ -42,6 +46,7 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/order/success" element={<OrderSuccess />} />
+        <Route path="/track/:id" element={<ProtectedRoute><TrackOrder /></ProtectedRoute>} />
         <Route path="/legal/:slug" element={<LegalPage />} />
         <Route path="/auth/login-required" element={<StatusPage code="401" retry />} />
         <Route path="/auth/access-denied" element={<StatusPage code="403" />} />
@@ -61,6 +66,10 @@ export default function AppRoutes() {
     </Suspense>
   );
 }
+
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 ﻿// Renders a user-owned order detail view from the backend.
-import { ArrowLeft, Package } from "lucide-react";
+import { ArrowLeft, ExternalLink, Package } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
@@ -22,6 +22,16 @@ const statusLabels = {
   paid: "Paid",
   failed: "Failed",
   refunded: "Refunded",
+  requires_details: "Preparing Shipment",
+  shiprocket_order_created: "Shipment Created",
+  awb_assigned: "AWB Assigned",
+  pickup_generated: "Pickup Requested",
+  label_generated: "Label Generated",
+  manifest_generated: "Ready for Pickup",
+  ready_for_pickup: "Ready for Pickup",
+  picked_up: "Picked Up",
+  in_transit: "In Transit",
+  rto: "Returning",
 };
 
 function formatDate(value) {
@@ -87,6 +97,14 @@ export default function OrderDetails() {
               <aside className="h-max rounded-[2rem] border border-ink/10 bg-white p-5 shadow-sm sm:p-6">
                 <h2 className="font-serif text-3xl font-semibold">Summary</h2>
                 <div className="mt-5 space-y-3 text-sm"><div className="flex justify-between"><span className="text-ink/55">Subtotal</span><span className="font-semibold">{formatCurrency(subtotal)}</span></div><div className="flex justify-between border-t border-ink/10 pt-3 text-lg font-bold"><span>Total</span><span>{formatCurrency(order.totalAmount || subtotal)}</span></div></div>
+                <div className="mt-6 rounded-2xl bg-cream p-4">
+                  <p className="font-semibold">Delivery</p>
+                  <p className="mt-2 text-sm leading-6 text-ink/60">{statusLabels[order.shippingStatus] || "Preparing Shipment"}</p>
+                  {order.courierName && <p className="mt-2 text-sm font-semibold text-ink/60">Courier: {order.courierName}</p>}
+                  {order.awbCode && <p className="mt-1 text-sm font-semibold text-ink/60">AWB: {order.awbCode}</p>}
+                  {order.estimatedDelivery && <p className="mt-1 text-sm text-ink/55">Estimated delivery: {formatDate(order.estimatedDelivery)}</p>}
+                  {order.trackingUrl ? <a href={order.trackingUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-xs font-bold text-white transition hover:bg-leaf">Track Order <ExternalLink size={14} /></a> : <p className="mt-3 text-xs font-semibold text-ink/45">Tracking appears here after courier assignment.</p>}
+                </div>
                 {address && <div className="mt-6 rounded-2xl bg-cream p-4"><p className="font-semibold">Delivery Address</p><p className="mt-2 text-sm leading-6 text-ink/60">{address.fullName}, {address.phone}<br />{address.street}, {address.city}, {address.state} {address.postalCode}<br />{address.country || "India"}</p></div>}
                 <p className="mt-5 text-sm leading-6 text-ink/55">Order cancellation is available only when supported by the backend order workflow. This order is currently managed by the store team.</p>
               </aside>
@@ -97,3 +115,4 @@ export default function OrderDetails() {
     </>
   );
 }
+

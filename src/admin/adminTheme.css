@@ -1,0 +1,17 @@
+﻿/* Admin-only theme tokens. Change --admin-primary here to update the admin panel brand colour. */
+:root {
+  --admin-primary: #4f6b2f;
+  --admin-primary-hover: #3f5526;
+  --admin-primary-soft: rgba(79, 107, 47, 0.12);
+  --admin-primary-foreground: #ffffff;
+  --admin-bg: #f7f2e8;
+  --admin-surface: #ffffff;
+  --admin-border: rgba(45, 32, 25, 0.1);
+  --admin-text: #2d2019;
+  --admin-muted: rgba(45, 32, 25, 0.58);
+  --admin-success: #4f6b2f;
+  --admin-warning: #a2632f;
+  --admin-error: #b84a3a;
+  --admin-info: #426d8f;
+}
+

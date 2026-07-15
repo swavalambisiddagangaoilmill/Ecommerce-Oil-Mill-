@@ -1,0 +1,56 @@
+﻿// Admin API controller mapping service results to safe responses.
+import * as admin from "../services/adminDataService.js";
+import { hasPermission } from "../middleware/adminAuth.js";
+import { writeAuditLog } from "../utils/audit.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { sendSuccess } from "../../utils/apiResponse.js";
+
+export const dashboard = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Dashboard fetched", await admin.dashboardData()));
+export const orders = asyncHandler(async (req, res) => sendSuccess(res, 200, "Orders fetched", await admin.listOrders(req.query)));
+export const orderStatus = asyncHandler(async (req, res) => { const order = await admin.updateOrderStatus(req.params.id, req.body.status); await writeAuditLog(req, { action: "order.status", resourceType: "Order", resourceId: order._id, summary: `Order moved to ${order.orderStatus}` }); sendSuccess(res, 200, "Order updated", { order }); });
+export const orderReadyToShip = asyncHandler(async (req, res) => { const order = await admin.readyToShip(req.params.id); await writeAuditLog(req, { action: "order.ready_to_ship", resourceType: "Order", resourceId: order._id, summary: "Order marked ready to ship" }); sendSuccess(res, 200, "Ready to ship", { order }); });
+export const mockShippingNext = asyncHandler(async (req, res) => { const order = await admin.nextMockShipping(req.params.id); await writeAuditLog(req, { action: "shipping.mock_next", resourceType: "Order", resourceId: order._id, summary: `Mock shipment moved to ${order.shippingStatus}` }); sendSuccess(res, 200, "Mock shipment advanced", { order }); });
+export const products = asyncHandler(async (req, res) => sendSuccess(res, 200, "Products fetched", await admin.listProducts(req.query)));
+export const saveProduct = asyncHandler(async (req, res) => { const product = await admin.saveProduct(req.body, req.params.id); await writeAuditLog(req, { action: req.params.id ? "product.update" : "product.create", resourceType: "Product", resourceId: product._id, summary: `${product.title} saved` }); sendSuccess(res, req.params.id ? 200 : 201, "Product saved", { product }); });
+export const archiveProduct = asyncHandler(async (req, res) => { const product = await admin.archiveProduct(req.params.id); await writeAuditLog(req, { action: "product.archive", resourceType: "Product", resourceId: product._id, summary: `${product.title} archived` }); sendSuccess(res, 200, "Product archived", { product }); });
+export const bulkPricePreview = asyncHandler(async (req, res) => sendSuccess(res, 200, "Bulk preview generated", await admin.bulkPricePreview(req.body)));
+export const bulkPriceApply = asyncHandler(async (req, res) => { const result = await admin.bulkPriceApply(req.body); await writeAuditLog(req, { action: "product.bulk_price", resourceType: "Product", summary: `${result.updated} products updated`, after: req.body }); sendSuccess(res, 200, "Bulk prices updated", result); });
+export const inventoryUpdate = asyncHandler(async (req, res) => { const product = await admin.updateInventory(req.params.id, req.body); await writeAuditLog(req, { action: "inventory.update", resourceType: "Product", resourceId: product._id, summary: `${product.title} stock is ${product.stock}` }); sendSuccess(res, 200, "Inventory updated", { product }); });
+export const categories = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Categories fetched", { items: await admin.listCategories() }));
+export const saveCategory = asyncHandler(async (req, res) => { const category = await admin.saveCategory(req.body, req.params.id); await writeAuditLog(req, { action: "category.save", resourceType: "Category", resourceId: category._id, summary: `${category.name} saved` }); sendSuccess(res, 200, "Category saved", { category }); });
+export const offers = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Offers fetched", { items: await admin.listOffers() }));
+export const createOffer = asyncHandler(async (req, res) => { const offer = await admin.saveOffer(req.body, req.user._id); await writeAuditLog(req, { action: "offer.create", resourceType: "Offer", resourceId: offer._id, summary: `${offer.name} created` }); sendSuccess(res, 201, "Offer created", { offer }); });
+export const coupons = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Coupons fetched", { items: await admin.listCoupons() }));
+export const createCoupon = asyncHandler(async (req, res) => { const coupon = await admin.saveCoupon(req.body, req.user._id); await writeAuditLog(req, { action: "coupon.create", resourceType: "Coupon", resourceId: coupon._id, summary: `${coupon.code} created` }); sendSuccess(res, 201, "Coupon created", { coupon }); });
+export const shipping = asyncHandler(async (req, res) => sendSuccess(res, 200, "Shipping fetched", await admin.listOrders({ ...req.query, limit: 100 })));
+export const customers = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Customers fetched", { items: await admin.listCustomers() }));
+export const payments = asyncHandler(async (req, res) => sendSuccess(res, 200, "Payments fetched", { items: await admin.listPayments(req.query) }));
+export const content = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Content fetched", { items: await admin.listContent() }));
+export const saveContent = asyncHandler(async (req, res) => { const item = await admin.upsertContent(req.params.key, req.body.value, req.user._id); await writeAuditLog(req, { action: "content.update", resourceType: "SiteContent", resourceId: item.key, summary: `${item.key} updated` }); sendSuccess(res, 200, "Content saved", { item }); });
+export const messages = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Messages fetched", { items: await admin.listMessages() }));
+export const messageStatus = asyncHandler(async (req, res) => sendSuccess(res, 200, "Message updated", { message: await admin.updateMessage(req.params.id, req.body.status) }));
+export const newsletter = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Subscribers fetched", { items: await admin.listNewsletter() }));
+export const unsubscribe = asyncHandler(async (req, res) => sendSuccess(res, 200, "Subscriber updated", { subscriber: await admin.unsubscribe(req.params.id) }));
+export const reports = asyncHandler(async (req, res) => sendSuccess(res, 200, "Report fetched", { items: await admin.reports(req.query.type) }));
+export const adminUsers = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Admin users fetched", { items: await admin.listAdmins() }));
+export const updateAdmin = asyncHandler(async (req, res) => { const user = await admin.updateAdminRole(req.params.id, req.body.adminRole); await writeAuditLog(req, { action: "admin.role", resourceType: "User", resourceId: user._id, summary: `${user.email} role updated` }); sendSuccess(res, 200, "Admin updated", { user }); });
+export const auditLogs = asyncHandler(async (req, res) => sendSuccess(res, 200, "Audit logs fetched", { items: await admin.listAuditLogs(req.query) }));
+export const settings = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Settings fetched", { settings: await admin.getSettings() }));
+export const saveSettings = asyncHandler(async (req, res) => { const settings = await admin.updateSettings(req.body); await writeAuditLog(req, { action: "settings.update", resourceType: "StoreSettings", resourceId: "store", summary: "Store settings updated" }); sendSuccess(res, 200, "Settings saved", { settings }); });
+
+export const updateOffer = asyncHandler(async (req, res) => {
+  const offer = await admin.saveOffer(req.body, req.user._id, req.params.id);
+  await writeAuditLog(req, { action: "offer.update", resourceType: "Offer", resourceId: offer._id, summary: `${offer.name} updated` });
+  sendSuccess(res, 200, "Offer updated", { offer });
+});
+
+export const updateCoupon = asyncHandler(async (req, res) => {
+  const coupon = await admin.saveCoupon(req.body, req.user._id, req.params.id);
+  await writeAuditLog(req, { action: "coupon.update", resourceType: "Coupon", resourceId: coupon._id, summary: `${coupon.code} updated` });
+  sendSuccess(res, 200, "Coupon updated", { coupon });
+});
+
+export const globalSearch = asyncHandler(async (req, res) => {
+  const results = await admin.globalAdminSearch(req.query.q, req.user, hasPermission);
+  sendSuccess(res, 200, "Search complete", results);
+});

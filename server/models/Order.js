@@ -25,6 +25,25 @@ const shippingAddressSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const shippingStatuses = [
+  "pending",
+  "requires_details",
+  "shiprocket_order_created",
+  "awb_assigned",
+  "pickup_generated",
+  "label_generated",
+  "manifest_generated",
+  "ready_for_pickup",
+  "picked_up",
+  "shipped",
+  "in_transit",
+  "out_for_delivery",
+  "delivered",
+  "cancelled",
+  "rto",
+  "failed",
+];
+
 const orderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -37,8 +56,30 @@ const orderSchema = new mongoose.Schema(
     razorpaySignature: { type: String },
     orderStatus: { type: String, enum: ["placed", "confirmed", "packed", "shipped", "delivered", "cancelled"], default: "placed" },
     totalAmount: { type: Number, required: true, min: 0 },
+    couponCode: { type: String, trim: true, uppercase: true },
+    couponDiscount: { type: Number, default: 0, min: 0 },
+    shiprocketOrderId: { type: String },
+    shiprocketShipmentId: { type: String },
+    awbCode: { type: String },
+    courierName: { type: String },
+    shippingStatus: { type: String, enum: shippingStatuses, default: "pending" },
+    trackingUrl: { type: String },
+    pickupStatus: { type: String },
+    estimatedDelivery: { type: Date },
+    labelUrl: { type: String },
+    manifestUrl: { type: String },
+    shippingFailureReason: { type: String },
+    readyToShipAt: { type: Date },
+    isMockShipment: { type: Boolean, default: false },
+    mockShippingStep: { type: Number, default: 0 },
+    mockShippingHistory: [{ status: String, label: String, createdAt: { type: Date, default: Date.now } }],
   },
   { timestamps: true }
 );
 
+orderSchema.index({ shiprocketShipmentId: 1 });
+orderSchema.index({ awbCode: 1 });
+
 export default mongoose.model("Order", orderSchema);
+
+

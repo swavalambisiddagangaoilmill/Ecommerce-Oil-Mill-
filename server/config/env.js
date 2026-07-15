@@ -24,8 +24,26 @@ export const env = {
     apiKey: process.env.CLOUDINARY_KEY || "",
     apiSecret: process.env.CLOUDINARY_SECRET || "",
   },
+  shiprocket: {
+    mock: !isProduction && process.env.SHIPROCKET_MOCK === "true",
+    email: process.env.SHIPROCKET_EMAIL || "",
+    password: process.env.SHIPROCKET_PASSWORD || "",
+    pickupLocation: process.env.SHIPROCKET_PICKUP_LOCATION || "",
+    pickupPostcode: process.env.SHIPROCKET_PICKUP_POSTCODE || "",
+    webhookSecret: process.env.SHIPROCKET_WEBHOOK_SECRET || "",
+    defaultWeightKg: Number(process.env.SHIPROCKET_DEFAULT_WEIGHT_KG) || 0,
+    defaultLengthCm: Number(process.env.SHIPROCKET_DEFAULT_LENGTH_CM) || 0,
+    defaultBreadthCm: Number(process.env.SHIPROCKET_DEFAULT_BREADTH_CM) || 0,
+    defaultHeightCm: Number(process.env.SHIPROCKET_DEFAULT_HEIGHT_CM) || 0,
+  },
 };
 
 if (isProduction && (env.jwtSecret === "development_only_change_me" || env.jwtSecret.length < 32)) {
   throw new Error("JWT_SECRET must be a strong secret in production.");
 }
+
+if (isProduction && process.env.SHIPROCKET_MOCK === "true") {
+  throw new Error("SHIPROCKET_MOCK cannot be enabled in production.");
+}
+
+

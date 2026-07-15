@@ -31,3 +31,17 @@ export const paymentStatusValidator = [
   body("paymentStatus").optional().isIn(["pending", "paid", "failed", "refunded"]).withMessage("Invalid payment status."),
   body("razorpayPaymentId").optional().trim(),
 ];
+
+export const upiQrValidator = [
+  body("order.products").isArray({ min: 1 }).withMessage("At least one product is required."),
+  body("order.products.*.product").isMongoId().withMessage("Valid product id is required."),
+  body("order.products.*.quantity").isInt({ min: 1 }).withMessage("Quantity must be at least 1."),
+  body("order.shippingAddress.fullName").trim().notEmpty().withMessage("Full name is required."),
+  body("order.shippingAddress.phone").trim().notEmpty().withMessage("Phone is required."),
+  body("order.shippingAddress.street").trim().notEmpty().withMessage("Street is required."),
+  body("order.shippingAddress.city").trim().notEmpty().withMessage("City is required."),
+  body("order.shippingAddress.state").trim().notEmpty().withMessage("State is required."),
+  body("order.shippingAddress.postalCode").trim().notEmpty().withMessage("Postal code is required."),
+];
+
+export const qrCheckoutIdValidator = [param("checkoutId").isMongoId().withMessage("Valid QR checkout id is required.")];

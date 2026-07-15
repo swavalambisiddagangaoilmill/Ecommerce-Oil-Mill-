@@ -1,7 +1,7 @@
 ﻿// Admin route registration.
 import { Router } from "express";
 import { getStats, getUsers, removeUser, updateRole } from "../controllers/adminController.js";
-import { getAllOrdersHandler, updateOrderStatusHandler } from "../controllers/orderController.js";
+import { advanceMockShipmentHandler, getAllOrdersHandler, readyToShipHandler, updateOrderStatusHandler } from "../controllers/orderController.js";
 import { createCategoryHandler, deleteCategoryHandler, updateCategoryHandler } from "../controllers/categoryController.js";
 import { createProductHandler, deleteProductHandler, updateProductHandler } from "../controllers/productController.js";
 import { adminOnly } from "../middleware/admin.js";
@@ -23,6 +23,8 @@ router.put("/users/:id/role", userIdValidator, roleValidator, validate, updateRo
 router.delete("/users/:id", userIdValidator, validate, removeUser);
 router.get("/orders", getAllOrdersHandler);
 router.put("/orders/:id/status", orderIdValidator, updateOrderStatusValidator, validate, updateOrderStatusHandler);
+router.post("/orders/:id/ready-to-ship", orderIdValidator, validate, readyToShipHandler);
+router.post("/orders/:id/mock-shipment/next", orderIdValidator, validate, advanceMockShipmentHandler);
 router.post("/products", productValidator, validate, createProductHandler);
 router.put("/products/:id", productIdValidator, productUpdateValidator, validate, updateProductHandler);
 router.delete("/products/:id", productIdValidator, validate, deleteProductHandler);
@@ -31,3 +33,5 @@ router.put("/categories/:id", categoryIdValidator, categoryValidator, validate, 
 router.delete("/categories/:id", categoryIdValidator, validate, deleteCategoryHandler);
 
 export default router;
+
+

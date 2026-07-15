@@ -3,7 +3,7 @@ import { CreditCard, Home, Truck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuthToken } from "../../../api/apiClient.js";
-import { createOrder } from "../../../services/checkoutService.js";
+import { checkUpiQrPayment, createOrder, createPaymentIntent, createUpiQrPayment, verifyPayment } from "../../../services/checkoutService.js";
 import { fetchAccountProfile } from "../../../services/accountService.js";
 import { useCart } from "../../../hooks/useCart.jsx";
 import { formatCurrency } from "../../../utils/formatCurrency.js";
@@ -11,14 +11,44 @@ import { writeGuestSession } from "../../../utils/guestSession.js";
 import Button from "../../ui/Button.jsx";
 import Input from "../../ui/Input.jsx";
 
+function loadRazorpayCheckout() {
+  if (window.Razorpay) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
+function formatOrderForSuccess(order, shippingAddress, items, total) {
+  return {
+    id: order?._id || `VEL-${Date.now().toString().slice(-6)}`,
+    date: new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(order?.createdAt || Date.now())),
+    paymentStatus: order?.paymentStatus || "pending",
+    address: `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.postalCode}`,
+    items,
+    total: order?.totalAmount || total,
+    estimatedDelivery: "2-5 business days",
+  };
+}
+
 export default function CheckoutForm() {
   const navigate = useNavigate();
   const { items, totals, clearCart } = useCart();
   const formRef = useRef(null);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("online");
+  const [processingStep, setProcessingStep] = useState("");
+  const [qrCheckout, setQrCheckout] = useState(null);
+  const [qrCountdown, setQrCountdown] = useState(0);
   const [error, setError] = useState("");
+
+  const processing = Boolean(processingStep);
+
   useEffect(() => {
     let active = true;
     if (!getAuthToken()) return undefined;
@@ -31,6 +61,38 @@ export default function CheckoutForm() {
     return () => { active = false; };
   }, []);
 
+
+  useEffect(() => {
+    if (!qrCheckout?.expiresAt || qrCheckout.status === "paid") return undefined;
+    const update = () => {
+      const remaining = Math.max(0, Math.floor((new Date(qrCheckout.expiresAt).getTime() - Date.now()) / 1000));
+      setQrCountdown(remaining);
+      if (remaining === 0) setQrCheckout((current) => current ? { ...current, status: "expired" } : current);
+    };
+    update();
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, [qrCheckout?.expiresAt, qrCheckout?.status]);
+
+  useEffect(() => {
+    if (!qrCheckout?.id || qrCheckout.status !== "created") return undefined;
+    let active = true;
+    const timer = window.setInterval(async () => {
+      try {
+        const result = await checkUpiQrPayment(qrCheckout.id);
+        if (!active) return;
+        if (result.status === "paid" && result.order) {
+          setQrCheckout((current) => current ? { ...current, status: "paid" } : current);
+          finishOrder(result.order, qrCheckout.shippingAddress);
+        } else if (result.status === "expired") {
+          setQrCheckout((current) => current ? { ...current, status: "expired" } : current);
+        }
+      } catch {
+        // Backend verification remains the source of truth while the QR is open.
+      }
+    }, 5000);
+    return () => { active = false; window.clearInterval(timer); };
+  }, [qrCheckout?.id, qrCheckout?.status]);
   const applyAddress = (address) => {
     const form = formRef.current;
     if (!form) return;
@@ -44,14 +106,8 @@ export default function CheckoutForm() {
     form.elements.pin.value = address.postalCode || "";
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (loading) return;
-    if (!getAuthToken()) {
-      navigate("/login", { state: { from: "/checkout" } });
-      return;
-    }
-    const form = new FormData(event.currentTarget);
+  const getOrderPayload = (formElement) => {
+    const form = new FormData(formElement);
     const shippingAddress = {
       fullName: `${form.get("firstName")} ${form.get("lastName")}`.trim(),
       phone: form.get("phone"),
@@ -61,36 +117,115 @@ export default function CheckoutForm() {
       postalCode: form.get("pin"),
       country: "India",
     };
-    setError("");
-    setLoading(true);
-    try {
-      const response = await createOrder({
+    return {
+      order: {
         products: items.map((item) => ({ product: item._id || item.id, quantity: item.quantity })),
         shippingAddress,
-        paymentMethod: form.get("payment") === "cod" ? "cod" : "upi",
-      });
-      const order = response.order;
-      writeGuestSession({ checkoutDraft: {} });
-      clearCart();
-      navigate("/order/success", {
-        state: {
-          order: {
-            id: order?._id || `VEL-${Date.now().toString().slice(-6)}`,
-            date: new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(order?.createdAt || Date.now())),
-            paymentStatus: order?.paymentStatus || "pending",
-            address: `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.postalCode}`,
-            items,
-            total: order?.totalAmount || totals.total,
-            estimatedDelivery: "2-5 business days",
+        paymentMethod: paymentMethod === "cod" ? "cod" : "upi",
+      },
+      customer: {
+        name: shippingAddress.fullName || profile?.name || "",
+        email: form.get("email") || profile?.email || "",
+        phone: shippingAddress.phone || profile?.phone || "",
+      },
+    };
+  };
+
+  const finishOrder = (order, shippingAddress) => {
+    writeGuestSession({ checkoutDraft: {} });
+    clearCart();
+    navigate("/order/success", { state: { order: formatOrderForSuccess(order, shippingAddress, items, totals.total) } });
+  };
+
+  const submitCodOrder = async (orderPayload) => {
+    setProcessingStep("cod");
+    const response = await createOrder({ ...orderPayload.order, paymentMethod: "cod" });
+    finishOrder(response.order, orderPayload.order.shippingAddress);
+  };
+
+
+  const submitQrOrder = async (orderPayload) => {
+    setProcessingStep("qr");
+    const response = await createUpiQrPayment({ order: orderPayload.order });
+    setQrCheckout({ ...response.qr, status: "created", shippingAddress: orderPayload.order.shippingAddress });
+  };
+  const submitRazorpayOrder = async (orderPayload) => {
+    setProcessingStep("preparing");
+    const loaded = await loadRazorpayCheckout();
+    if (!loaded) throw new Error("Unable to load Razorpay Checkout. Please try again.");
+
+    const { payment } = await createPaymentIntent({ order: orderPayload.order });
+    if (!payment?.key || !window.Razorpay) throw new Error("Razorpay is not configured. Please choose Cash on delivery or try again later.");
+
+    await new Promise((resolve, reject) => {
+      let settled = false;
+      const checkout = new window.Razorpay({
+        key: payment.key,
+        amount: payment.amount,
+        currency: payment.currency || "INR",
+        name: "Velora",
+        description: "Cold pressed oil order",
+        order_id: payment.id,
+        prefill: orderPayload.customer,
+        theme: { color: "#55712f" },
+        handler: async (response) => {
+          if (settled) return;
+          settled = true;
+          try {
+            setProcessingStep("verifying");
+            const verified = await verifyPayment({
+              order: orderPayload.order,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+            finishOrder(verified.order, orderPayload.order.shippingAddress);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            if (settled) return;
+            settled = true;
+            reject(new Error("Payment was cancelled. Your cart has not been changed."));
           },
         },
       });
+      checkout.on("payment.failed", (response) => {
+        if (settled) return;
+        settled = true;
+        reject(new Error(response.error?.description || "Payment failed. Your cart has not been changed."));
+      });
+      checkout.open();
+    });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (processing) return;
+    if (!getAuthToken()) {
+      navigate("/login", { state: { from: "/checkout" } });
+      return;
+    }
+    const orderPayload = getOrderPayload(event.currentTarget);
+    setError("");
+    try {
+      if (paymentMethod === "cod") await submitCodOrder(orderPayload);
+      else if (paymentMethod === "upi_qr") await submitQrOrder(orderPayload);
+      else await submitRazorpayOrder(orderPayload);
     } catch (err) {
-      setError(err.message || "Unable to place order. Please try again.");
+      setError(err.message || "Unable to complete payment. Please try again.");
     } finally {
-      setLoading(false);
+      setProcessingStep("");
     }
   };
+
+  const buttonText = processingStep === "preparing" ? "Preparing Payment..." : processingStep === "verifying" ? "Verifying Payment..." : processingStep === "qr" ? "Generating QR..." : paymentMethod === "cod" ? "Place Order" : paymentMethod === "upi_qr" ? "Generate UPI QR" : "Pay Now & Place Order";
+  const paymentCardClass = (value) => `flex cursor-pointer items-center justify-between rounded-2xl border p-4 font-semibold transition ${paymentMethod === value ? "border-leaf bg-leaf/5" : "border-ink/10 bg-white hover:border-leaf/30"}`;
+  const qrMinutes = String(Math.floor(qrCountdown / 60)).padStart(2, "0");
+  const qrSeconds = String(qrCountdown % 60).padStart(2, "0");
 
   return (
     <form ref={formRef} className="rounded-3xl border border-ink/10 bg-white p-6 shadow-sm" onSubmit={handleSubmit}>
@@ -132,18 +267,25 @@ export default function CheckoutForm() {
       </div>
       <div className="mt-8">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold"><CreditCard size={20} /> Payment</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="rounded-2xl border border-leaf bg-leaf/5 p-4 font-semibold"><input type="radio" name="payment" value="online" defaultChecked className="mr-2" /> UPI / Cards</label>
-          <label className="rounded-2xl border border-ink/10 p-4 font-semibold"><input type="radio" name="payment" value="cod" className="mr-2" /> Cash on delivery</label>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <label className={paymentCardClass("online")}>
+            <span>UPI / Cards</span>
+            <input type="radio" name="payment" value="online" checked={paymentMethod === "online"} onChange={() => setPaymentMethod("online")} className="ml-3" />
+          </label>
+          <label className={paymentCardClass("upi_qr")}>
+            <span>UPI QR</span>
+            <input type="radio" name="payment" value="upi_qr" checked={paymentMethod === "upi_qr"} onChange={() => { setPaymentMethod("upi_qr"); setQrCheckout(null); }} className="ml-3" />
+          </label>
+          <label className={paymentCardClass("cod")}>
+            <span>Cash on delivery</span>
+            <input type="radio" name="payment" value="cod" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} className="ml-3" />
+          </label>
         </div>
       </div>
       <label className="mt-6 flex items-start gap-3 text-sm leading-6 text-ink/65"><input type="checkbox" required className="mt-1" />I agree to the Terms & Conditions, Privacy Policy, and Refund & Cancellation Policy.</label>
-      <Button type="submit" className="mt-8 w-full" loading={loading}>Place Order</Button>
+      <Button type="submit" className="mt-8 w-full" disabled={processing}>{buttonText}</Button>
     </form>
   );
 }
-
-
-
 
 

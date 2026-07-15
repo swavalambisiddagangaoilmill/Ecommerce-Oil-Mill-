@@ -1,4 +1,7 @@
-﻿// Content controller serves static editorial content through API endpoints.
+﻿// Contact, newsletter, and public content controller backed by MongoDB with safe fallbacks.
+import ContactMessage from "../models/ContactMessage.js";
+import NewsletterSubscriber from "../models/NewsletterSubscriber.js";
+import SiteContent from "../models/SiteContent.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 
@@ -7,10 +10,21 @@ const faqs = [
   { category: "Orders", items: [{ question: "How long does delivery take?", answer: "Most orders are delivered within 2-5 business days depending on serviceability." }] },
 ];
 
+export const submitContact = asyncHandler(async (req, res) => {
+  const message = await ContactMessage.create({ name: req.body.name, email: req.body.email, phone: req.body.phone, subject: req.body.subject, message: req.body.message });
+  sendSuccess(res, 201, "Message received successfully", { message });
+});
+
+export const subscribeNewsletter = asyncHandler(async (req, res) => {
+  const subscription = await NewsletterSubscriber.findOneAndUpdate({ email: req.body.email }, { email: req.body.email, status: "ACTIVE", subscribedAt: new Date() }, { upsert: true, new: true, runValidators: true });
+  sendSuccess(res, 201, "Newsletter subscription saved", { subscription });
+});
+
 export const getFaqs = asyncHandler(async (_req, res) => {
   sendSuccess(res, 200, "FAQs fetched successfully", { groups: faqs });
 });
 
 export const getPageContent = asyncHandler(async (req, res) => {
-  sendSuccess(res, 200, "Page content fetched successfully", { slug: req.params.slug, sections: [] });
+  const content = await SiteContent.findOne({ key: req.params.slug });
+  sendSuccess(res, 200, "Page content fetched successfully", { slug: req.params.slug, sections: content?.value?.sections || [], value: content?.value || null });
 });

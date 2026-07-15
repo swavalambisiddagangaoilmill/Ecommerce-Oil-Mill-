@@ -29,12 +29,18 @@ export const API_ENDPOINTS = {
   orders: "/orders",
   myOrders: "/orders/my",
   order: (id) => `/orders/${id}`,
+  orderTracking: (id) => `/orders/${id}/tracking`,
+  adminAdvanceMockShipment: (id) => `/admin/orders/${id}/mock-shipment/next`,
   paymentIntent: "/payments/intent",
   paymentVerify: "/payments/verify",
+  paymentUpiQr: "/payments/upi-qr",
+  paymentUpiQrStatus: (id) => `/payments/upi-qr/${id}`,
   contact: "/contact",
   newsletter: "/newsletter",
   faqs: "/content/faqs",
   pageContent: (slug) => `/content/pages/${slug}`,
 };
+
+
 
 

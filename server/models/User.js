@@ -24,6 +24,8 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: 6, select: false },
     phone: { type: String, trim: true },
     role: { type: String, enum: ["user", "admin"], default: "user" },
+    adminRole: { type: String, enum: ["OWNER", "ORDER_MANAGER", "PRODUCT_MANAGER", "CONTENT_MANAGER"] },
+    isDisabled: { type: Boolean, default: false },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     cart: [
       {
@@ -59,3 +61,4 @@ userSchema.methods.toJSON = function toJSON() {
 };
 
 export default mongoose.model("User", userSchema);
+

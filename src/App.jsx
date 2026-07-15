@@ -16,6 +16,7 @@ import AppRoutes from "./routes/AppRoutes.jsx";
 export default function App() {
   const { pathname } = useLocation();
   const authPage = pathname === "/login" || pathname === "/signup";
+  const adminPage = pathname.startsWith("/admin");
 
   return (
     <div className="min-h-screen bg-cream text-ink">
@@ -24,18 +25,19 @@ export default function App() {
         <RouteTransitionLoader />
         <SecurityAwareness />
         <NetworkStatusBanner />
-        {!authPage && <AnnouncementBar />}
-        {!authPage && <Navbar />}
+        {!authPage && !adminPage && <AnnouncementBar />}
+        {!authPage && !adminPage && <Navbar />}
         <main>
           <AppRoutes />
         </main>
-        {!authPage && <Footer />}
+        {!authPage && !adminPage && <Footer />}
         <GuestSessionNotice />
-        {!authPage && <WishlistWidget />}
-        {!authPage && <ChatWidget />}
+        {!authPage && !adminPage && <WishlistWidget />}
+        {!authPage && !adminPage && <ChatWidget />}
       </ErrorBoundary>
     </div>
   );
 }
+
 
 

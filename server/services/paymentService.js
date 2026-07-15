@@ -2,6 +2,7 @@
 import crypto from "crypto";
 import { env } from "../config/env.js";
 import Order from "../models/Order.js";
+import PaymentCheckout from "../models/PaymentCheckout.js";
 import Product from "../models/Product.js";
 import { createOrder as createStoreOrder } from "./orderService.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -66,3 +67,93 @@ export async function markOrderPayment(orderId, payload) {
   if (!order) throw new ApiError("Order not found.", 404);
   return order;
 }
+
+function razorpayAuthHeader() {
+  return `Basic ${Buffer.from(`${env.razorpay.keyId}:${env.razorpay.keySecret}`).toString("base64")}`;
+}
+
+function normalizeRazorpayError(payload, status) {
+  const message = payload?.error?.description || payload?.error?.reason || payload?.error?.code || payload?.message || "Unable to create Razorpay UPI QR.";
+  if (status === 404 || /requested url was not found/i.test(message)) {
+    return `Razorpay UPI QR is not available for this account or key mode. Razorpay returned: ${message}. Please enable the QR Codes / upi_qr feature for this Razorpay account. Standard Checkout remains available.`;
+  }
+  return message;
+}
+
+export async function createUpiQrCheckout(userId, payload) {
+  if (!env.razorpay.keyId || !env.razorpay.keySecret) throw new ApiError("Razorpay credentials are not configured for UPI QR.", 400);
+  const amount = Math.round(await calculateOrderAmount(payload.order?.products || []) * 100);
+  if (!amount || amount < 100) throw new ApiError("Valid order products are required.", 400);
+  const closeBy = Math.ceil((Date.now() + 15 * 60 * 1000) / 1000);
+  const response = await fetch("https://api.razorpay.com/v1/payments/qr_codes", {
+    method: "POST",
+    headers: { Authorization: razorpayAuthHeader(), "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "upi_qr",
+      name: `Velora checkout ${Date.now()}`,
+      usage: "single_use",
+      fixed_amount: true,
+      payment_amount: amount,
+      description: "Velora UPI QR checkout",
+      close_by: closeBy,
+      notes: { userId: String(userId) },
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new ApiError(normalizeRazorpayError(data, response.status), response.status === 404 ? 400 : response.status === 400 ? 400 : 502);
+  const checkout = await PaymentCheckout.create({
+    user: userId,
+    type: "upi_qr",
+    amount,
+    currency: data.currency || "INR",
+    razorpayQrId: data.id,
+    imageUrl: data.image_url,
+    orderPayload: payload.order,
+    expiresAt: new Date(closeBy * 1000),
+  });
+  return { id: checkout._id, qrId: checkout.razorpayQrId, imageUrl: checkout.imageUrl, amount: checkout.amount, currency: checkout.currency, expiresAt: checkout.expiresAt };
+}
+
+async function fetchQrPayments(qrId) {
+  const response = await fetch(`https://api.razorpay.com/v1/payments/qr_codes/${qrId}/payments`, { headers: { Authorization: razorpayAuthHeader() } });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new ApiError(normalizeRazorpayError(data, response.status) || "Unable to verify QR payment.", response.status === 404 ? 400 : response.status === 400 ? 400 : 502);
+  return data.items || [];
+}
+
+export async function verifyUpiQrCheckout(userId, checkoutId) {
+  const checkout = await PaymentCheckout.findOne({ _id: checkoutId, user: userId });
+  if (!checkout) throw new ApiError("QR checkout not found.", 404);
+  if (checkout.status === "paid") {
+    const order = await Order.findById(checkout.order);
+    return { status: "paid", order, checkout };
+  }
+  if (checkout.expiresAt <= new Date()) {
+    checkout.status = "expired";
+    await checkout.save();
+    return { status: "expired", checkout };
+  }
+  const payments = await fetchQrPayments(checkout.razorpayQrId);
+  const captured = payments.find((payment) => payment.status === "captured" && Number(payment.amount) === checkout.amount);
+  if (!captured) return { status: "created", checkout };
+  const existing = await PaymentCheckout.findOne({ razorpayPaymentId: captured.id, status: "paid" });
+  if (existing?.order) {
+    checkout.status = "paid";
+    checkout.razorpayPaymentId = captured.id;
+    checkout.order = existing.order;
+    await checkout.save();
+    const order = await Order.findById(existing.order);
+    return { status: "paid", order, checkout };
+  }
+  const order = await createStoreOrder(userId, { ...checkout.orderPayload, paymentMethod: "razorpay" });
+  order.paymentStatus = "paid";
+  order.razorpayPaymentId = captured.id;
+  await order.save();
+  checkout.status = "paid";
+  checkout.razorpayPaymentId = captured.id;
+  checkout.order = order._id;
+  await checkout.save();
+  return { status: "paid", order, checkout };
+}
+
+

@@ -16,6 +16,7 @@ export const protect = asyncHandler(async (req, res, next) => {
   const decoded = verifyToken(token);
   const user = await User.findById(decoded.id);
   if (!user) throw new ApiError("User no longer exists.", 401);
+  if (user.isDisabled) throw new ApiError("This account is disabled.", 403);
 
   req.user = user;
   next();
@@ -33,3 +34,4 @@ export const optionalProtect = asyncHandler(async (req, _res, next) => {
   }
   next();
 });
+

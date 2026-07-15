@@ -27,6 +27,7 @@ export async function registerUser(payload) {
 export async function loginUser(email, password) {
   const user = await User.findOne({ email }).select("+password +refreshToken");
   if (!user || !(await user.comparePassword(password))) throw new ApiError("Invalid email or password.", 401);
+  if (user.isDisabled) throw new ApiError("This account is disabled.", 403);
   return issueSession(user);
 }
 
@@ -36,6 +37,7 @@ export async function refreshUserSession(refreshToken) {
   if (decoded.type !== "refresh") throw new ApiError("Invalid refresh token.", 401);
   const user = await User.findById(decoded.id).select("+refreshToken");
   if (!user || user.refreshToken !== refreshToken) throw new ApiError("Invalid refresh token.", 401);
+  if (user.isDisabled) throw new ApiError("This account is disabled.", 403);
   return issueSession(user);
 }
 
@@ -116,5 +118,6 @@ export async function deleteAddress(userId, addressId) {
   await user.save();
   return user.addresses;
 }
+
 
 

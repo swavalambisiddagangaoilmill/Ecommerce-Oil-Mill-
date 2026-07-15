@@ -37,6 +37,16 @@ const statusLabels = {
   paid: "Paid",
   failed: "Failed",
   refunded: "Refunded",
+  requires_details: "Preparing Shipment",
+  shiprocket_order_created: "Shipment Created",
+  awb_assigned: "AWB Assigned",
+  pickup_generated: "Pickup Requested",
+  label_generated: "Label Generated",
+  manifest_generated: "Ready for Pickup",
+  ready_for_pickup: "Ready for Pickup",
+  picked_up: "Picked Up",
+  in_transit: "In Transit",
+  rto: "Returning",
 };
 
 const emptyAddress = { label: "Home", fullName: "", phone: "", street: "", city: "", state: "", postalCode: "", country: "India", isDefault: false };
@@ -259,16 +269,16 @@ export default function Account() {
                   <h2 className="font-serif text-3xl font-semibold">My Orders</h2>
                   <div className="mt-6 grid gap-4">
                     {orders.length === 0 && <div className="rounded-2xl bg-cream p-6 text-center"><Package className="mx-auto text-leaf" /><p className="mt-3 font-semibold">No orders yet</p><Button to="/shop" className="mt-5">Shop Oils</Button></div>}
-                    {orders.map((order) => <Link key={order._id} to={`/account/orders/${order._id}`} className="grid gap-4 rounded-2xl border border-ink/10 p-4 transition hover:border-leaf/40 hover:bg-cream sm:grid-cols-[1fr_auto]">
-                      <div>
+                    {orders.map((order) => <article key={order._id} className="grid gap-4 rounded-2xl border border-ink/10 p-4 transition hover:border-leaf/40 hover:bg-cream sm:grid-cols-[1fr_auto]">
+                      <Link to={`/account/orders/${order._id}`} className="block">
                         <p className="text-xs font-bold uppercase tracking-[0.16em] text-clay">Order {order._id}</p>
                         <p className="mt-2 text-sm font-semibold text-ink/50">{formatDate(order.createdAt)}</p>
                         <div className="mt-4 flex flex-wrap gap-3">
                           {(order.products || []).slice(0, 3).map((item) => <div key={`${order._id}-${item.title}`} className="flex items-center gap-3"><SafeImage src={item.image} alt={item.title} className="h-14 w-14 rounded-xl object-cover" /><span className="max-w-[180px] text-sm font-semibold line-clamp-2">{item.title} x {item.quantity}</span></div>)}
                         </div>
-                      </div>
-                      <div className="text-left sm:text-right"><p className="text-lg font-bold">{formatCurrency(order.totalAmount || 0)}</p><p className="mt-2 text-sm font-semibold text-leaf">{statusLabels[order.orderStatus] || order.orderStatus}</p><p className="mt-1 text-sm font-semibold text-ink/45">Payment: {statusLabels[order.paymentStatus] || order.paymentStatus}</p></div>
-                    </Link>)}
+                      </Link>
+                      <div className="text-left sm:text-right"><p className="text-lg font-bold">{formatCurrency(order.totalAmount || 0)}</p><p className="mt-2 text-sm font-semibold text-leaf">{statusLabels[order.orderStatus] || order.orderStatus}</p><p className="mt-1 text-sm font-semibold text-ink/45">Payment: {statusLabels[order.paymentStatus] || order.paymentStatus}</p><p className="mt-1 text-sm font-semibold text-ink/45">Delivery: {statusLabels[order.shippingStatus] || "Preparing Shipment"}</p>{order.trackingUrl && <Link to={`/track/${order._id}`} className="mt-3 inline-flex rounded-full bg-ink px-4 py-2 text-xs font-bold text-white transition hover:bg-leaf">Track Order</Link>}</div>
+                    </article>)}
                   </div>
                 </section>
               )}
@@ -339,4 +349,8 @@ export default function Account() {
     </>
   );
 }
+
+
+
+
 

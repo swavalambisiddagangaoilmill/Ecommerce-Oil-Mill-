@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "velora-ecommerce-backend",
   "version": "1.0.0",
   "description": "Production-ready Express and MongoDB backend for Velora e-commerce.",
@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed": "node seed/seed.js",
-    "reset": "node seed/seed.js --reset"
+    "reset": "node seed/seed.js --reset",
+    "create-owner": "node scripts/create-owner.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -30,3 +31,4 @@
     "nodemon": "^3.1.9"
   }
 }
+
