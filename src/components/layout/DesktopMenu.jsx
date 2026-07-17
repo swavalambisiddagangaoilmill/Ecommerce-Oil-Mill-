@@ -1,4 +1,4 @@
-﻿// Renders the DesktopMenu layout element.
+// Renders the DesktopMenu layout element.
 import { useEffect, useRef, useState } from "react";
 import { megaMenus } from "../../data/siteData.js";
 import MenuItem from "./MenuItem.jsx";
@@ -96,5 +96,3 @@ export default function DesktopMenu() {
     </div>
   );
 }
-
-

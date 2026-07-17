@@ -1,4 +1,4 @@
-﻿// Payment business logic for Razorpay-compatible flows.
+// Payment business logic for Razorpay-compatible flows.
 import crypto from "crypto";
 import { env } from "../config/env.js";
 import Order from "../models/Order.js";
@@ -6,6 +6,7 @@ import PaymentCheckout from "../models/PaymentCheckout.js";
 import Product from "../models/Product.js";
 import { createOrder as createStoreOrder } from "./orderService.js";
 import { ApiError } from "../utils/ApiError.js";
+import { createAdminNotification } from "./adminNotificationService.js";
 
 async function calculateOrderAmount(productsPayload = []) {
   const productIds = productsPayload.map((item) => item.product);
@@ -59,12 +60,15 @@ export async function verifyPaymentAndCreateOrder(userId, payload) {
   order.razorpayPaymentId = payload.razorpayPaymentId;
   order.razorpaySignature = payload.razorpaySignature;
   await order.save();
+  await createAdminNotification({ category: "payments", type: "payment_successful", title: "Payment Successful", description: `Payment received for order ${order._id}.`, related: { kind: "Order", id: order._id, label: `Order ${order._id}`, path: "/admin/payments" } });
   return order;
 }
 
 export async function markOrderPayment(orderId, payload) {
   const order = await Order.findByIdAndUpdate(orderId, payload, { new: true, runValidators: true });
   if (!order) throw new ApiError("Order not found.", 404);
+  if (payload.paymentStatus === "failed") await createAdminNotification({ category: "payments", type: "payment_failed", title: "Payment Failed", description: `Payment failed for order ${order._id}.`, related: { kind: "Order", id: order._id, label: `Order ${order._id}`, path: "/admin/payments" } });
+  if (payload.paymentStatus === "refunded") await createAdminNotification({ category: "payments", type: "payment_refunded", title: "Payment Refunded", description: `Payment refunded for order ${order._id}.`, related: { kind: "Order", id: order._id, label: `Order ${order._id}`, path: "/admin/payments" } });
   return order;
 }
 
@@ -155,5 +159,7 @@ export async function verifyUpiQrCheckout(userId, checkoutId) {
   await checkout.save();
   return { status: "paid", order, checkout };
 }
+
+
 
 

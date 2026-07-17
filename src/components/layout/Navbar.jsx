@@ -1,4 +1,4 @@
-﻿// Renders the Navbar layout element.
+// Renders the Navbar layout element.
 import { Heart, Menu, Search, ShoppingBag, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -59,7 +59,6 @@ export default function Navbar() {
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
   const accountPath = authenticated ? "/account" : "/login";
   const isAdmin = user?.role === "admin";
-
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -155,10 +154,3 @@ export default function Navbar() {
     </>
   );
 }
-
-
-
-
-
-
-

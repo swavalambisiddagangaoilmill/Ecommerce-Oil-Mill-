@@ -1,4 +1,4 @@
-﻿// Renders the MobileDrawer layout element.
+// Renders the MobileDrawer layout element.
 import { AnimatePresence, motion } from "framer-motion";
 import { Heart, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import { useEffect } from "react";
@@ -102,8 +102,3 @@ export default function MobileDrawer({ open, onClose, onWishlist, accountPath = 
     </AnimatePresence>
   );
 }
-
-
-
-
-

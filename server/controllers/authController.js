@@ -1,12 +1,15 @@
-﻿// Auth controller exposes account and session endpoints.
+// Auth controller exposes account and session endpoints.
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 import { clearAuthCookies, setAuthCookie, setRefreshCookie } from "../utils/jwt.js";
 import { logSecurityEvent } from "../services/securityEventService.js";
+import { continuePendingAdminLogin, attachRefreshToken, revokeAdminSessions } from "../services/adminSessionService.js";
+import { createAdminNotification } from "../services/adminNotificationService.js";
 import {
   addAddress,
   changeUserPassword,
   deleteAddress,
+  issueSession,
   loginUser,
   logoutUser,
   refreshUserSession,
@@ -31,13 +34,22 @@ export const register = asyncHandler(async (req, res) => {
 
 export const login = asyncHandler(async (req, res) => {
   try {
-    const { user, token, refreshToken } = await loginUser(req.body.email, req.body.password);
+    const { user, token, refreshToken } = await loginUser(req.body.email, req.body.password, req);
     setSession(res, token, refreshToken);
     sendSuccess(res, 200, "Logged in successfully", { user, token, refreshToken });
   } catch (error) {
     await logSecurityEvent(req, "failed_login", { email: req.body.email }, "medium");
+    await createAdminNotification({ category: "security", type: "failed_admin_login", title: "Failed Admin Login", description: `A login attempt failed for ${req.body.email || "an admin account"}.`, dedupeKey: `failed-admin-login:${req.ip}:${req.body.email}:${new Date().toISOString().slice(0, 13)}`, related: { kind: "Security", label: req.ip, path: "/admin/audit-logs" } });
     throw error;
   }
+});
+
+export const continueAdminLogin = asyncHandler(async (req, res) => {
+  const { admin, session } = await continuePendingAdminLogin(req, req.body.pendingToken, req.body.revokeSessionIds || []);
+  const { user, token, refreshToken } = await issueSession(admin, session.sessionId);
+  await attachRefreshToken(session.sessionId, refreshToken);
+  setSession(res, token, refreshToken);
+  sendSuccess(res, 200, "Admin login continued", { user, token, refreshToken });
 });
 
 export const refresh = asyncHandler(async (req, res) => {
@@ -47,6 +59,10 @@ export const refresh = asyncHandler(async (req, res) => {
 });
 
 export const logout = asyncHandler(async (req, res) => {
+  if (req.user?.role === "admin") {
+    await revokeAdminSessions(req.user._id, req.authSessionId ? [req.authSessionId] : [], "logout");
+    await createAdminNotification({ category: "security", type: "admin_logout", title: "Admin Logout", description: `${req.user.email} signed out.`, related: { kind: "User", id: req.user._id, label: req.user.email, path: "/admin/settings" } });
+  }
   await logoutUser(req.user?._id);
   clearAuthCookies(res);
   sendSuccess(res, 200, "Logged out successfully");
@@ -63,6 +79,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
 export const changePassword = asyncHandler(async (req, res) => {
   await changeUserPassword(req.user, req.body.currentPassword, req.body.password);
+  if (req.user?.role === "admin") await revokeAdminSessions(req.user._id, [], "password_change");
   sendSuccess(res, 200, "Password changed successfully");
 });
 

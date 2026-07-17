@@ -1,4 +1,4 @@
-﻿// Renders the Shop page experience.
+// Renders the Shop page experience.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
@@ -101,4 +101,3 @@ export default function Shop() {
     </>
   );
 }
-

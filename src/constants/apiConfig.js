@@ -1,10 +1,11 @@
-﻿// Centralizes API configuration for backend communication.
+// Centralizes API configuration for backend communication.
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 export const API_ENDPOINTS = {
   auth: {
     register: "/auth/register",
     login: "/auth/login",
+    continueAdminLogin: "/auth/admin-login/continue",
     logout: "/auth/logout",
     refresh: "/auth/refresh",
     profile: "/auth/profile",
@@ -40,6 +41,7 @@ export const API_ENDPOINTS = {
   faqs: "/content/faqs",
   pageContent: (slug) => `/content/pages/${slug}`,
 };
+
 
 
 

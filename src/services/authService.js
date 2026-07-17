@@ -1,9 +1,15 @@
-﻿// Handles frontend authentication API calls.
+// Handles frontend authentication API calls.
 import { API_ENDPOINTS } from "../constants/apiConfig.js";
 import { apiRequest, clearAuthTokens, setAuthTokens } from "../api/apiClient.js";
 
 export async function loginAccount(payload) {
   const data = await apiRequest(API_ENDPOINTS.auth.login, { method: "POST", body: JSON.stringify(payload) });
+  setAuthTokens(data.token, data.refreshToken);
+  return data;
+}
+
+export async function continueAdminLogin(payload) {
+  const data = await apiRequest(API_ENDPOINTS.auth.continueAdminLogin, { method: "POST", body: JSON.stringify(payload) });
   setAuthTokens(data.token, data.refreshToken);
   return data;
 }

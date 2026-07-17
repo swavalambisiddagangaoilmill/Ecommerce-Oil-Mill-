@@ -1,9 +1,11 @@
-﻿// Admin API controller mapping service results to safe responses.
+// Admin API controller mapping service results to safe responses.
 import * as admin from "../services/adminDataService.js";
 import { hasPermission } from "../middleware/adminAuth.js";
 import { writeAuditLog } from "../utils/audit.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { sendSuccess } from "../../utils/apiResponse.js";
+import { clearReadNotifications, deleteNotification, getNotificationPreferences, listAdminNotifications, markAllNotificationsRead, markNotification, saveNotificationPreferences } from "../../services/adminNotificationService.js";
+import { listAdminSessions, revokeAdminSessions } from "../../services/adminSessionService.js";
 
 export const dashboard = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Dashboard fetched", await admin.dashboardData()));
 export const orders = asyncHandler(async (req, res) => sendSuccess(res, 200, "Orders fetched", await admin.listOrders(req.query)));
@@ -54,3 +56,13 @@ export const globalSearch = asyncHandler(async (req, res) => {
   const results = await admin.globalAdminSearch(req.query.q, req.user, hasPermission);
   sendSuccess(res, 200, "Search complete", results);
 });
+
+export const notifications = asyncHandler(async (req, res) => sendSuccess(res, 200, "Notifications fetched", await listAdminNotifications(req.user._id, req.query)));
+export const notificationPreferences = asyncHandler(async (req, res) => sendSuccess(res, 200, "Notification preferences fetched", await getNotificationPreferences(req.user._id)));
+export const saveNotificationPreferencesHandler = asyncHandler(async (req, res) => sendSuccess(res, 200, "Notification preferences saved", await saveNotificationPreferences(req.user._id, req.body.enabled || {})));
+export const markNotificationRead = asyncHandler(async (req, res) => sendSuccess(res, 200, "Notification updated", { notification: await markNotification(req.user._id, req.params.id, req.body.read !== false) }));
+export const removeNotification = asyncHandler(async (req, res) => sendSuccess(res, 200, "Notification deleted", { notification: await deleteNotification(req.user._id, req.params.id) }));
+export const markNotificationsRead = asyncHandler(async (req, res) => { await markAllNotificationsRead(req.user._id); sendSuccess(res, 200, "Notifications marked read"); });
+export const clearReadNotificationsHandler = asyncHandler(async (req, res) => { await clearReadNotifications(req.user._id); sendSuccess(res, 200, "Read notifications cleared"); });
+export const sessions = asyncHandler(async (req, res) => sendSuccess(res, 200, "Admin sessions fetched", await listAdminSessions(req.user._id, req.authSessionId)));
+export const revokeSessions = asyncHandler(async (req, res) => { const count = await revokeAdminSessions(req.user._id, req.body.sessionIds || [], "admin_panel"); sendSuccess(res, 200, "Admin sessions revoked", { count }); });

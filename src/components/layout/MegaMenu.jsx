@@ -1,7 +1,11 @@
-﻿// Renders the MegaMenu layout element.
+// Renders the MegaMenu layout element.
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+
+function shortcutHref(link) {
+  return link.href === "/shop" ? `/shop?q=${encodeURIComponent(link.label)}&focus=search` : link.href;
+}
 
 export default function MegaMenu({ menu, open, onNavigate }) {
   const data = menu?.data;
@@ -26,7 +30,7 @@ export default function MegaMenu({ menu, open, onNavigate }) {
             {data.links.map((link) => (
               <Link
                 key={link.label}
-                to={link.href}
+                to={shortcutHref(link)}
                 onClick={onNavigate}
                 className={
                   isShop
@@ -63,5 +67,3 @@ export default function MegaMenu({ menu, open, onNavigate }) {
     </motion.div>
   );
 }
-
-

@@ -1,16 +1,18 @@
-﻿// Authentication business logic.
+// Authentication business logic.
 import crypto from "crypto";
 import User from "../models/User.js";
 import { ApiError } from "../utils/ApiError.js";
 import { signRefreshToken, signToken, verifyToken } from "../utils/jwt.js";
+import { assertAdminSessionCapacity, attachRefreshToken, createAdminSession } from "./adminSessionService.js";
+import { createAdminNotification } from "./adminNotificationService.js";
 
 function createToken() {
   return crypto.randomBytes(32).toString("hex");
 }
 
-async function issueSession(user) {
-  const token = signToken(user._id);
-  const refreshToken = signRefreshToken(user._id);
+export async function issueSession(user, sessionId) {
+  const token = signToken(user._id, sessionId);
+  const refreshToken = signRefreshToken(user._id, sessionId);
   user.refreshToken = refreshToken;
   await user.save({ validateBeforeSave: false });
   user.refreshToken = undefined;
@@ -21,14 +23,19 @@ export async function registerUser(payload) {
   const exists = await User.findOne({ email: payload.email });
   if (exists) throw new ApiError("Email is already registered.", 409);
   const user = await User.create({ ...payload, emailVerificationToken: createToken(), emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000 });
+  await createAdminNotification({ category: "customers", type: "new_user_registration", title: "New User Registration", description: `${user.name} created an account.`, related: { kind: "User", id: user._id, label: user.email, path: "/admin/customers" } });
   return issueSession(user);
 }
 
-export async function loginUser(email, password) {
+export async function loginUser(email, password, req) {
   const user = await User.findOne({ email }).select("+password +refreshToken");
   if (!user || !(await user.comparePassword(password))) throw new ApiError("Invalid email or password.", 401);
   if (user.isDisabled) throw new ApiError("This account is disabled.", 403);
-  return issueSession(user);
+  if (req && user.role === "admin") await assertAdminSessionCapacity(req, user);
+  const adminSession = req && user.role === "admin" ? await createAdminSession(req, user) : null;
+  const issued = await issueSession(user, adminSession?.sessionId);
+  if (adminSession) await attachRefreshToken(adminSession.sessionId, issued.refreshToken);
+  return { ...issued, adminSession };
 }
 
 export async function refreshUserSession(refreshToken) {
@@ -38,7 +45,7 @@ export async function refreshUserSession(refreshToken) {
   const user = await User.findById(decoded.id).select("+refreshToken");
   if (!user || user.refreshToken !== refreshToken) throw new ApiError("Invalid refresh token.", 401);
   if (user.isDisabled) throw new ApiError("This account is disabled.", 403);
-  return issueSession(user);
+  return issueSession(user, decoded.sessionId);
 }
 
 export async function logoutUser(userId) {
@@ -57,6 +64,7 @@ export async function changeUserPassword(user, currentPassword, nextPassword) {
   account.password = nextPassword;
   account.refreshToken = undefined;
   await account.save();
+  if (user.role === "admin") await createAdminNotification({ category: "security", type: "password_changed", title: "Admin Password Changed", description: `${user.email} changed their password.`, related: { kind: "User", id: user._id, label: user.email, path: "/admin/settings" } });
   return true;
 }
 
@@ -118,6 +126,3 @@ export async function deleteAddress(userId, addressId) {
   await user.save();
   return user.addresses;
 }
-
-
-

@@ -1,19 +1,86 @@
-﻿// Product catalog business logic.
+// Product catalog business logic.
+import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import { ApiError } from "../utils/ApiError.js";
 import { slugify } from "../utils/slugify.js";
 
-function buildProductQuery(query) {
+function normalizeSearch(value = "") {
+  return String(value).trim().replace(/\s+/g, " ");
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function buildBaseMatch(query) {
   const filter = { isActive: true };
-  if (query.category) filter.category = query.category;
+  if (query.category && mongoose.Types.ObjectId.isValid(query.category)) filter.category = new mongoose.Types.ObjectId(query.category);
   if (query.featured) filter.featured = query.featured === "true";
   if (query.minPrice || query.maxPrice) {
     filter.price = {};
     if (query.minPrice) filter.price.$gte = Number(query.minPrice);
     if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
   }
-  if (query.search) filter.$text = { $search: query.search };
   return filter;
+}
+
+function buildKeywordMatch(search) {
+  const tokens = normalizeSearch(search).split(" ").filter(Boolean);
+  if (!tokens.length) return null;
+  return {
+    $and: tokens.map((token) => {
+      const regex = new RegExp(escapeRegex(token), "i");
+      return {
+        $or: [
+          { title: regex },
+          { description: regex },
+          { tags: regex },
+          { sku: regex },
+          { slug: regex },
+          { "categoryDoc.name": regex },
+          { "categoryDoc.slug": regex },
+        ],
+      };
+    }),
+  };
+}
+
+function regexScore(input, regex, score) {
+  return { $cond: [{ $regexMatch: { input: { $ifNull: [input, ""] }, regex, options: "i" } }, score, 0] };
+}
+
+function buildSearchRank(search) {
+  const normalized = normalizeSearch(search);
+  if (!normalized) return 0;
+  const exact = `^${escapeRegex(normalized)}$`;
+  const prefix = `^${escapeRegex(normalized)}`;
+  const contains = escapeRegex(normalized);
+  return {
+    $max: [
+      regexScore("$title", exact, 100),
+      regexScore("$title", prefix, 80),
+      regexScore("$title", contains, 60),
+      regexScore("$categoryDoc.name", contains, 45),
+      {
+        $cond: [
+          {
+            $anyElementTrue: {
+              $map: {
+                input: { $ifNull: ["$tags", []] },
+                as: "tag",
+                in: { $regexMatch: { input: "$$tag", regex: contains, options: "i" } },
+              },
+            },
+          },
+          35,
+          0,
+        ],
+      },
+      regexScore("$description", contains, 20),
+      regexScore("$sku", contains, 10),
+      regexScore("$slug", contains, 10),
+    ],
+  };
 }
 
 function buildSort(sort = "newest") {
@@ -27,13 +94,33 @@ function buildSort(sort = "newest") {
 }
 
 export async function listProducts(query) {
-  const page = Number(query.page) || 1;
-  const limit = Number(query.limit) || 12;
-  const filter = buildProductQuery(query);
-  const [items, total] = await Promise.all([
-    Product.find(filter).populate("category", "name slug").sort(buildSort(query.sort)).skip((page - 1) * limit).limit(limit),
-    Product.countDocuments(filter),
-  ]);
+  const page = Math.max(Number(query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(query.limit) || 12, 1), 100);
+  const search = normalizeSearch(query.search);
+  const pipeline = [
+    { $match: buildBaseMatch(query) },
+    { $lookup: { from: "categories", localField: "category", foreignField: "_id", as: "categoryDoc" } },
+    { $unwind: { path: "$categoryDoc", preserveNullAndEmptyArrays: true } },
+  ];
+  const keywordMatch = buildKeywordMatch(search);
+  if (keywordMatch) pipeline.push({ $match: keywordMatch }, { $addFields: { searchRank: buildSearchRank(search) } });
+  pipeline.push(
+    { $sort: keywordMatch ? { searchRank: -1, ...buildSort(query.sort) } : buildSort(query.sort) },
+    {
+      $facet: {
+        items: [
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          { $addFields: { category: { _id: "$categoryDoc._id", name: "$categoryDoc.name", slug: "$categoryDoc.slug" } } },
+          { $project: { categoryDoc: 0, searchRank: 0 } },
+        ],
+        total: [{ $count: "count" }],
+      },
+    }
+  );
+  const [result] = await Product.aggregate(pipeline);
+  const items = result?.items || [];
+  const total = result?.total?.[0]?.count || 0;
   return { items, pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
 }
 

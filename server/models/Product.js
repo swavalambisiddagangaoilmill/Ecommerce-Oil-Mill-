@@ -1,4 +1,4 @@
-﻿// Product catalog model.
+// Product catalog model.
 import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema(
@@ -7,6 +7,7 @@ const productSchema = new mongoose.Schema(
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     description: { type: String, required: true, trim: true },
     sku: { type: String, trim: true, uppercase: true },
+    tags: [{ type: String, trim: true, lowercase: true }],
     price: { type: Number, required: true, min: 0 },
     discountPrice: { type: Number, min: 0 },
     stock: { type: Number, default: 0, min: 0 },
@@ -21,8 +22,7 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-productSchema.index({ title: "text", description: "text", sku: "text" });
+productSchema.index({ title: "text", description: "text", sku: "text", slug: "text", tags: "text" });
 productSchema.index({ category: 1, isActive: 1 });
 
 export default mongoose.model("Product", productSchema);
-

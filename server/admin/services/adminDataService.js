@@ -1,4 +1,4 @@
-﻿// Admin data services backed by existing Velora models.
+// Admin data services backed by existing Velora models.
 import AdminAuditLog from "../../models/AdminAuditLog.js";
 import Category from "../../models/Category.js";
 import ContactMessage from "../../models/ContactMessage.js";
@@ -11,6 +11,7 @@ import SiteContent from "../../models/SiteContent.js";
 import StoreSettings from "../../models/StoreSettings.js";
 import User from "../../models/User.js";
 import { createReadyToShipShipment, advanceMockShipment } from "../../services/shiprocketService.js";
+import { createAdminNotification, createInventoryNotifications } from "../../services/adminNotificationService.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { slugify } from "../../utils/slugify.js";
 
@@ -213,5 +214,7 @@ export async function globalAdminSearch(term, user, hasPermission) {
   ]);
   return { pages, products, categories, orders, customers };
 }
+
+
 
 

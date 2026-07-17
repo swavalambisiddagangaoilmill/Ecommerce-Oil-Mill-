@@ -1,4 +1,4 @@
-﻿// Admin API routes with permission enforcement.
+// Admin API routes with permission enforcement.
 import { Router } from "express";
 import * as controller from "../controllers/adminController.js";
 import { requireAdmin, requireAdminPermission } from "../middleware/adminAuth.js";
@@ -9,6 +9,15 @@ router.use(protect, requireAdmin);
 
 router.get("/search", requireAdminPermission("dashboard.read"), controller.globalSearch);
 router.get("/dashboard", requireAdminPermission("dashboard.read"), controller.dashboard);
+router.get("/notifications", requireAdminPermission("notifications.read"), controller.notifications);
+router.put("/notifications/:id/read", requireAdminPermission("notifications.read"), controller.markNotificationRead);
+router.delete("/notifications/:id", requireAdminPermission("notifications.read"), controller.removeNotification);
+router.post("/notifications/mark-all-read", requireAdminPermission("notifications.read"), controller.markNotificationsRead);
+router.delete("/notifications/clear-read", requireAdminPermission("notifications.read"), controller.clearReadNotificationsHandler);
+router.get("/notification-preferences", requireAdminPermission("settings.read"), controller.notificationPreferences);
+router.put("/notification-preferences", requireAdminPermission("settings.manage"), controller.saveNotificationPreferencesHandler);
+router.get("/sessions", requireAdminPermission("sessions.read"), controller.sessions);
+router.post("/sessions/revoke", requireAdminPermission("sessions.manage"), controller.revokeSessions);
 router.get("/orders", requireAdminPermission("orders.read"), controller.orders);
 router.put("/orders/:id/status", requireAdminPermission("orders.update"), controller.orderStatus);
 router.post("/orders/:id/ready-to-ship", requireAdminPermission("orders.ship"), controller.orderReadyToShip);
@@ -46,4 +55,6 @@ router.get("/settings", requireAdminPermission("settings.read"), controller.sett
 router.put("/settings", requireAdminPermission("settings.manage"), controller.saveSettings);
 
 export default router;
+
+
 

@@ -1,17 +1,20 @@
-﻿// Admin shell with permission-aware navigation, global search, and profile controls.
+// Admin shell with permission-aware navigation, global search, and profile controls.
 import "../adminTheme.css";
 import { BarChart3, Bell, Boxes, ChevronDown, ClipboardList, FileText, Home, Image, LayoutDashboard, Mail, Megaphone, Menu, Package, Percent, Settings, ShieldCheck, Truck, Users, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { adminApi } from "../services/adminApi.js";
+import AdminNotificationBell from "../components/AdminNotificationBell.jsx";
 
 const roleModules = {
   OWNER: ["*"],
-  ORDER_MANAGER: ["Dashboard", "Orders", "Shipping", "Customers", "Payments", "Reports"],
-  PRODUCT_MANAGER: ["Dashboard", "Products", "Inventory", "Categories", "Reports"],
-  CONTENT_MANAGER: ["Dashboard", "Content", "Media", "Messages", "Newsletter"],
+  ORDER_MANAGER: ["Dashboard", "Orders", "Shipping", "Customers", "Payments", "Reports", "Notifications"],
+  PRODUCT_MANAGER: ["Dashboard", "Products", "Inventory", "Categories", "Reports", "Notifications"],
+  CONTENT_MANAGER: ["Dashboard", "Content", "Media", "Messages", "Newsletter", "Notifications"],
 };
+
+const BellIcon = Bell;
 
 const navItems = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard, end: true },
@@ -29,6 +32,7 @@ const navItems = [
   { label: "Messages", to: "/admin/messages", icon: Mail },
   { label: "Newsletter", to: "/admin/newsletter", icon: Mail },
   { label: "Reports", to: "/admin/reports", icon: BarChart3 },
+  { label: "Notifications", to: "/admin/notifications", icon: BellIcon },
   { label: "Admin Users", to: "/admin/users", icon: ShieldCheck },
   { label: "Audit Logs", to: "/admin/audit-logs", icon: ClipboardList },
   { label: "Settings", to: "/admin/settings", icon: Settings },
@@ -73,6 +77,8 @@ export default function AdminLayout() {
   const items = useMemo(() => navItems.filter((item) => canSee(user, item.label)), [user]);
   const current = items.find((item) => item.to === location.pathname || (!item.end && location.pathname.startsWith(item.to))) || items[0] || navItems[0];
   const logout = async () => { await websiteLogout(); navigate("/", { replace: true }); };
-  return <div className="min-h-screen bg-[var(--admin-bg)] text-[var(--admin-text)]"><div className="fixed inset-y-0 left-0 z-50 hidden lg:block"><Sidebar collapsed={collapsed} user={user} /></div>{mobileOpen && <div className="fixed inset-0 z-50 bg-ink/30 lg:hidden"><div className="h-full w-72"><Sidebar close={() => setMobileOpen(false)} user={user} /></div></div>}<div className={`${collapsed ? "lg:pl-20" : "lg:pl-64"} transition-all`}><header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 shadow-sm"><div className="flex items-center gap-3"><button type="button" onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-lg hover:bg-linen lg:hidden"><Menu size={18} /></button><button type="button" onClick={() => setCollapsed((value) => !value)} className="hidden h-9 rounded-lg border border-[var(--admin-border)] px-3 text-sm font-bold text-ink/65 hover:text-[var(--admin-primary)] lg:inline-flex">{collapsed ? "Expand" : "Collapse"}</button><div><p className="text-sm font-bold">{current.label}</p><p className="hidden text-xs text-ink/45 sm:block">{current.label === "Dashboard" ? "Store operations overview" : `Manage ${current.label.toLowerCase()}`}</p></div></div><div className="flex items-center gap-2"><Link to="/" className="hidden h-9 items-center rounded-lg border border-[var(--admin-border)] px-3 text-sm font-bold text-ink/65 transition hover:text-[var(--admin-primary)] md:inline-flex">View Website</Link><AdminSearch /><button className="relative grid h-9 w-9 place-items-center rounded-lg hover:bg-linen"><Bell size={18} /></button><div className="relative"><button type="button" onClick={() => setProfileOpen((value) => !value)} className="flex h-9 items-center gap-2 rounded-lg border border-[var(--admin-border)] px-2 text-sm font-bold"><span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--admin-primary)] text-xs text-white">{user?.name?.[0] || "A"}</span><span className="hidden sm:inline">{user?.name || "Admin"}</span><span className="hidden text-xs text-ink/45 lg:inline">{user?.adminRole || "OWNER"}</span><ChevronDown size={14} /></button>{profileOpen && <div className="absolute right-0 mt-2 w-44 rounded-xl border border-[var(--admin-border)] bg-white p-2 shadow-soft"><Link to="/account" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-linen">View Website Profile</Link><Link to="/" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-linen">View Store</Link><button onClick={logout} className="block w-full rounded-lg px-3 py-2 text-left text-sm font-semibold hover:bg-linen">Logout</button></div>}</div></div></header><main className="p-4 lg:p-6"><Outlet /></main></div></div>;
+  return <div className="min-h-screen bg-[var(--admin-bg)] text-[var(--admin-text)]"><div className="fixed inset-y-0 left-0 z-50 hidden lg:block"><Sidebar collapsed={collapsed} user={user} /></div>{mobileOpen && <div className="fixed inset-0 z-50 bg-ink/30 lg:hidden"><div className="h-full w-72"><Sidebar close={() => setMobileOpen(false)} user={user} /></div></div>}<div className={`${collapsed ? "lg:pl-20" : "lg:pl-64"} transition-all`}><header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 shadow-sm"><div className="flex items-center gap-3"><button type="button" onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-lg hover:bg-linen lg:hidden"><Menu size={18} /></button><button type="button" onClick={() => setCollapsed((value) => !value)} className="hidden h-9 rounded-lg border border-[var(--admin-border)] px-3 text-sm font-bold text-ink/65 hover:text-[var(--admin-primary)] lg:inline-flex">{collapsed ? "Expand" : "Collapse"}</button><div><p className="text-sm font-bold">{current.label}</p><p className="hidden text-xs text-ink/45 sm:block">{current.label === "Dashboard" ? "Store operations overview" : `Manage ${current.label.toLowerCase()}`}</p></div></div><div className="flex items-center gap-2"><Link to="/" className="hidden h-9 items-center rounded-lg border border-[var(--admin-border)] px-3 text-sm font-bold text-ink/65 transition hover:text-[var(--admin-primary)] md:inline-flex">View Website</Link><AdminSearch /><AdminNotificationBell /><div className="relative"><button type="button" onClick={() => setProfileOpen((value) => !value)} className="flex h-9 items-center gap-2 rounded-lg border border-[var(--admin-border)] px-2 text-sm font-bold"><span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--admin-primary)] text-xs text-white">{user?.name?.[0] || "A"}</span><span className="hidden sm:inline">{user?.name || "Admin"}</span><span className="hidden text-xs text-ink/45 lg:inline">{user?.adminRole || "OWNER"}</span><ChevronDown size={14} /></button>{profileOpen && <div className="absolute right-0 mt-2 w-44 rounded-xl border border-[var(--admin-border)] bg-white p-2 shadow-soft"><Link to="/account" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-linen">View Website Profile</Link><Link to="/" className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-linen">View Store</Link><button onClick={logout} className="block w-full rounded-lg px-3 py-2 text-left text-sm font-semibold hover:bg-linen">Logout</button></div>}</div></div></header><main className="p-4 lg:p-6"><Outlet /></main></div></div>;
 }
+
+
 

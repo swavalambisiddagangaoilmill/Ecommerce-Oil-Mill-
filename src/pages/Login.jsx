@@ -1,4 +1,4 @@
-﻿// Renders the refined Login page experience.
+// Renders the refined Login page experience.
 import { ChevronLeft } from "lucide-react";
 import { useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -25,6 +25,11 @@ export default function Login() {
       await login({ email: form.get("email"), password: form.get("password") });
       navigate(location.state?.from || "/account", { replace: true });
     } catch (err) {
+      const sessionLimit = err.errors?.find((item) => item.code === "ADMIN_SESSION_LIMIT");
+      if (sessionLimit) {
+        navigate("/admin-session-limit", { state: { pendingToken: sessionLimit.pendingToken, sessions: sessionLimit.sessions }, replace: true });
+        return;
+      }
       setError(err.message || "Unable to login. Please try again.");
     } finally {
       setLoading(false);
@@ -49,6 +54,8 @@ export default function Login() {
     </section>
   );
 }
+
+
 
 
 

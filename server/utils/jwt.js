@@ -1,14 +1,14 @@
-﻿// JWT utility functions.
+// JWT utility functions.
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { env } from "../config/env.js";
 
-export function signToken(userId) {
-  return jwt.sign({ id: userId }, env.jwtSecret, { expiresIn: env.jwtExpiresIn });
+export function signToken(userId, sessionId) {
+  return jwt.sign({ id: userId, ...(sessionId ? { sessionId } : {}) }, env.jwtSecret, { expiresIn: env.jwtExpiresIn });
 }
 
-export function signRefreshToken(userId) {
-  return jwt.sign({ id: userId, type: "refresh" }, env.jwtSecret, { expiresIn: env.refreshExpiresIn });
+export function signRefreshToken(userId, sessionId) {
+  return jwt.sign({ id: userId, type: "refresh", ...(sessionId ? { sessionId } : {}) }, env.jwtSecret, { expiresIn: env.refreshExpiresIn });
 }
 
 export function verifyToken(token) {

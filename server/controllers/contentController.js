@@ -1,7 +1,8 @@
-﻿// Contact, newsletter, and public content controller backed by MongoDB with safe fallbacks.
+// Contact, newsletter, and public content controller backed by MongoDB with safe fallbacks.
 import ContactMessage from "../models/ContactMessage.js";
 import NewsletterSubscriber from "../models/NewsletterSubscriber.js";
 import SiteContent from "../models/SiteContent.js";
+import { createAdminNotification } from "../services/adminNotificationService.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 
@@ -12,11 +13,13 @@ const faqs = [
 
 export const submitContact = asyncHandler(async (req, res) => {
   const message = await ContactMessage.create({ name: req.body.name, email: req.body.email, phone: req.body.phone, subject: req.body.subject, message: req.body.message });
+  await createAdminNotification({ category: "customers", type: "contact_form_submission", title: "Contact Form Submission", description: `${message.name} sent a message.`, related: { kind: "ContactMessage", id: message._id, label: message.email, path: "/admin/messages" } });
   sendSuccess(res, 201, "Message received successfully", { message });
 });
 
 export const subscribeNewsletter = asyncHandler(async (req, res) => {
   const subscription = await NewsletterSubscriber.findOneAndUpdate({ email: req.body.email }, { email: req.body.email, status: "ACTIVE", subscribedAt: new Date() }, { upsert: true, new: true, runValidators: true });
+  await createAdminNotification({ category: "customers", type: "newsletter_subscription", title: "Newsletter Subscription", description: `${subscription.email} subscribed to the newsletter.`, related: { kind: "NewsletterSubscriber", id: subscription._id, label: subscription.email, path: "/admin/newsletter" } });
   sendSuccess(res, 201, "Newsletter subscription saved", { subscription });
 });
 

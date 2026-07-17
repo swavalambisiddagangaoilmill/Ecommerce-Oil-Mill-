@@ -1,8 +1,12 @@
-﻿// Renders the AccordionMenu layout element.
+// Renders the AccordionMenu layout element.
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+
+function shortcutHref(link) {
+  return link.href === "/shop" ? `/shop?q=${encodeURIComponent(link.label)}&focus=search` : link.href;
+}
 
 export default function AccordionMenu({ title, links, onClose }) {
   const [open, setOpen] = useState(false);
@@ -31,7 +35,7 @@ export default function AccordionMenu({ title, links, onClose }) {
               {links.map((link) => (
                 <Link
                   key={link.label}
-                  to={link.href}
+                  to={shortcutHref(link)}
                   onClick={onClose}
                   className="rounded-xl px-4 py-3 text-base font-medium text-ink/65 transition hover:bg-linen hover:text-leaf"
                 >
@@ -45,5 +49,3 @@ export default function AccordionMenu({ title, links, onClose }) {
     </div>
   );
 }
-
-

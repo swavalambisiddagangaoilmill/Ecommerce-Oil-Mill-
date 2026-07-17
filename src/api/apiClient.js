@@ -1,4 +1,4 @@
-﻿// Wraps HTTP requests so backend details stay out of UI components.
+// Wraps HTTP requests so backend details stay out of UI components.
 import { API_BASE_URL } from "../constants/apiConfig.js";
 
 const TOKEN_KEY = "velora_token";
@@ -43,8 +43,13 @@ export async function apiRequest(endpoint, options = {}) {
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     const message = payload.message || (response.status === 429 ? "Rate limit reached. Please retry after a short pause." : `API request failed: ${response.status}`);
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = response.status;
+    error.errors = payload.errors || [];
+    error.payload = payload;
+    throw error;
   }
   return payload.data ?? payload;
 }
+
 

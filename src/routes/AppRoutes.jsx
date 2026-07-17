@@ -1,4 +1,4 @@
-﻿// Defines all public storefront routes.
+// Defines all public storefront routes.
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import ProtectedRoute from "../components/features/auth/ProtectedRoute.jsx";
@@ -10,6 +10,7 @@ import StatusPage from "../pages/StatusPage.jsx";
 const AdminProtectedRoute = lazy(() => import("../admin/routes/AdminProtectedRoute.jsx"));
 const AdminRoutes = lazy(() => import("../admin/routes/AdminRoutes.jsx"));
 const Account = lazy(() => import("../pages/Account.jsx"));
+const AdminSessionLimit = lazy(() => import("../pages/AdminSessionLimit.jsx"));
 const Cart = lazy(() => import("../pages/Cart.jsx"));
 const Checkout = lazy(() => import("../pages/Checkout.jsx"));
 const Contact = lazy(() => import("../pages/Contact.jsx"));
@@ -44,6 +45,7 @@ export default function AppRoutes() {
         <Route path="/about/process" element={<OurProcess />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/admin-session-limit" element={<AdminSessionLimit />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/order/success" element={<OrderSuccess />} />
         <Route path="/track/:id" element={<ProtectedRoute><TrackOrder /></ProtectedRoute>} />
@@ -66,6 +68,7 @@ export default function AppRoutes() {
     </Suspense>
   );
 }
+
 
 
 

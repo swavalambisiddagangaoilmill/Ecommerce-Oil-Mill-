@@ -1,4 +1,4 @@
-﻿// Admin API service layer using the existing shared API client.
+// Admin API service layer using the existing shared API client.
 import { apiRequest } from "../../api/apiClient.js";
 
 const base = "/admin-panel";
@@ -41,9 +41,20 @@ export const adminApi = {
   users: () => apiRequest(`${base}/users`),
   updateUser: (id, adminRole) => apiRequest(`${base}/users/${id}`, { method: "PUT", body: JSON.stringify({ adminRole }) }),
   auditLogs: () => apiRequest(`${base}/audit-logs`),
+  notifications: (query = "") => apiRequest(`${base}/notifications${query}`),
+  markNotification: (id, read = true) => apiRequest(`${base}/notifications/${id}/read`, { method: "PUT", body: JSON.stringify({ read }) }),
+  deleteNotification: (id) => apiRequest(`${base}/notifications/${id}`, { method: "DELETE" }),
+  markAllNotificationsRead: () => apiRequest(`${base}/notifications/mark-all-read`, { method: "POST" }),
+  clearReadNotifications: () => apiRequest(`${base}/notifications/clear-read`, { method: "DELETE" }),
+  notificationPreferences: () => apiRequest(`${base}/notification-preferences`),
+  saveNotificationPreferences: (enabled) => apiRequest(`${base}/notification-preferences`, { method: "PUT", body: JSON.stringify({ enabled }) }),
+  sessions: () => apiRequest(`${base}/sessions`),
+  revokeSessions: (sessionIds) => apiRequest(`${base}/sessions/revoke`, { method: "POST", body: JSON.stringify({ sessionIds }) }),
   settings: () => apiRequest(`${base}/settings`),
   saveSettings: (payload) => apiRequest(`${base}/settings`, { method: "PUT", body: JSON.stringify(payload) }),
 };
+
+
 
 
 

@@ -1,4 +1,4 @@
-﻿// Auth route registration.
+// Auth route registration.
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import {
@@ -8,6 +8,7 @@ import {
   forgotPassword,
   getProfile,
   login,
+  continueAdminLogin,
   logout,
   refresh,
   register,
@@ -35,6 +36,7 @@ const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 20, standardHea
 
 router.post("/register", authLimiter, registerValidator, validate, register);
 router.post("/login", authLimiter, loginValidator, validate, login);
+router.post("/admin-login/continue", authLimiter, continueAdminLogin);
 router.post("/refresh", authLimiter, refresh);
 router.post("/logout", protect, logout);
 router.post("/forgot-password", forgotPasswordValidator, validate, forgotPassword);
@@ -48,3 +50,4 @@ router.put("/addresses/:addressId", protect, addressIdValidator, addressValidato
 router.delete("/addresses/:addressId", protect, addressIdValidator, validate, deleteAddressHandler);
 
 export default router;
+
