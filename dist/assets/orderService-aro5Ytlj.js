@@ -1,0 +1,1 @@
+import{b as e,w as n}from"./index-DmplAATu.js";function a(){return e(n.myOrders)}function c(r){return e(n.order(r))}function i(r){return e(n.orderTracking(r))}function o(r){return e(n.adminAdvanceMockShipment(r),{method:"POST"})}export{c as a,i as b,o as c,a as f};

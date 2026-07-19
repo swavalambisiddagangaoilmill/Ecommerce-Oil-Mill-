@@ -1,6 +1,6 @@
 // Admin shell with permission-aware navigation, global search, and profile controls.
 import "../adminTheme.css";
-import { BarChart3, Bell, Boxes, ChevronDown, ClipboardList, FileText, Home, Image, LayoutDashboard, Mail, Megaphone, Menu, Package, Percent, Settings, ShieldCheck, Truck, Users, X } from "lucide-react";
+import { BarChart3, Bell, Boxes, ChevronDown, ClipboardList, FileText, Home, Image, LayoutDashboard, LockKeyhole, Mail, Megaphone, Menu, Package, Percent, Settings, ShieldCheck, Truck, Users, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -35,6 +35,7 @@ const navItems = [
   { label: "Notifications", to: "/admin/notifications", icon: BellIcon },
   { label: "Admin Users", to: "/admin/users", icon: ShieldCheck },
   { label: "Audit Logs", to: "/admin/audit-logs", icon: ClipboardList },
+  { label: "Restrictions", to: "/admin/restrictions", icon: LockKeyhole },
   { label: "Settings", to: "/admin/settings", icon: Settings },
 ];
 

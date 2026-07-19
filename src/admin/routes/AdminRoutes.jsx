@@ -2,6 +2,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout.jsx";
 import AdminNotificationsPage from "../pages/AdminNotificationsPage.jsx";
+import RestrictionManagementPage from "../pages/RestrictionManagementPage.jsx";
 import { AuditLogsPage, CategoriesPage, ContentPage, CouponsPage, CustomersPage, DashboardPage, InventoryPage, MediaPage, MessagesPage, NewsletterPage, OffersPage, OrdersPage, PaymentsPage, ProductFormPage, ProductsPage, ReportsPage, SettingsPage, ShippingPage, UsersPage } from "../pages/AdminPages.jsx";
 
 export default function AdminRoutes() {
@@ -26,6 +27,7 @@ export default function AdminRoutes() {
       <Route path="notifications" element={<AdminNotificationsPage />} />
       <Route path="users" element={<UsersPage />} />
       <Route path="audit-logs" element={<AuditLogsPage />} />
+      <Route path="restrictions" element={<RestrictionManagementPage />} />
       <Route path="settings" element={<SettingsPage />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Route>

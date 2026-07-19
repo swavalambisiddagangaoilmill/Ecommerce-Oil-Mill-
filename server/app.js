@@ -1,4 +1,4 @@
-﻿// Express application composition and route mounting.
+// Express application composition and route mounting.
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -10,6 +10,7 @@ import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
 import { assignRequestId, preventParameterPollution, sanitizeRequest } from "./middleware/security.js";
+import { restrictionGuard } from "./middleware/restrictionGuard.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import adminApiRoutes from "./admin/routes/adminApiRoutes.js";
@@ -66,6 +67,7 @@ app.use(express.json({ limit: "256kb" }));
 app.use(express.urlencoded({ extended: true, limit: "64kb", parameterLimit: 50 }));
 app.use(sanitizeRequest);
 app.use(preventParameterPollution);
+app.use(restrictionGuard);
 app.use(morgan(env.isProduction ? "combined" : "dev"));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 150, standardHeaders: true, legacyHeaders: false, message: { success: false, message: "Too many requests.", errors: [] } }));
 

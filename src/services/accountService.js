@@ -1,6 +1,6 @@
-﻿// Handles authenticated customer account API calls.
+// Handles authenticated customer account API calls.
 import { API_ENDPOINTS } from "../constants/apiConfig.js";
-import { apiRequest } from "../api/apiClient.js";
+import { apiRequest, clearAuthTokens } from "../api/apiClient.js";
 
 export function fetchAccountProfile() {
   return apiRequest(API_ENDPOINTS.auth.profile);
@@ -12,6 +12,28 @@ export function updateAccountProfile(payload) {
 
 export function changeAccountPassword(payload) {
   return apiRequest(API_ENDPOINTS.auth.changePassword, { method: "PUT", body: JSON.stringify(payload) });
+}
+
+export function fetchSecurityDetails() {
+  return apiRequest(API_ENDPOINTS.auth.security);
+}
+
+export function resendVerificationEmail() {
+  return apiRequest(API_ENDPOINTS.auth.resendVerification, { method: "POST" });
+}
+
+export function requestSecurityOtp(purpose) {
+  return apiRequest(API_ENDPOINTS.auth.requestOtp, { method: "POST", body: JSON.stringify({ purpose }) });
+}
+
+export function revokeAccountSession(id) {
+  return apiRequest(API_ENDPOINTS.auth.session(id), { method: "DELETE" });
+}
+
+export async function revokeAllAccountSessions() {
+  const data = await apiRequest(API_ENDPOINTS.auth.sessions, { method: "DELETE" });
+  clearAuthTokens();
+  return data;
 }
 
 export function addAccountAddress(payload) {

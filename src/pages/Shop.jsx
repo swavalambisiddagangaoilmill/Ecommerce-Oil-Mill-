@@ -1,6 +1,6 @@
 // Renders the Shop page experience.
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
 import ProductCard from "../components/features/product/ProductCard.jsx";
 import Container from "../components/ui/Container.jsx";
@@ -19,6 +19,8 @@ export default function Shop() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const searchInputRef = useRef(null);
   const invalidSearch = search.trim().length === 1;
 
@@ -42,7 +44,18 @@ export default function Shop() {
   useEffect(() => {
     const nextSearch = searchParams.get("q") || "";
     setSearch((current) => (current === nextSearch ? current : nextSearch));
+    if (nextSearch) setCategory("All");
+    setPage(1);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!location.state?.resetShop) return;
+    setCategory("All");
+    setSort("featured");
+    setPage(1);
+    if (!searchParams.get("q")) setSearch("");
+    navigate({ pathname: "/shop", search: searchParams.toString() ? `?${searchParams}` : "" }, { replace: true, state: null });
+  }, [location.key]);
 
   useEffect(() => {
     if (searchParams.get("focus") === "search") window.setTimeout(() => searchInputRef.current?.focus(), 150);

@@ -1,9 +1,10 @@
-﻿// Renders the authenticated My Account customer dashboard.
+// Renders the authenticated My Account customer dashboard.
 import { BarChart3, Boxes, Heart, Home, Lock, LogOut, MapPin, Package, ShieldCheck, ShoppingBag, Tags, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
 import SafeImage from "../components/common/SafeImage.jsx";
+import AccountSecurityPanel from "../components/features/account/AccountSecurityPanel.jsx";
 import AddToCartButton from "../components/features/product/AddToCartButton.jsx";
 import WishlistToggle from "../components/features/product/WishlistToggle.jsx";
 import Button from "../components/ui/Button.jsx";
@@ -355,17 +356,7 @@ export default function Account() {
                 </section>
               )}
 
-              {!loading && activeTab === "security" && (
-                <section>
-                  <h2 className="font-serif text-3xl font-semibold">Account & Security</h2>
-                  <form onSubmit={handlePasswordChange} className="mt-6 max-w-xl rounded-2xl bg-cream p-5">
-                    <div className="mb-5 flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-full bg-white text-leaf"><Lock size={18} /></span><div><p className="font-semibold">Change Password</p><p className="text-sm text-ink/50">You will be asked to log in again after changing your password.</p></div></div>
-                    <div className="grid gap-4"><Input label="Current password" name="currentPassword" type="password" required /><Input label="New password" name="password" type="password" required /><Input label="Confirm new password" name="confirmPassword" type="password" required /></div>
-                    <Button type="submit" loading={saving} className="mt-5">Update Password</Button>
-                  </form>
-                  <div className="mt-6 rounded-2xl border border-ink/10 p-5"><p className="font-semibold">Session</p><p className="mt-2 text-sm leading-6 text-ink/60">Active session details are not shown because the current backend stores a single refresh token, not a full session device history.</p><Button type="button" variant="secondary" className="mt-5" onClick={handleLogout}>Logout</Button></div>
-                </section>
-              )}
+              {!loading && activeTab === "security" && <AccountSecurityPanel onLogout={handleLogout} />}
 
               {!loading && activeTab === "logout" && (
                 <section className="grid place-items-center py-12 text-center">

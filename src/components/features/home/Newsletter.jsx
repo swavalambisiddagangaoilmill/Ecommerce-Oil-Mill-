@@ -1,6 +1,7 @@
-﻿// Renders the homepage Newsletter section.
+// Renders the homepage Newsletter section.
 import { Send } from "lucide-react";
 import { useState } from "react";
+import TurnstileWidget from "../auth/TurnstileWidget.jsx";
 import { subscribeToNewsletter } from "../../../services/contactService.js";
 import Button from "../../ui/Button.jsx";
 import Container from "../../ui/Container.jsx";
@@ -9,13 +10,14 @@ import Input from "../../ui/Input.jsx";
 export default function Newsletter() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const handleSubmit = async (event) => {
     event.preventDefault();
     const email = new FormData(event.currentTarget).get("email");
     setLoading(true);
     setMessage("");
     try {
-      await subscribeToNewsletter({ email });
+      await subscribeToNewsletter({ email, turnstileToken });
       setMessage("Subscribed successfully.");
       event.currentTarget.reset();
     } catch (err) {
@@ -32,6 +34,7 @@ export default function Newsletter() {
         <form className="grid w-full gap-3 rounded-3xl bg-white p-4 shadow-soft sm:grid-cols-[minmax(0,1fr)_180px] lg:p-5 xl:grid-cols-[minmax(0,1fr)_200px]" onSubmit={handleSubmit}>
           <Input name="email" type="email" placeholder="Email address" aria-label="Email address" className="h-14 bg-cream px-5 sm:h-16" required />
           <Button type="submit" className="h-14 w-full sm:h-16" loading={loading}><Send size={18} /> Subscribe</Button>
+          <TurnstileWidget onVerify={setTurnstileToken} className="sm:col-span-2" />
           {message && <p className="text-sm font-semibold text-ink sm:col-span-2">{message}</p>}
         </form>
       </Container>

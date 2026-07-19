@@ -9,13 +9,18 @@ import {
   addAddress,
   changeUserPassword,
   deleteAddress,
+  getSecuritySummary,
+  googleLogin,
   issueSession,
   loginUser,
   logoutUser,
   refreshUserSession,
   registerUser,
+  requestOtp,
   requestPasswordReset,
+  resendVerification,
   resetPassword,
+  revokeUserSession,
   updateAddress,
   updateUserProfile,
   verifyEmail,
@@ -27,14 +32,16 @@ function setSession(res, token, refreshToken) {
 }
 
 export const register = asyncHandler(async (req, res) => {
-  const { user, token, refreshToken } = await registerUser(req.body);
+  const { user, token, refreshToken, verificationToken } = await registerUser(req.body, req);
   setSession(res, token, refreshToken);
-  sendSuccess(res, 201, "Registered successfully", { user, token, refreshToken });
+  sendSuccess(res, 201, "Registered successfully", { user, token, refreshToken, verificationToken });
 });
 
 export const login = asyncHandler(async (req, res) => {
   try {
-    const { user, token, refreshToken } = await loginUser(req.body.email, req.body.password, req);
+    const result = await loginUser(req.body.email, req.body.password, req, { remember: req.body.remember, turnstileToken: req.body.turnstileToken, otpCode: req.body.otpCode });
+    if (result.otpRequired) return sendSuccess(res, 202, result.message, result);
+    const { user, token, refreshToken } = result;
     setSession(res, token, refreshToken);
     sendSuccess(res, 200, "Logged in successfully", { user, token, refreshToken });
   } catch (error) {
@@ -44,16 +51,22 @@ export const login = asyncHandler(async (req, res) => {
   }
 });
 
+export const google = asyncHandler(async (req, res) => {
+  const { user, token, refreshToken } = await googleLogin(req.body.credential || req.body.idToken, req, req.body.remember !== false);
+  setSession(res, token, refreshToken);
+  sendSuccess(res, 200, "Google login successful", { user, token, refreshToken });
+});
+
 export const continueAdminLogin = asyncHandler(async (req, res) => {
   const { admin, session } = await continuePendingAdminLogin(req, req.body.pendingToken, req.body.revokeSessionIds || []);
-  const { user, token, refreshToken } = await issueSession(admin, session.sessionId);
+  const { user, token, refreshToken } = await issueSession(admin, session.sessionId, req, true);
   await attachRefreshToken(session.sessionId, refreshToken);
   setSession(res, token, refreshToken);
   sendSuccess(res, 200, "Admin login continued", { user, token, refreshToken });
 });
 
 export const refresh = asyncHandler(async (req, res) => {
-  const { user, token, refreshToken } = await refreshUserSession(req.cookies?.refreshToken || req.body.refreshToken);
+  const { user, token, refreshToken } = await refreshUserSession(req.cookies?.refreshToken || req.body.refreshToken, req);
   setSession(res, token, refreshToken);
   sendSuccess(res, 200, "Session refreshed successfully", { user, token, refreshToken });
 });
@@ -63,7 +76,7 @@ export const logout = asyncHandler(async (req, res) => {
     await revokeAdminSessions(req.user._id, req.authSessionId ? [req.authSessionId] : [], "logout");
     await createAdminNotification({ category: "security", type: "admin_logout", title: "Admin Logout", description: `${req.user.email} signed out.`, related: { kind: "User", id: req.user._id, label: req.user.email, path: "/admin/settings" } });
   }
-  await logoutUser(req.user?._id);
+  await logoutUser(req.user?._id, req.authSessionId);
   clearAuthCookies(res);
   sendSuccess(res, 200, "Logged out successfully");
 });
@@ -78,13 +91,14 @@ export const updateProfile = asyncHandler(async (req, res) => {
 });
 
 export const changePassword = asyncHandler(async (req, res) => {
-  await changeUserPassword(req.user, req.body.currentPassword, req.body.password);
+  await changeUserPassword(req.user, req.body.currentPassword, req.body.password, req.body.otpCode);
   if (req.user?.role === "admin") await revokeAdminSessions(req.user._id, [], "password_change");
+  clearAuthCookies(res);
   sendSuccess(res, 200, "Password changed successfully");
 });
 
 export const forgotPassword = asyncHandler(async (req, res) => {
-  const resetToken = await requestPasswordReset(req.body.email);
+  const resetToken = await requestPasswordReset(req.body.email, req);
   sendSuccess(res, 200, "Password reset request accepted", { resetToken: process.env.NODE_ENV === "production" ? undefined : resetToken });
 });
 
@@ -97,6 +111,32 @@ export const resetPasswordHandler = asyncHandler(async (req, res) => {
 export const verifyEmailHandler = asyncHandler(async (req, res) => {
   const user = await verifyEmail(req.params.token);
   sendSuccess(res, 200, "Email verified successfully", { user });
+});
+
+export const resendVerificationHandler = asyncHandler(async (req, res) => {
+  const data = await resendVerification(req.user._id);
+  sendSuccess(res, 200, "Verification email sent", data);
+});
+
+export const requestOtpHandler = asyncHandler(async (req, res) => {
+  await requestOtp(req.user._id, req.body.purpose);
+  sendSuccess(res, 200, "Security code sent");
+});
+
+export const getSecurityHandler = asyncHandler(async (req, res) => {
+  const security = await getSecuritySummary(req.user._id);
+  sendSuccess(res, 200, "Security details fetched", { security });
+});
+
+export const revokeSessionHandler = asyncHandler(async (req, res) => {
+  const security = await revokeUserSession(req.user._id, req.params.sessionId);
+  sendSuccess(res, 200, "Session revoked", { security });
+});
+
+export const revokeAllSessionsHandler = asyncHandler(async (req, res) => {
+  const security = await revokeUserSession(req.user._id);
+  clearAuthCookies(res);
+  sendSuccess(res, 200, "All sessions revoked", { security });
 });
 
 export const addAddressHandler = asyncHandler(async (req, res) => {

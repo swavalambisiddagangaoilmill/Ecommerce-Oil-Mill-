@@ -1,7 +1,8 @@
-﻿// Renders the Contact page experience.
+// Renders the Contact page experience.
 import { Mail, MapPin, Phone } from "lucide-react";
 import { useState } from "react";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
+import TurnstileWidget from "../components/features/auth/TurnstileWidget.jsx";
 import Button from "../components/ui/Button.jsx";
 import Container from "../components/ui/Container.jsx";
 import Input from "../components/ui/Input.jsx";
@@ -10,6 +11,7 @@ import { submitContactMessage } from "../services/contactService.js";
 export default function Contact() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -18,7 +20,7 @@ export default function Contact() {
     setLoading(true);
     setMessage("");
     try {
-      await submitContactMessage({ name: form.get("name"), email: form.get("email"), message: form.get("message") });
+      await submitContactMessage({ name: form.get("name"), email: form.get("email"), message: form.get("message"), turnstileToken });
       setMessage("Message sent successfully.");
       event.currentTarget.reset();
     } catch (err) {
@@ -39,6 +41,7 @@ export default function Contact() {
             {message && <p className="mt-5 rounded-2xl bg-linen p-4 text-sm font-semibold text-ink/65">{message}</p>}
             <div className="mt-8 grid gap-5 sm:grid-cols-2"><Input label="Name" name="name" required /><Input label="Email" name="email" type="email" required /></div>
             <div className="mt-5"><label className="block"><span className="mb-2 block text-sm font-semibold text-ink/75">Message</span><textarea name="message" className="min-h-40 w-full rounded-xl border border-ink/10 bg-white p-4 outline-none focus:border-leaf focus:ring-4 focus:ring-leaf/10" required /></label></div>
+            <TurnstileWidget onVerify={setTurnstileToken} className="mt-5 min-h-[65px]" />
             <Button type="submit" className="mt-6" loading={loading}>Send Message</Button>
           </form>
           <div className="space-y-5">

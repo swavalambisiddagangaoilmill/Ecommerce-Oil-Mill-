@@ -1,4 +1,4 @@
-﻿// Loads and normalizes environment configuration.
+// Loads and normalizes environment configuration.
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -15,6 +15,12 @@ export const env = {
   refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "30d",
   clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
   clientUrls: (process.env.CLIENT_URLS || process.env.CLIENT_URL || "http://localhost:5173").split(",").map((url) => url.trim()).filter(Boolean),
+  oauth: {
+    googleClientId: process.env.GOOGLE_CLIENT_ID || "",
+  },
+  turnstile: {
+    secretKey: process.env.TURNSTILE_SECRET_KEY || "",
+  },
   razorpay: {
     keyId: process.env.RAZORPAY_KEY_ID || "",
     keySecret: process.env.RAZORPAY_KEY_SECRET || "",

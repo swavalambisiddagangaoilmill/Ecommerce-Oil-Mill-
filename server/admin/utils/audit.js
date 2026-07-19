@@ -1,4 +1,4 @@
-﻿// Admin audit logging helpers.
+// Admin audit logging helpers.
 import AdminAuditLog from "../../models/AdminAuditLog.js";
 
 const sensitiveKeys = new Set(["password", "token", "refreshToken", "jwt", "secret", "apiKey", "apiSecret", "keySecret"]);
@@ -12,6 +12,7 @@ function redact(value) {
 export async function writeAuditLog(req, { action, resourceType, resourceId, summary, before, after }) {
   await AdminAuditLog.create({
     admin: req.user?._id,
+    adminEmail: req.user?.email,
     action,
     resourceType,
     resourceId: resourceId?.toString?.() || resourceId,

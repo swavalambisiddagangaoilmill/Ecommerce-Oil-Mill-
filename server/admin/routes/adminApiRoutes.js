@@ -1,10 +1,18 @@
 // Admin API routes with permission enforcement.
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
+import { body, param } from "express-validator";
 import * as controller from "../controllers/adminController.js";
 import { requireAdmin, requireAdminPermission } from "../middleware/adminAuth.js";
 import { protect } from "../../middleware/auth.js";
+import { validate } from "../../middleware/validate.js";
 
 const router = Router();
+const restrictionLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 40, standardHeaders: true, legacyHeaders: false, message: { success: false, message: "Too many restriction management requests.", errors: [] } });
+const restrictionId = [param("id").isMongoId().withMessage("Valid restriction id is required.")];
+const noteBody = [body("note").trim().isLength({ min: 2, max: 1000 }).withMessage("Internal note is required.")];
+const reasonBody = [body("reason").trim().isLength({ min: 2, max: 1000 }).withMessage("Admin reason is required.")];
+const extendBody = [...reasonBody, body("expiresAt").isISO8601().withMessage("Valid expiry time is required.")];
 router.use(protect, requireAdmin);
 
 router.get("/search", requireAdminPermission("dashboard.read"), controller.globalSearch);
@@ -51,6 +59,11 @@ router.get("/reports", requireAdminPermission("reports.read"), controller.report
 router.get("/users", requireAdminPermission("admins.read"), controller.adminUsers);
 router.put("/users/:id", requireAdminPermission("admins.manage"), controller.updateAdmin);
 router.get("/audit-logs", requireAdminPermission("audit.read"), controller.auditLogs);
+router.get("/restrictions", restrictionLimiter, requireAdminPermission("restrictions.read"), controller.restrictions);
+router.get("/restrictions/:id", restrictionLimiter, requireAdminPermission("restrictions.read"), restrictionId, validate, controller.restrictionDetails);
+router.post("/restrictions/:id/remove", restrictionLimiter, requireAdminPermission("restrictions.manage"), restrictionId, reasonBody, validate, controller.removeRestrictionHandler);
+router.post("/restrictions/:id/extend", restrictionLimiter, requireAdminPermission("restrictions.manage"), restrictionId, extendBody, validate, controller.extendRestrictionHandler);
+router.post("/restrictions/:id/notes", restrictionLimiter, requireAdminPermission("restrictions.manage"), restrictionId, noteBody, validate, controller.addRestrictionNoteHandler);
 router.get("/settings", requireAdminPermission("settings.read"), controller.settings);
 router.put("/settings", requireAdminPermission("settings.manage"), controller.saveSettings);
 

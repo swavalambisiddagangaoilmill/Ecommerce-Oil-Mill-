@@ -6,6 +6,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { sendSuccess } from "../../utils/apiResponse.js";
 import { clearReadNotifications, deleteNotification, getNotificationPreferences, listAdminNotifications, markAllNotificationsRead, markNotification, saveNotificationPreferences } from "../../services/adminNotificationService.js";
 import { listAdminSessions, revokeAdminSessions } from "../../services/adminSessionService.js";
+import { addRestrictionNote, extendRestriction, getRestriction, listRestrictions, removeRestriction } from "../services/restrictionAdminService.js";
 
 export const dashboard = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Dashboard fetched", await admin.dashboardData()));
 export const orders = asyncHandler(async (req, res) => sendSuccess(res, 200, "Orders fetched", await admin.listOrders(req.query)));
@@ -66,3 +67,28 @@ export const markNotificationsRead = asyncHandler(async (req, res) => { await ma
 export const clearReadNotificationsHandler = asyncHandler(async (req, res) => { await clearReadNotifications(req.user._id); sendSuccess(res, 200, "Read notifications cleared"); });
 export const sessions = asyncHandler(async (req, res) => sendSuccess(res, 200, "Admin sessions fetched", await listAdminSessions(req.user._id, req.authSessionId)));
 export const revokeSessions = asyncHandler(async (req, res) => { const count = await revokeAdminSessions(req.user._id, req.body.sessionIds || [], "admin_panel"); sendSuccess(res, 200, "Admin sessions revoked", { count }); });
+export const restrictions = asyncHandler(async (req, res) => {
+  sendSuccess(res, 200, "Restrictions fetched", await listRestrictions(req.query));
+});
+
+export const restrictionDetails = asyncHandler(async (req, res) => {
+  sendSuccess(res, 200, "Restriction fetched", { restriction: await getRestriction(req.params.id) });
+});
+
+export const removeRestrictionHandler = asyncHandler(async (req, res) => {
+  const restriction = await removeRestriction(req.params.id, req.user, req.body.reason);
+  await writeAuditLog(req, { action: "restriction.remove", resourceType: "Restriction", resourceId: req.params.id, summary: `Restriction removed by ${req.user.email}`, after: { reason: req.body.reason } });
+  sendSuccess(res, 200, "Restriction removed", { restriction });
+});
+
+export const extendRestrictionHandler = asyncHandler(async (req, res) => {
+  const restriction = await extendRestriction(req.params.id, req.user, req.body.expiresAt, req.body.reason);
+  await writeAuditLog(req, { action: "restriction.extend", resourceType: "Restriction", resourceId: req.params.id, summary: `Restriction extended by ${req.user.email}`, after: { expiresAt: req.body.expiresAt, reason: req.body.reason } });
+  sendSuccess(res, 200, "Restriction extended", { restriction });
+});
+
+export const addRestrictionNoteHandler = asyncHandler(async (req, res) => {
+  const restriction = await addRestrictionNote(req.params.id, req.user, req.body.note);
+  await writeAuditLog(req, { action: "restriction.note", resourceType: "Restriction", resourceId: req.params.id, summary: `Restriction note added by ${req.user.email}`, after: { reason: req.body.note } });
+  sendSuccess(res, 200, "Restriction note saved", { restriction });
+});

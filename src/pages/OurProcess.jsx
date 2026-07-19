@@ -1,6 +1,6 @@
-﻿// Renders the OurProcess page experience.
+// Renders the OurProcess page experience.
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
-import CinematicHero from "../components/common/CinematicHero.jsx";
+import CinematicHero, { DEMO_HERO_VIDEO } from "../components/common/CinematicHero.jsx";
 import PageCta from "../components/common/PageCta.jsx";
 import Container from "../components/ui/Container.jsx";
 import SectionHeading from "../components/ui/SectionHeading.jsx";
@@ -17,7 +17,8 @@ export default function OurProcess() {
         title="From selected seeds to fresh pantry dispatch."
         text="A detailed look at how Velora sources, presses, settles, bottles, and delivers oils with a freshness-first standard."
         image="https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1800&q=85"
-        posterLabel="Process film"
+        video={DEMO_HERO_VIDEO}
+        contentVisible={false}
       />
 
       <section className="section-padding">
@@ -103,5 +104,3 @@ export default function OurProcess() {
     </>
   );
 }
-
-

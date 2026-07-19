@@ -1,9 +1,10 @@
-﻿// Admin audit log model.
+// Admin audit log model.
 import mongoose from "mongoose";
 
 const auditSchema = new mongoose.Schema(
   {
     admin: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    adminEmail: { type: String, trim: true },
     action: { type: String, required: true, trim: true },
     resourceType: { type: String, required: true, trim: true },
     resourceId: { type: String, trim: true },

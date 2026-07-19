@@ -8,20 +8,29 @@ function shortcutHref(link) {
   return link.href === "/shop" ? `/shop?q=${encodeURIComponent(link.label)}&focus=search` : link.href;
 }
 
-export default function AccordionMenu({ title, links, onClose }) {
+export default function AccordionMenu({ title, href, state, links, onClose }) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="border-b border-ink/10">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between py-4 text-left text-lg font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf"
-        aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
-      >
-        {title}
-        <ChevronDown size={18} className={`transition duration-200 ${open ? "rotate-180" : ""}`} />
-      </button>
+      <div className="flex w-full items-center justify-between py-4 text-left text-lg font-semibold">
+        {href ? (
+          <Link to={href} state={state} onClick={onClose} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf">
+            {title}
+          </Link>
+        ) : (
+          <span>{title}</span>
+        )}
+        <button
+          type="button"
+          className="inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf"
+          aria-label={`Open ${title} menu`}
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+        >
+          <ChevronDown size={18} className={`transition duration-200 ${open ? "rotate-180" : ""}`} />
+        </button>
+      </div>
       <AnimatePresence initial={false}>
         {open && (
           <motion.div

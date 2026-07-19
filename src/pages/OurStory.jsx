@@ -1,8 +1,8 @@
-﻿// Renders the OurStory page experience.
+// Renders the OurStory page experience.
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
-import CinematicHero from "../components/common/CinematicHero.jsx";
+import CinematicHero, { DEMO_HERO_VIDEO } from "../components/common/CinematicHero.jsx";
 import PageCta from "../components/common/PageCta.jsx";
 import Button from "../components/ui/Button.jsx";
 import Container from "../components/ui/Container.jsx";
@@ -20,7 +20,8 @@ export default function OurStory() {
         title="A slower oil house for thoughtful kitchens."
         text="Velora brings traditional cold pressed oils into a refined modern pantry, with patience, clarity, and sensory warmth guiding every bottle."
         image="https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=1800&q=85"
-        posterLabel="Brand film"
+        video={DEMO_HERO_VIDEO}
+        contentVisible={false}
       />
 
       <section className="section-padding">
@@ -111,5 +112,3 @@ export default function OurStory() {
     </>
   );
 }
-
-

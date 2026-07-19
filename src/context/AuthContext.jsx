@@ -1,7 +1,7 @@
-﻿// Provides reactive authentication state across the storefront.
+// Provides reactive authentication state across the storefront.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { clearAuthTokens, getAuthToken, setAuthTokens } from "../api/apiClient.js";
-import { getProfile, loginAccount, logoutAccount, registerAccount } from "../services/authService.js";
+import { getProfile, googleLoginAccount, loginAccount, logoutAccount, registerAccount } from "../services/authService.js";
 
 const AuthContext = createContext(null);
 
@@ -45,6 +45,16 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (payload) => {
     const data = await loginAccount(payload);
+    if (data.token) {
+      setAuthTokens(data.token, data.refreshToken);
+      setToken(data.token || getAuthToken());
+      setUser(data.user || null);
+    }
+    return data;
+  }, []);
+
+  const loginWithGoogle = useCallback(async (payload) => {
+    const data = await googleLoginAccount(payload);
     setAuthTokens(data.token, data.refreshToken);
     setToken(data.token || getAuthToken());
     setUser(data.user || null);
@@ -65,7 +75,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({ token, user, loading, authenticated: Boolean(token), login, register, logout, refreshAuth: refreshState }), [token, user, loading, login, register, logout, refreshState]);
+  const value = useMemo(() => ({ token, user, loading, authenticated: Boolean(token), login, loginWithGoogle, register, logout, refreshAuth: refreshState }), [token, user, loading, login, loginWithGoogle, register, logout, refreshState]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

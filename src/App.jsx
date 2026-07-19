@@ -1,4 +1,4 @@
-﻿// Renders the global storefront shell.
+// Renders the global storefront shell.
 import { useLocation } from "react-router-dom";
 import ErrorBoundary from "./components/features/feedback/ErrorBoundary.jsx";
 import GuestSessionNotice from "./components/features/feedback/GuestSessionNotice.jsx";
@@ -15,7 +15,7 @@ import AppRoutes from "./routes/AppRoutes.jsx";
 
 export default function App() {
   const { pathname } = useLocation();
-  const authPage = pathname === "/login" || pathname === "/signup";
+  const authPage = pathname === "/login" || pathname === "/signup" || pathname.startsWith("/auth/forgot-password") || pathname.startsWith("/auth/reset-password") || pathname.startsWith("/auth/verify-email");
   const adminPage = pathname.startsWith("/admin");
 
   return (

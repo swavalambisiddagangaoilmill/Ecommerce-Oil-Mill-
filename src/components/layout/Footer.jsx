@@ -1,7 +1,8 @@
-﻿// Renders the premium footer layout element.
+// Renders the premium footer layout element.
 import { Facebook, Instagram, Mail, MapPin, Phone, Send, Youtube } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import TurnstileWidget from "../features/auth/TurnstileWidget.jsx";
 import Container from "../ui/Container.jsx";
 import { subscribeToNewsletter } from "../../services/contactService.js";
 
@@ -21,6 +22,7 @@ const socialLinks = [
 export default function Footer() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const handleNewsletterSubmit = async (event) => {
     event.preventDefault();
@@ -28,7 +30,7 @@ export default function Footer() {
     setLoading(true);
     setMessage("");
     try {
-      await subscribeToNewsletter({ email });
+      await subscribeToNewsletter({ email, turnstileToken });
       setMessage("Subscribed successfully.");
       event.currentTarget.reset();
     } catch (err) {
@@ -72,6 +74,7 @@ export default function Footer() {
                 <label className="sr-only" htmlFor="footer-email">Email address</label>
                 <input id="footer-email" name="email" type="email" required placeholder="Email address" className="h-12 min-w-0 rounded-full border border-ink/10 bg-white px-5 text-sm outline-none placeholder:text-ink/35 focus:border-leaf" />
                 <button type="submit" disabled={loading} className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-ink px-6 text-sm font-semibold text-white transition hover:bg-leaf disabled:cursor-wait disabled:opacity-70"><Send size={16} /> Subscribe</button>
+                <TurnstileWidget onVerify={setTurnstileToken} className="sm:col-span-2" />
                 {message && <p className="text-sm font-semibold text-ink/65 sm:col-span-2">{message}</p>}
               </form>
             </div>

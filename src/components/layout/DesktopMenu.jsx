@@ -5,10 +5,10 @@ import MenuItem from "./MenuItem.jsx";
 import MegaMenu from "./MegaMenu.jsx";
 
 const desktopItems = [
-  { label: "Shop", href: "/shop", dropdown: "shop" },
-  { label: "Cold Pressed Oils", href: "/shop", dropdown: "coldPressed" },
-  { label: "Essential Oils", href: "/shop", dropdown: "essential" },
-  { label: "About", href: "/about", dropdown: "about" },
+  { label: "Shop", href: "/shop", dropdown: "shop", state: { resetShop: true } },
+  { label: "Cold Pressed Oils", href: "/shop?q=Cold%20Pressed%20Oils&focus=search", dropdown: "coldPressed", state: { resetShop: true } },
+  { label: "Essential Oils", href: "/shop?q=Essential%20Oils&focus=search", dropdown: "essential", state: { resetShop: true } },
+  { label: "About", href: "/about/story", dropdown: "about" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -76,6 +76,13 @@ export default function DesktopMenu() {
                 onMouseEnter={() => item.dropdown && setActive(item.dropdown)}
                 onFocus={() => item.dropdown && setActive(item.dropdown)}
                 onKeyDown={(event) => handleKeyDown(event, index, item)}
+                onNavigate={() => setActive(null)}
+                onDropdownToggle={() =>
+                  item.dropdown &&
+                  setActive((current) =>
+                    current === item.dropdown ? null : item.dropdown
+                  )
+                }
                 buttonRef={(node) => {
                   itemRefs.current[index] = node;
                 }}
