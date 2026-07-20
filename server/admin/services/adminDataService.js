@@ -3,11 +3,9 @@ import AdminAuditLog from "../../models/AdminAuditLog.js";
 import Category from "../../models/Category.js";
 import ContactMessage from "../../models/ContactMessage.js";
 import Coupon from "../../models/Coupon.js";
-import NewsletterSubscriber from "../../models/NewsletterSubscriber.js";
 import Offer from "../../models/Offer.js";
 import Order from "../../models/Order.js";
 import Product from "../../models/Product.js";
-import SiteContent from "../../models/SiteContent.js";
 import StoreSettings from "../../models/StoreSettings.js";
 import User from "../../models/User.js";
 import { createReadyToShipShipment, advanceMockShipment } from "../../services/shiprocketService.js";
@@ -93,7 +91,7 @@ export async function listProducts(query) {
 }
 
 export async function saveProduct(payload, id) {
-  const allowed = ["title", "description", "sku", "price", "discountPrice", "stock", "category", "images", "featured", "isActive", "weight", "dimensions"];
+  const allowed = ["title", "description", "sku", "price", "discountPrice", "stock", "category", "images", "featured", "bestSeller", "newArrival", "codEnabled", "onlinePaymentEnabled", "returnEligible", "exchangeEligible", "isActive", "weight", "dimensions"];
   const data = Object.fromEntries(Object.entries(payload).filter(([key]) => allowed.includes(key)));
   if (data.title) data.slug = slugify(data.title);
   return id ? Product.findByIdAndUpdate(id, data, { new: true, runValidators: true }) : Product.create(data);
@@ -174,12 +172,8 @@ export const saveCoupon = (payload, userId, id) => {
   const data = { ...payload, code: payload.code?.toUpperCase() };
   return id ? Coupon.findByIdAndUpdate(id, data, { new: true, runValidators: true }) : Coupon.create({ ...data, createdBy: userId });
 };
-export const listContent = () => SiteContent.find().sort({ key: 1 });
-export const upsertContent = (key, value, userId) => SiteContent.findOneAndUpdate({ key }, { value, updatedBy: userId }, { upsert: true, new: true });
 export const listMessages = () => ContactMessage.find({ status: { $ne: "ARCHIVED" } }).sort({ createdAt: -1 });
 export const updateMessage = (id, status) => ContactMessage.findByIdAndUpdate(id, { status }, { new: true, runValidators: true });
-export const listNewsletter = () => NewsletterSubscriber.find().sort({ subscribedAt: -1 });
-export const unsubscribe = (id) => NewsletterSubscriber.findByIdAndUpdate(id, { status: "UNSUBSCRIBED" }, { new: true });
 export const listAuditLogs = (query) => AdminAuditLog.find(query.search ? { summary: new RegExp(query.search, "i") } : {}).populate("admin", "name email adminRole").sort({ createdAt: -1 }).limit(100);
 
 export async function listCustomers() {
@@ -204,7 +198,7 @@ export async function updateAdminRole(id, adminRole) { return User.findByIdAndUp
 export async function globalAdminSearch(term, user, hasPermission) {
   const q = String(term || "").trim();
   if (q.length < 2) return { pages: [], products: [], orders: [], customers: [], categories: [] };
-  const pageMap = ["Dashboard", "Orders", "Products", "Inventory", "Categories", "Offers", "Coupons", "Shipping", "Customers", "Payments", "Content", "Media", "Messages", "Newsletter", "Reports", "Admin Users", "Audit Logs", "Settings"];
+  const pageMap = ["Dashboard", "Orders", "Products", "Inventory", "Categories", "Offers", "Coupons", "Shipping", "Customers", "Payments", "Messages", "Reports", "Admin Users", "Audit Logs", "Settings"];
   const pages = pageMap.filter((label) => label.toLowerCase().includes(q.toLowerCase())).slice(0, 5).map((label) => ({ label, path: `/admin/${label.toLowerCase().replaceAll(" ", "-").replace("dashboard", "")}`.replace(/\/$/, "") || "/admin" }));
   const [products, categories, orders, customers] = await Promise.all([
     hasPermission(user, "products.read") ? Product.find({ $or: [{ title: new RegExp(q, "i") }, { sku: new RegExp(q, "i") }] }).select("title sku slug").limit(5) : [],
@@ -214,6 +208,8 @@ export async function globalAdminSearch(term, user, hasPermission) {
   ]);
   return { pages, products, categories, orders, customers };
 }
+
+
 
 
 

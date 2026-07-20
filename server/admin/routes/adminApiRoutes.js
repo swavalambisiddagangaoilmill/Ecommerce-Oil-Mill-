@@ -49,12 +49,8 @@ router.put("/coupons/:id", requireAdminPermission("coupons.manage"), controller.
 router.get("/shipping", requireAdminPermission("shipping.read"), controller.shipping);
 router.get("/customers", requireAdminPermission("customers.read"), controller.customers);
 router.get("/payments", requireAdminPermission("payments.read"), controller.payments);
-router.get("/content", requireAdminPermission("content.read"), controller.content);
-router.put("/content/:key", requireAdminPermission("content.manage"), controller.saveContent);
 router.get("/messages", requireAdminPermission("messages.read"), controller.messages);
 router.put("/messages/:id/status", requireAdminPermission("messages.manage"), controller.messageStatus);
-router.get("/newsletter", requireAdminPermission("newsletter.read"), controller.newsletter);
-router.delete("/newsletter/:id", requireAdminPermission("newsletter.manage"), controller.unsubscribe);
 router.get("/reports", requireAdminPermission("reports.read"), controller.reports);
 router.get("/users", requireAdminPermission("admins.read"), controller.adminUsers);
 router.put("/users/:id", requireAdminPermission("admins.manage"), controller.updateAdmin);
@@ -68,6 +64,7 @@ router.get("/settings", requireAdminPermission("settings.read"), controller.sett
 router.put("/settings", requireAdminPermission("settings.manage"), controller.saveSettings);
 
 export default router;
+
 
 
 

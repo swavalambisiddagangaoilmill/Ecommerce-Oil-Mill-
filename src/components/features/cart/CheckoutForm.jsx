@@ -1,4 +1,4 @@
-﻿// Renders CheckoutForm for cart and checkout flows.
+// Renders CheckoutForm for cart and checkout flows.
 import { CreditCard, Home, Truck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -48,6 +48,8 @@ export default function CheckoutForm() {
   const [error, setError] = useState("");
 
   const processing = Boolean(processingStep);
+  const codAvailable = items.every((item) => item.codEnabled !== false);
+  const onlineAvailable = items.every((item) => item.onlinePaymentEnabled !== false);
 
   useEffect(() => {
     let active = true;
@@ -209,6 +211,8 @@ export default function CheckoutForm() {
       navigate("/login", { state: { from: "/checkout" } });
       return;
     }
+    if (paymentMethod === 'cod' && !codAvailable) { setError('Cash on delivery is not available for one or more products in your cart.'); return; }
+    if (paymentMethod !== 'cod' && !onlineAvailable) { setError('Online payment is not available for one or more products in your cart.'); return; }
     const orderPayload = getOrderPayload(event.currentTarget);
     setError("");
     try {
@@ -223,7 +227,7 @@ export default function CheckoutForm() {
   };
 
   const buttonText = processingStep === "preparing" ? "Preparing Payment..." : processingStep === "verifying" ? "Verifying Payment..." : processingStep === "qr" ? "Generating QR..." : paymentMethod === "cod" ? "Place Order" : paymentMethod === "upi_qr" ? "Generate UPI QR" : "Pay Now & Place Order";
-  const paymentCardClass = (value) => `flex cursor-pointer items-center justify-between rounded-2xl border p-4 font-semibold transition ${paymentMethod === value ? "border-leaf bg-leaf/5" : "border-ink/10 bg-white hover:border-leaf/30"}`;
+  const paymentCardClass = (value, disabled = false) => `flex ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"} items-center justify-between rounded-2xl border p-4 font-semibold transition ${paymentMethod === value ? "border-leaf bg-leaf/5" : "border-ink/10 bg-white hover:border-leaf/30"}`;
   const qrMinutes = String(Math.floor(qrCountdown / 60)).padStart(2, "0");
   const qrSeconds = String(qrCountdown % 60).padStart(2, "0");
 
@@ -268,17 +272,17 @@ export default function CheckoutForm() {
       <div className="mt-8">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold"><CreditCard size={20} /> Payment</h2>
         <div className="grid gap-4 sm:grid-cols-3">
-          <label className={paymentCardClass("online")}>
+          <label className={paymentCardClass("online", !onlineAvailable)}>
             <span>UPI / Cards</span>
-            <input type="radio" name="payment" value="online" checked={paymentMethod === "online"} onChange={() => setPaymentMethod("online")} className="ml-3" />
+            <input type="radio" name="payment" value="online" checked={paymentMethod === "online"} disabled={!onlineAvailable} onChange={() => onlineAvailable && setPaymentMethod("online")} className="ml-3" />
           </label>
-          <label className={paymentCardClass("upi_qr")}>
+          <label className={paymentCardClass("upi_qr", !onlineAvailable)}>
             <span>UPI QR</span>
-            <input type="radio" name="payment" value="upi_qr" checked={paymentMethod === "upi_qr"} onChange={() => { setPaymentMethod("upi_qr"); setQrCheckout(null); }} className="ml-3" />
+            <input type="radio" name="payment" value="upi_qr" checked={paymentMethod === "upi_qr"} disabled={!onlineAvailable} onChange={() => { if (!onlineAvailable) return; setPaymentMethod("upi_qr"); setQrCheckout(null); }} className="ml-3" />
           </label>
-          <label className={paymentCardClass("cod")}>
+          <label className={paymentCardClass("cod", !codAvailable)}>
             <span>Cash on delivery</span>
-            <input type="radio" name="payment" value="cod" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} className="ml-3" />
+            <input type="radio" name="payment" value="cod" checked={paymentMethod === "cod"} disabled={!codAvailable} onChange={() => codAvailable && setPaymentMethod("cod")} className="ml-3" />
           </label>
         </div>
       </div>
@@ -287,5 +291,8 @@ export default function CheckoutForm() {
     </form>
   );
 }
+
+
+
 
 

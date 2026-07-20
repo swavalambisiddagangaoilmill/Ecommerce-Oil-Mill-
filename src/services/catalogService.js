@@ -1,4 +1,4 @@
-﻿// Serves catalog data from backend APIs and normalizes it for existing UI components.
+// Serves catalog data from backend APIs and normalizes it for existing UI components.
 import { API_ENDPOINTS } from "../constants/apiConfig.js";
 import { apiRequest } from "../api/apiClient.js";
 
@@ -22,6 +22,14 @@ function normalizeProduct(product) {
     image: product.image || product.images?.[0]?.url || "",
     images: product.images?.length ? product.images : [{ url: product.image || "" }],
     stock: product.stock ?? 0,
+    featured: Boolean(product.featured),
+    bestSeller: Boolean(product.bestSeller),
+    newArrival: Boolean(product.newArrival),
+    codEnabled: product.codEnabled !== false,
+    onlinePaymentEnabled: product.onlinePaymentEnabled !== false,
+    returnEligible: product.returnEligible !== false,
+    exchangeEligible: Boolean(product.exchangeEligible),
+    isActive: product.isActive !== false,
     rating: product.rating || 4.8,
     reviews: product.reviews || 84,
     volume: product.volume || "1L",
@@ -68,3 +76,5 @@ export async function getBestSellerProducts() {
   const data = await apiRequest(API_ENDPOINTS.featuredProducts);
   return productListFrom(data).slice(0, 10);
 }
+
+

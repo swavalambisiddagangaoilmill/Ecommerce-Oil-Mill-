@@ -1,4 +1,4 @@
-﻿// Progressive automated protection for admin login attempts.
+// Progressive automated protection for admin login attempts.
 import crypto from "node:crypto";
 import AdminLoginProtection from "../models/AdminLoginProtection.js";
 import User from "../models/User.js";
@@ -32,7 +32,8 @@ function publicState(record) {
 
 async function getRecord(req) {
   const key = protectionKey(req);
-  return AdminLoginProtection.findOne({ key }).select("+captchaAnswer") || new AdminLoginProtection({ key, ip: req.ip, fingerprint: getFingerprint(req), userAgent: req.get("user-agent") || "" });
+  const record = await AdminLoginProtection.findOne({ key }).select("+captchaAnswer");
+  return record || new AdminLoginProtection({ key, ip: req.ip, fingerprint: getFingerprint(req), userAgent: req.get("user-agent") || "" });
 }
 
 async function shouldUseAdminProtection(req) {

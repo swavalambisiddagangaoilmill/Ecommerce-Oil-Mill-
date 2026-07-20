@@ -6,6 +6,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
+import { cspConnectSources, corsOrigin } from "./config/cors.js";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
@@ -41,7 +42,7 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:"],
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      connectSrc: ["'self'", ...env.clientUrls],
+      connectSrc: ["'self'", ...cspConnectSources()],
     },
   },
   crossOriginEmbedderPolicy: false,
@@ -54,10 +55,7 @@ app.use((_req, res, next) => {
 });
 app.use(compression());
 app.use(cors({
-  origin(origin, callback) {
-    if (!origin || env.clientUrls.includes(origin)) return callback(null, true);
-    return callback(new Error("CORS origin blocked."));
-  },
+  origin: corsOrigin,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token", "X-Requested-With"],

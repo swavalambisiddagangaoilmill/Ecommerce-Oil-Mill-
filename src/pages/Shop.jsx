@@ -13,11 +13,13 @@ const perPage = 6;
 export default function Shop() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([{ name: "All" }]);
+  const [categoriesReady, setCategoriesReady] = useState(false);
   const [category, setCategory] = useState("All");
   const [sort, setSort] = useState("featured");
   const [search, setSearch] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,21 +27,21 @@ export default function Shop() {
   const invalidSearch = search.trim().length === 1;
 
   useEffect(() => {
-    getCategories().then((items) => setCategories([{ name: "All" }, ...items])).catch(() => setCategories([{ name: "All" }]));
+    getCategories().then((items) => setCategories([{ name: "All" }, ...items])).catch(() => setCategories([{ name: "All" }])).finally(() => setCategoriesReady(true));
   }, []);
 
   useEffect(() => {
-    if (invalidSearch) return undefined;
+    if (invalidSearch || !categoriesReady) return undefined;
     setSearchLoading(true);
     const timer = window.setTimeout(() => {
       const categoryId = categories.find((item) => item.name === category)?.id;
       getProducts({ page, limit: perPage, search, category: category === "All" ? undefined : categoryId, sort: sort === "featured" ? "featured" : sort === "price-low" ? "priceAsc" : sort === "price-high" ? "priceDesc" : "newest" })
-        .then((data) => setProducts(data.products))
+        .then((data) => { setProducts(data.products); setPagination(data.pagination || null); })
         .catch(() => setProducts([]))
         .finally(() => setSearchLoading(false));
     }, search ? 300 : 0);
     return () => window.clearTimeout(timer);
-  }, [categories, category, invalidSearch, page, search, sort]);
+  }, [categories, categoriesReady, category, invalidSearch, page, search, sort]);
 
   useEffect(() => {
     const nextSearch = searchParams.get("q") || "";
@@ -72,7 +74,7 @@ export default function Shop() {
   };
 
   const visible = useMemo(() => products.filter(() => !invalidSearch), [invalidSearch, products]);
-  const totalPages = Math.max(1, page + (visible.length === perPage ? 1 : 0));
+  const totalPages = Math.max(1, pagination?.pages || page);
 
   const changeCategory = (next) => {
     setCategory(next);

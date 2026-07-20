@@ -1,9 +1,9 @@
 // Sends authentication emails through a replaceable adapter.
 import { env } from "../config/env.js";
 
-async function sendMail({ to, subject, text }) {
+async function sendMail({ to, subject, text: _text }) {
   if (!env.isProduction) {
-    console.log(`[auth-email] ${subject} -> ${to}\n${text}`);
+    console.log(`[auth-email] ${subject} -> ${to}`);
     return true;
   }
   console.warn("Email adapter not configured. Set SMTP provider before production email delivery.");

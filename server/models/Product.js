@@ -16,6 +16,12 @@ const productSchema = new mongoose.Schema(
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
     images: [{ url: { type: String, required: true }, publicId: { type: String } }],
     featured: { type: Boolean, default: false },
+    bestSeller: { type: Boolean, default: false },
+    newArrival: { type: Boolean, default: false },
+    codEnabled: { type: Boolean, default: true },
+    onlinePaymentEnabled: { type: Boolean, default: true },
+    returnEligible: { type: Boolean, default: true },
+    exchangeEligible: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     isArchived: { type: Boolean, default: false },
   },
@@ -24,5 +30,10 @@ const productSchema = new mongoose.Schema(
 
 productSchema.index({ title: "text", description: "text", sku: "text", slug: "text", tags: "text" });
 productSchema.index({ category: 1, isActive: 1 });
+productSchema.index({ featured: 1, isActive: 1, createdAt: -1 });
+productSchema.index({ bestSeller: 1, isActive: 1, createdAt: -1 });
+productSchema.index({ newArrival: 1, isActive: 1, createdAt: -1 });
+productSchema.index({ stock: 1, isActive: 1 });
 
 export default mongoose.model("Product", productSchema);
+

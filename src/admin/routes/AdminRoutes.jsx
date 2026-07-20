@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout.jsx";
 import AdminNotificationsPage from "../pages/AdminNotificationsPage.jsx";
 import RestrictionManagementPage from "../pages/RestrictionManagementPage.jsx";
-import { AuditLogsPage, CategoriesPage, ContentPage, CouponsPage, CustomersPage, DashboardPage, InventoryPage, MediaPage, MessagesPage, NewsletterPage, OffersPage, OrdersPage, PaymentsPage, ProductFormPage, ProductsPage, ReportsPage, SettingsPage, ShippingPage, UsersPage } from "../pages/AdminPages.jsx";
+import { AuditLogsPage, CategoriesPage, CouponsPage, CustomersPage, DashboardPage, InventoryPage, MessagesPage, OffersPage, OrdersPage, PaymentsPage, ProductFormPage, ProductsPage, ReportsPage, SettingsPage, ShippingPage, UsersPage } from "../pages/AdminPages.jsx";
 
 export default function AdminRoutes() {
   return <Routes>
@@ -19,10 +19,7 @@ export default function AdminRoutes() {
       <Route path="shipping" element={<ShippingPage />} />
       <Route path="customers" element={<CustomersPage />} />
       <Route path="payments" element={<PaymentsPage />} />
-      <Route path="content" element={<ContentPage />} />
-      <Route path="media" element={<MediaPage />} />
       <Route path="messages" element={<MessagesPage />} />
-      <Route path="newsletter" element={<NewsletterPage />} />
       <Route path="reports" element={<ReportsPage />} />
       <Route path="notifications" element={<AdminNotificationsPage />} />
       <Route path="users" element={<UsersPage />} />
@@ -33,4 +30,5 @@ export default function AdminRoutes() {
     </Route>
   </Routes>;
 }
+
 

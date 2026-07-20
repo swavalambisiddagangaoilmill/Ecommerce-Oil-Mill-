@@ -31,12 +31,8 @@ export const adminApi = {
   shipping: () => apiRequest(`${base}/shipping`),
   customers: () => apiRequest(`${base}/customers`),
   payments: () => apiRequest(`${base}/payments`),
-  content: () => apiRequest(`${base}/content`),
-  saveContent: (key, value) => apiRequest(`${base}/content/${encodeURIComponent(key)}`, { method: "PUT", body: JSON.stringify({ value }) }),
   messages: () => apiRequest(`${base}/messages`),
   messageStatus: (id, status) => apiRequest(`${base}/messages/${id}/status`, { method: "PUT", body: JSON.stringify({ status }) }),
-  newsletter: () => apiRequest(`${base}/newsletter`),
-  unsubscribe: (id) => apiRequest(`${base}/newsletter/${id}`, { method: "DELETE" }),
   reports: (type = "sales") => apiRequest(`${base}/reports?type=${type}`),
   users: () => apiRequest(`${base}/users`),
   updateUser: (id, adminRole) => apiRequest(`${base}/users/${id}`, { method: "PUT", body: JSON.stringify({ adminRole }) }),
@@ -58,6 +54,7 @@ export const adminApi = {
   settings: () => apiRequest(`${base}/settings`),
   saveSettings: (payload) => apiRequest(`${base}/settings`, { method: "PUT", body: JSON.stringify(payload) }),
 };
+
 
 
 

@@ -1,1 +1,0 @@
-import{r as e,j as n}from"./index-DmplAATu.js";function u({onCredential:t,disabled:o=!1}){e.useRef(null);const[r,s]=e.useState(!1);return e.useEffect(()=>{},[t]),n.jsx("button",{type:"button",disabled:!0,className:"h-12 w-full rounded-full border border-ink/10 bg-linen text-sm font-bold text-ink/45",children:"Continue with Google"})}export{u as G};

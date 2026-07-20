@@ -28,12 +28,8 @@ export const createCoupon = asyncHandler(async (req, res) => { const coupon = aw
 export const shipping = asyncHandler(async (req, res) => sendSuccess(res, 200, "Shipping fetched", await admin.listOrders({ ...req.query, limit: 100 })));
 export const customers = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Customers fetched", { items: await admin.listCustomers() }));
 export const payments = asyncHandler(async (req, res) => sendSuccess(res, 200, "Payments fetched", { items: await admin.listPayments(req.query) }));
-export const content = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Content fetched", { items: await admin.listContent() }));
-export const saveContent = asyncHandler(async (req, res) => { const item = await admin.upsertContent(req.params.key, req.body.value, req.user._id); await writeAuditLog(req, { action: "content.update", resourceType: "SiteContent", resourceId: item.key, summary: `${item.key} updated` }); sendSuccess(res, 200, "Content saved", { item }); });
 export const messages = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Messages fetched", { items: await admin.listMessages() }));
 export const messageStatus = asyncHandler(async (req, res) => sendSuccess(res, 200, "Message updated", { message: await admin.updateMessage(req.params.id, req.body.status) }));
-export const newsletter = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Subscribers fetched", { items: await admin.listNewsletter() }));
-export const unsubscribe = asyncHandler(async (req, res) => sendSuccess(res, 200, "Subscriber updated", { subscriber: await admin.unsubscribe(req.params.id) }));
 export const reports = asyncHandler(async (req, res) => sendSuccess(res, 200, "Report fetched", { items: await admin.reports(req.query.type) }));
 export const adminUsers = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Admin users fetched", { items: await admin.listAdmins() }));
 export const updateAdmin = asyncHandler(async (req, res) => { const user = await admin.updateAdminRole(req.params.id, req.body.adminRole); await writeAuditLog(req, { action: "admin.role", resourceType: "User", resourceId: user._id, summary: `${user.email} role updated` }); sendSuccess(res, 200, "Admin updated", { user }); });
@@ -92,3 +88,4 @@ export const addRestrictionNoteHandler = asyncHandler(async (req, res) => {
   await writeAuditLog(req, { action: "restriction.note", resourceType: "Restriction", resourceId: req.params.id, summary: `Restriction note added by ${req.user.email}`, after: { reason: req.body.note } });
   sendSuccess(res, 200, "Restriction note saved", { restriction });
 });
+

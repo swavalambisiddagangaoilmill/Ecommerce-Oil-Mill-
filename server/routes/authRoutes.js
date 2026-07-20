@@ -29,11 +29,13 @@ import {
   addressIdValidator,
   addressValidator,
   changePasswordValidator,
+  continueAdminLoginValidator,
   forgotPasswordValidator,
   googleValidator,
   loginValidator,
   otpRequestValidator,
   registerValidator,
+  refreshValidator,
   resetPasswordValidator,
   sessionIdValidator,
   updateProfileValidator,
@@ -47,8 +49,8 @@ const sensitiveLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 8, standar
 router.post("/register", authLimiter, registerValidator, validate, register);
 router.post("/login", authLimiter, loginValidator, validate, login);
 router.post("/google", authLimiter, googleValidator, validate, google);
-router.post("/admin-login/continue", authLimiter, continueAdminLogin);
-router.post("/refresh", authLimiter, refresh);
+router.post("/admin-login/continue", authLimiter, continueAdminLoginValidator, validate, continueAdminLogin);
+router.post("/refresh", authLimiter, refreshValidator, validate, refresh);
 router.post("/logout", protect, logout);
 router.post("/forgot-password", sensitiveLimiter, forgotPasswordValidator, validate, forgotPassword);
 router.post("/reset-password/:token", sensitiveLimiter, resetPasswordValidator, validate, resetPasswordHandler);

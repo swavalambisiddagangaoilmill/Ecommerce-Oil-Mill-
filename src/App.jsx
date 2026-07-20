@@ -1,5 +1,7 @@
 // Renders the global storefront shell.
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import CookieConsentBanner from "./components/features/feedback/CookieConsentBanner.jsx";
 import ErrorBoundary from "./components/features/feedback/ErrorBoundary.jsx";
 import GuestSessionNotice from "./components/features/feedback/GuestSessionNotice.jsx";
 import NetworkStatusBanner from "./components/features/feedback/NetworkStatusBanner.jsx";
@@ -12,11 +14,16 @@ import AnnouncementBar from "./components/layout/AnnouncementBar.jsx";
 import Navbar from "./components/layout/Navbar.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import AppRoutes from "./routes/AppRoutes.jsx";
+import { showConsoleSecurityWarning } from "./utils/consoleWarning.js";
 
 export default function App() {
   const { pathname } = useLocation();
   const authPage = pathname === "/login" || pathname === "/signup" || pathname.startsWith("/auth/forgot-password") || pathname.startsWith("/auth/reset-password") || pathname.startsWith("/auth/verify-email");
   const adminPage = pathname.startsWith("/admin");
+
+  useEffect(() => {
+    showConsoleSecurityWarning();
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream text-ink">
@@ -32,6 +39,7 @@ export default function App() {
         </main>
         {!authPage && !adminPage && <Footer />}
         <GuestSessionNotice />
+        {!adminPage && <CookieConsentBanner />}
         {!authPage && !adminPage && <WishlistWidget />}
         {!authPage && !adminPage && <ChatWidget />}
       </ErrorBoundary>

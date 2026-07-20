@@ -1,4 +1,4 @@
-﻿# Velora Backend
+# Velora Backend
 
 Production-ready Express + MongoDB backend for the Velora MERN storefront.
 
@@ -41,4 +41,4 @@ All endpoints are mounted under `/api`.
 - Payments: `/api/payments/intent`, `/api/payments/verify`
 - Uploads: `/api/upload/image`
 
-Payment and upload providers are ready for production integration through the service/controller placeholders.
+Payment and upload providers are connected through environment-based service adapters. Configure provider credentials only in server/.env or the deployment secret manager.

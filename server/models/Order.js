@@ -1,4 +1,4 @@
-﻿// Customer order model.
+// Customer order model.
 import mongoose from "mongoose";
 
 const orderItemSchema = new mongoose.Schema(
@@ -79,6 +79,10 @@ const orderSchema = new mongoose.Schema(
 
 orderSchema.index({ shiprocketShipmentId: 1 });
 orderSchema.index({ awbCode: 1 });
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ orderStatus: 1, createdAt: -1 });
+orderSchema.index({ razorpayPaymentId: 1 }, { unique: true, sparse: true });
+orderSchema.index({ razorpayOrderId: 1 }, { sparse: true });
 
 export default mongoose.model("Order", orderSchema);
 

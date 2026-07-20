@@ -70,7 +70,7 @@ export async function registerUser(payload, req) {
   const exists = await User.findOne({ email: payload.email });
   if (exists) throw new ApiError("Email is already registered.", 409);
   const user = new User({ name: payload.name, email: payload.email, phone: payload.phone, password: payload.password, emailVerified: false });
-  const verificationToken = await createEmailVerification(user);
+  await createEmailVerification(user);
   if (req) {
     trustDevice(user, req);
     pushLoginHistory(user, req, "register");
@@ -78,7 +78,7 @@ export async function registerUser(payload, req) {
   await user.save();
   await createAdminNotification({ category: "customers", type: "new_user_registration", title: "New User Registration", description: `${user.name} created an account.`, related: { kind: "User", id: user._id, label: user.email, path: "/admin/customers" } });
   const issued = await issueSession(user, undefined, req, true);
-  return { ...issued, verificationToken: process.env.NODE_ENV === "production" ? undefined : verificationToken };
+  return issued;
 }
 
 export async function loginUser(email, password, req, options = {}) {
@@ -94,15 +94,16 @@ export async function loginUser(email, password, req, options = {}) {
   }
   if (user.isDisabled) throw new ApiError("This account is disabled.", 403);
 
+  const skipAdminEmailVerification = process.env.NODE_ENV !== "production" && user.role === "admin";
   if (req && !isKnownDevice(user, req)) {
-    if (!options.otpCode) {
+    if (!skipAdminEmailVerification && !options.otpCode) {
       await createOtp(user, "new_device");
       pushLoginHistory(user, req, "new_device_login", { pendingOtp: true });
       await sendNewDeviceEmail(user, getDeviceDetails(req));
       await user.save({ validateBeforeSave: false });
       return { otpRequired: true, reason: "NEW_DEVICE", message: "Security code sent to your email." };
     }
-    verifyOtp(user, "new_device", options.otpCode);
+    if (!skipAdminEmailVerification) verifyOtp(user, "new_device", options.otpCode);
     trustDevice(user, req);
   } else if (req) {
     trustDevice(user, req);
@@ -223,9 +224,9 @@ export async function resendVerification(userId) {
   const user = await User.findById(userId).select("+emailVerificationToken +emailVerificationExpires");
   if (!user) throw new ApiError("User not found.", 404);
   if (user.emailVerified) return { user };
-  const verificationToken = await createEmailVerification(user);
+  await createEmailVerification(user);
   await user.save({ validateBeforeSave: false });
-  return { user, verificationToken: process.env.NODE_ENV === "production" ? undefined : verificationToken };
+  return { user };
 }
 
 export async function getSecuritySummary(userId) {

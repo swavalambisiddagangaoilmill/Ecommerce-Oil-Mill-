@@ -5,6 +5,7 @@ import { clearAuthCookies, setAuthCookie, setRefreshCookie } from "../utils/jwt.
 import { logSecurityEvent } from "../services/securityEventService.js";
 import { continuePendingAdminLogin, attachRefreshToken, revokeAdminSessions } from "../services/adminSessionService.js";
 import { createAdminNotification } from "../services/adminNotificationService.js";
+import { precheckAdminLogin, recordAdminLoginFailure, recordAdminLoginSuccess } from "../services/adminLoginProtectionService.js";
 import {
   addAddress,
   changeUserPassword,
@@ -32,21 +33,26 @@ function setSession(res, token, refreshToken) {
 }
 
 export const register = asyncHandler(async (req, res) => {
-  const { user, token, refreshToken, verificationToken } = await registerUser(req.body, req);
+  const { user, token, refreshToken } = await registerUser(req.body, req);
   setSession(res, token, refreshToken);
-  sendSuccess(res, 201, "Registered successfully", { user, token, refreshToken, verificationToken });
+  sendSuccess(res, 201, "Registered successfully", { user, token, refreshToken });
 });
 
 export const login = asyncHandler(async (req, res) => {
+  const adminProtection = await precheckAdminLogin(req);
   try {
     const result = await loginUser(req.body.email, req.body.password, req, { remember: req.body.remember, turnstileToken: req.body.turnstileToken, otpCode: req.body.otpCode });
     if (result.otpRequired) return sendSuccess(res, 202, result.message, result);
     const { user, token, refreshToken } = result;
+    if (adminProtection.protected && user.role === "admin") await recordAdminLoginSuccess(req, adminProtection.record, user);
     setSession(res, token, refreshToken);
     sendSuccess(res, 200, "Logged in successfully", { user, token, refreshToken });
   } catch (error) {
     await logSecurityEvent(req, "failed_login", { email: req.body.email }, "medium");
-    await createAdminNotification({ category: "security", type: "failed_admin_login", title: "Failed Admin Login", description: `A login attempt failed for ${req.body.email || "an admin account"}.`, dedupeKey: `failed-admin-login:${req.ip}:${req.body.email}:${new Date().toISOString().slice(0, 13)}`, related: { kind: "Security", label: req.ip, path: "/admin/audit-logs" } });
+    if (adminProtection.protected) {
+      await recordAdminLoginFailure(req, adminProtection.record);
+      await createAdminNotification({ category: "security", type: "failed_admin_login", title: "Failed Admin Login", description: "A protected admin login attempt failed for " + (req.body.email || "an admin account") + ".", dedupeKey: "failed-admin-login:" + req.ip + ":" + req.body.email + ":" + new Date().toISOString().slice(0, 13), related: { kind: "Security", label: req.ip, path: "/admin/audit-logs" } });
+    }
     throw error;
   }
 });
@@ -98,8 +104,8 @@ export const changePassword = asyncHandler(async (req, res) => {
 });
 
 export const forgotPassword = asyncHandler(async (req, res) => {
-  const resetToken = await requestPasswordReset(req.body.email, req);
-  sendSuccess(res, 200, "Password reset request accepted", { resetToken: process.env.NODE_ENV === "production" ? undefined : resetToken });
+  await requestPasswordReset(req.body.email, req);
+  sendSuccess(res, 200, "Password reset request accepted");
 });
 
 export const resetPasswordHandler = asyncHandler(async (req, res) => {

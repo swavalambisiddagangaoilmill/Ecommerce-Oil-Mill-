@@ -1,5 +1,6 @@
-﻿// Barrel exports for this component group.
+// Barrel exports for this component group.
 export { default as AddToCartModal } from './AddToCartModal.jsx';
+export { default as CookieConsentBanner } from './CookieConsentBanner.jsx';
 export { default as ErrorBoundary } from './ErrorBoundary.jsx';
 export { default as GuestSessionNotice } from './GuestSessionNotice.jsx';
 export { default as IntroLoader } from './IntroLoader.jsx';

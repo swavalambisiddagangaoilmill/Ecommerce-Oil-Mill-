@@ -82,8 +82,8 @@ export default function Footer() {
             <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-8">
               <div className="grid gap-3 text-sm font-semibold text-white/62">
                 <span className="flex items-center gap-3"><MapPin size={18} className="text-clay" /> Indiranagar, Bengaluru</span>
-                <span className="flex items-center gap-3"><Phone size={18} className="text-clay" /> +91 98765 43210</span>
-                <span className="flex items-center gap-3"><Mail size={18} className="text-clay" /> care@veloraoils.in</span>
+                <span className="flex items-center gap-3"><Phone size={18} className="text-clay" /> Support phone configured in store settings</span>
+                <span className="flex items-center gap-3"><Mail size={18} className="text-clay" /> Support email configured in store settings</span>
               </div>
               <div className="mt-6 flex flex-wrap gap-3">
                 {socialLinks.map(({ label, icon: Icon, href }) => <Link key={label} to={href} aria-label={label} className="grid h-11 w-11 place-items-center rounded-full bg-white/10 text-white transition hover:-translate-y-1 hover:bg-white hover:text-ink"><Icon size={18} /></Link>)}

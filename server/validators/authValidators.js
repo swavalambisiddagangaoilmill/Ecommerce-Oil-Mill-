@@ -21,9 +21,11 @@ export const loginValidator = [
   body("remember").optional().isBoolean().toBoolean(),
   body("turnstileToken").optional().trim(),
   body("otpCode").optional().isLength({ min: 6, max: 6 }).withMessage("Security code must be 6 digits."),
+  body("adminMode").optional().isBoolean().toBoolean(),
+  body("captchaAnswer").optional().trim().isLength({ max: 16 }).withMessage("Security answer is invalid."),
 ];
 
-export const googleValidator = [body("credential").optional().trim(), body("idToken").optional().trim()];
+export const googleValidator = [body("credential").optional().trim(), body("idToken").optional().trim(), body().custom((value) => { if (!value.credential && !value.idToken) throw new Error("Google credential is required."); return true; })];
 
 export const updateProfileValidator = [
   body("name").optional().trim().notEmpty().withMessage("Name cannot be empty."),
@@ -36,6 +38,8 @@ export const changePasswordValidator = [
   body("otpCode").isLength({ min: 6, max: 6 }).withMessage("Security code is required."),
 ];
 
+export const continueAdminLoginValidator = [body("pendingToken").trim().notEmpty().withMessage("Pending token is required."), body("revokeSessionIds").optional().isArray().withMessage("Session ids must be an array.")];
+export const refreshValidator = [body("refreshToken").optional().trim().isLength({ max: 2048 }).withMessage("Refresh token is invalid.")];
 export const forgotPasswordValidator = [body("email").isEmail().normalizeEmail().withMessage("Valid email is required."), body("turnstileToken").optional().trim()];
 export const resetPasswordValidator = [param("token").notEmpty().withMessage("Reset token is required."), strongPassword];
 export const verifyEmailValidator = [param("token").notEmpty().withMessage("Verification token is required.")];

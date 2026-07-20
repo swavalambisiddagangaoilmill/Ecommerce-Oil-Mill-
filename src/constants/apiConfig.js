@@ -1,5 +1,5 @@
-// Centralizes API configuration for backend communication.
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+// Centralizes API paths for backend communication.
+export const API_BASE_URL = "/api";
 
 export const API_ENDPOINTS = {
   auth: {
@@ -47,8 +47,3 @@ export const API_ENDPOINTS = {
   faqs: "/content/faqs",
   pageContent: (slug) => `/content/pages/${slug}`,
 };
-
-
-
-
-

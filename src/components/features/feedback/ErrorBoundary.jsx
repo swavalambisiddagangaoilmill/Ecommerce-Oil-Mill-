@@ -1,6 +1,7 @@
-﻿// Catches broken page renders and shows a retry path.
+// Catches broken page renders and shows a retry path.
 import { Component } from "react";
 import StatusPage from "../../../pages/StatusPage.jsx";
+import { reportFrontendError } from "../../../utils/errorReporting.js";
 
 export default class ErrorBoundary extends Component {
   state = { hasError: false };

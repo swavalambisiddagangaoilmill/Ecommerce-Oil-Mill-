@@ -17,6 +17,7 @@ async function calculateOrderAmount(productsPayload = []) {
     const product = productMap.get(item.product.toString());
     if (!product) throw new ApiError("One or more products are unavailable.", 400);
     if (product.stock < item.quantity) throw new ApiError(`${product.title} does not have enough stock.`, 400);
+    if (product.onlinePaymentEnabled === false) throw new ApiError(`${product.title} is not eligible for online payment.`, 400);
     return total + (product.discountPrice || product.price) * item.quantity;
   }, 0);
 }
@@ -26,9 +27,7 @@ export async function createPaymentOrder(payload) {
   const calculatedAmount = amountSource?.length ? await calculateOrderAmount(amountSource) : 0;
   const amount = Math.round(calculatedAmount * 100);
   if (!amount || amount < 100) throw new ApiError("Valid order products are required.", 400);
-  if (!env.razorpay.keyId || !env.razorpay.keySecret) {
-    return { id: `order_local_${Date.now()}`, amount, currency: "INR", provider: "local", key: env.razorpay.keyId };
-  }
+  if (!env.razorpay.keyId || !env.razorpay.keySecret) throw new ApiError("Razorpay credentials are not configured.", 400);
   const auth = Buffer.from(`${env.razorpay.keyId}:${env.razorpay.keySecret}`).toString("base64");
   const response = await fetch("https://api.razorpay.com/v1/orders", {
     method: "POST",
@@ -41,25 +40,19 @@ export async function createPaymentOrder(payload) {
 }
 
 export async function verifyPaymentAndCreateOrder(userId, payload) {
-  if (payload.razorpayPaymentId) {
-    const existing = await Order.findOne({ razorpayPaymentId: payload.razorpayPaymentId });
-    if (existing) throw new ApiError("Payment has already been processed.", 409);
-  }
-  if (env.isProduction && (!payload.razorpayOrderId || !payload.razorpayPaymentId || !payload.razorpaySignature)) {
+  if (!env.razorpay.keySecret) throw new ApiError("Razorpay credentials are not configured.", 400);
+  if (!payload.razorpayOrderId || !payload.razorpayPaymentId || !payload.razorpaySignature) {
     throw new ApiError("Complete payment verification data is required.", 400);
   }
-  if (payload.razorpayOrderId && payload.razorpayPaymentId && payload.razorpaySignature && env.razorpay.keySecret) {
+  const existing = await Order.findOne({ razorpayPaymentId: payload.razorpayPaymentId }).lean();
+  if (existing) throw new ApiError("Payment has already been processed.", 409);
+  {
     const expected = crypto.createHmac("sha256", env.razorpay.keySecret).update(`${payload.razorpayOrderId}|${payload.razorpayPaymentId}`).digest("hex");
     const received = Buffer.from(payload.razorpaySignature);
     const expectedBuffer = Buffer.from(expected);
     if (received.length !== expectedBuffer.length || !crypto.timingSafeEqual(expectedBuffer, received)) throw new ApiError("Payment verification failed.", 400);
   }
-  const order = await createStoreOrder(userId, { ...payload.order, paymentMethod: "razorpay" });
-  order.paymentStatus = "paid";
-  order.razorpayOrderId = payload.razorpayOrderId;
-  order.razorpayPaymentId = payload.razorpayPaymentId;
-  order.razorpaySignature = payload.razorpaySignature;
-  await order.save();
+  const order = await createStoreOrder(userId, { ...payload.order, paymentMethod: "razorpay", paymentStatus: "paid", razorpayOrderId: payload.razorpayOrderId, razorpayPaymentId: payload.razorpayPaymentId, razorpaySignature: payload.razorpaySignature });
   await createAdminNotification({ category: "payments", type: "payment_successful", title: "Payment Successful", description: `Payment received for order ${order._id}.`, related: { kind: "Order", id: order._id, label: `Order ${order._id}`, path: "/admin/payments" } });
   return order;
 }
@@ -149,16 +142,15 @@ export async function verifyUpiQrCheckout(userId, checkoutId) {
     const order = await Order.findById(existing.order);
     return { status: "paid", order, checkout };
   }
-  const order = await createStoreOrder(userId, { ...checkout.orderPayload, paymentMethod: "razorpay" });
-  order.paymentStatus = "paid";
-  order.razorpayPaymentId = captured.id;
-  await order.save();
+  const order = await createStoreOrder(userId, { ...checkout.orderPayload, paymentMethod: "razorpay", paymentStatus: "paid", razorpayPaymentId: captured.id });
   checkout.status = "paid";
   checkout.razorpayPaymentId = captured.id;
   checkout.order = order._id;
   await checkout.save();
   return { status: "paid", order, checkout };
 }
+
+
 
 
 
