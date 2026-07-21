@@ -17,7 +17,7 @@ const slides = [
     alt: "Premium pantry ingredients on a kitchen table",
   },
   {
-    src: "https://images.unsplash.com/photo-1518492104633-130d0cc84637?auto=format&fit=crop&w=2200&q=90",
+    src: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=2200&q=90",
     alt: "Golden edible oil and fresh ingredients",
   },
 ];
@@ -112,6 +112,3 @@ export default function Hero() {
     </section>
   );
 }
-
-
-
