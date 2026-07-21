@@ -41,8 +41,8 @@ export default function MobileDrawer({ open, onClose, onWishlist, accountPath = 
             aria-label="Mobile navigation"
           >
             <div className="flex min-h-12 items-center justify-between">
-              <Link to="/" onClick={onClose} className="font-serif text-3xl font-semibold tracking-tight">
-                Velora
+              <Link to="/" onClick={onClose} className="font-serif text-2xl font-semibold tracking-tight">
+                SS Oil Mill
               </Link>
               <button
                 type="button"

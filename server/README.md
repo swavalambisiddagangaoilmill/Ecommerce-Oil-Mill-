@@ -1,6 +1,6 @@
-# Velora Backend
+# Swavalambi Siddaganga Oil Mill Backend
 
-Production-ready Express + MongoDB backend for the Velora MERN storefront.
+Production-ready Express + MongoDB backend for the Swavalambi Siddaganga Oil Mill MERN storefront.
 
 ## Setup
 

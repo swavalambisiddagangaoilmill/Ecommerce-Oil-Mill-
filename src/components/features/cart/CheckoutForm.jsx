@@ -165,7 +165,7 @@ export default function CheckoutForm() {
         key: payment.key,
         amount: payment.amount,
         currency: payment.currency || "INR",
-        name: "Velora",
+        name: "Swavalambi Siddaganga Oil Mill",
         description: "Cold pressed oil order",
         order_id: payment.id,
         prefill: orderPayload.customer,

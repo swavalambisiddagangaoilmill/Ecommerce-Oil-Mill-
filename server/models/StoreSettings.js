@@ -4,13 +4,13 @@ import mongoose from "mongoose";
 const settingsSchema = new mongoose.Schema(
   {
     key: { type: String, unique: true, default: "store" },
-    storeName: { type: String, default: "Velora" },
+    storeName: { type: String, default: "Swavalambi Siddaganga Oil Mill" },
     currency: { type: String, default: "INR" },
     supportEmail: { type: String, trim: true },
     supportPhone: { type: String, trim: true },
     whatsappNumber: { type: String, trim: true },
     minimumOrderAmount: { type: Number, default: 0, min: 0 },
-    orderPrefix: { type: String, default: "VEL" },
+    orderPrefix: { type: String, default: "SSOM" },
     lowStockThreshold: { type: Number, default: 10, min: 0 },
     allowOutOfStockVisibility: { type: Boolean, default: true },
     preventOutOfStockCheckout: { type: Boolean, default: true },

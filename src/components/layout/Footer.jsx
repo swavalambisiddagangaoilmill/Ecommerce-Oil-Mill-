@@ -46,12 +46,14 @@ export default function Footer() {
         <div className="mx-auto max-w-5xl text-center">
           <Link to="/" className="group block rounded-[2rem] border border-white/10 bg-white/[0.04] px-6 py-10 transition hover:-translate-y-1 hover:bg-white/[0.07]">
             <span className="text-xs font-bold uppercase tracking-[0.28em] text-clay">Primary brand logo</span>
-            <span className="mt-4 block font-serif text-6xl font-semibold leading-none sm:text-7xl lg:text-8xl">Velora</span>
+            {/* <!-- Company Logo Placeholder --> */}
+            <span className="mt-4 block font-serif text-5xl font-semibold leading-tight sm:text-6xl lg:text-7xl">Swavalambi Siddaganga Oil Mill</span>
           </Link>
-          <a href="https://www.glora.studio" target="_blank" rel="noopener noreferrer" className="mx-auto mt-5 inline-grid min-w-56 place-items-center rounded-full border border-white/10 bg-white px-7 py-4 text-ink shadow-sm transition hover:-translate-y-0.5 hover:bg-linen">
+          <div className="mx-auto mt-5 inline-grid min-w-56 place-items-center rounded-full border border-white/10 bg-white px-7 py-4 text-ink shadow-sm">
             <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/38">Made by team</span>
-            <img src="/glora-black.svg" alt="Glora Studio" className="mt-1 h-10 w-auto" />
-          </a>
+            {/* <!-- Company Logo Placeholder --> */}
+            <span className="mt-1 font-serif text-xl font-semibold">Team Logo Placeholder</span>
+          </div>
         </div>
 
         <div className="mt-12 grid gap-5 xl:mt-16 xl:grid-cols-[1fr_0.82fr]">
@@ -81,9 +83,9 @@ export default function Footer() {
 
             <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-8">
               <div className="grid gap-3 text-sm font-semibold text-white/62">
-                <span className="flex items-center gap-3"><MapPin size={18} className="text-clay" /> Indiranagar, Bengaluru</span>
-                <span className="flex items-center gap-3"><Phone size={18} className="text-clay" /> Support phone configured in store settings</span>
-                <span className="flex items-center gap-3"><Mail size={18} className="text-clay" /> Support email configured in store settings</span>
+                <span className="flex items-start gap-3"><MapPin size={18} className="mt-0.5 shrink-0 text-clay" /> SIDDAGANGA OIL MILL, Near Small City Club Road, Sira Gate, TUDA Layout, Tumakuru, Karnataka 572106</span>
+                <span className="flex items-center gap-3"><Phone size={18} className="text-clay" /> 09972565174</span>
+                <span className="flex items-center gap-3"><Mail size={18} className="text-clay" /> support@swavalambisiddagangaoilmill.com</span>
               </div>
               <div className="mt-6 flex flex-wrap gap-3">
                 {socialLinks.map(({ label, icon: Icon, href }) => <Link key={label} to={href} aria-label={label} className="grid h-11 w-11 place-items-center rounded-full bg-white/10 text-white transition hover:-translate-y-1 hover:bg-white hover:text-ink"><Icon size={18} /></Link>)}
@@ -93,8 +95,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm font-medium text-white/52 sm:flex-row sm:items-center sm:justify-between">
-          <p>&copy; 2026 Velora Oils. All rights reserved.</p>
-          <p>Cold pressed pantry staples, bottled with patience.</p>
+          <p>&copy; 2026 Swavalambi Siddaganga Oil Mill. All rights reserved.</p>
+          <p>Work is Worship.</p>
         </div>
       </Container>
     </footer>

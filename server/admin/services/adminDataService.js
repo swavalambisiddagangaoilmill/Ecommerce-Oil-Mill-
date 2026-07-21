@@ -1,4 +1,4 @@
-// Admin data services backed by existing Velora models.
+// Admin data services backed by existing Swavalambi Siddaganga Oil Mill models.
 import AdminAuditLog from "../../models/AdminAuditLog.js";
 import Category from "../../models/Category.js";
 import ContactMessage from "../../models/ContactMessage.js";

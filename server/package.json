@@ -1,7 +1,7 @@
 ﻿{
-  "name": "velora-ecommerce-backend",
+  "name": "ss-oil-mill-ecommerce-backend",
   "version": "1.0.0",
-  "description": "Production-ready Express and MongoDB backend for Velora e-commerce.",
+  "description": "Production-ready Express and MongoDB backend for Swavalambi Siddaganga Oil Mill e-commerce.",
   "type": "module",
   "main": "server.js",
   "scripts": {

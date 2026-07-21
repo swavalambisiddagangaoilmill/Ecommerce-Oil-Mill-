@@ -1,7 +1,7 @@
 // Stores visitor cookie consent preferences without blocking storefront use.
 import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "velora_cookie_consent";
+const STORAGE_KEY = "ss_oil_mill_cookie_consent";
 const defaultPrefs = { essential: true, analytics: false, marketing: false };
 
 export default function CookieConsentBanner() {

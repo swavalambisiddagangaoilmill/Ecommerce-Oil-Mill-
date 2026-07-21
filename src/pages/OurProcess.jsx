@@ -15,7 +15,7 @@ export default function OurProcess() {
       <CinematicHero
         eyebrow="Our process"
         title="From selected seeds to fresh pantry dispatch."
-        text="A detailed look at how Velora sources, presses, settles, bottles, and delivers oils with a freshness-first standard."
+        text="A detailed look at how Swavalambi Siddaganga Oil Mill sources, presses, settles, bottles, and delivers oils with a freshness-first standard."
         image="https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1800&q=85"
         video={DEMO_HERO_VIDEO}
         contentVisible={false}
@@ -30,7 +30,7 @@ export default function OurProcess() {
             </h2>
           </div>
           <p className="rounded-[2rem] bg-white p-7 text-lg leading-8 text-ink/65 shadow-sm sm:p-9">
-            The Velora process favors low intervention: careful sourcing, slow pressing, natural settling, protective packing, and fresh dispatch. It is a practical system for oils that need to taste alive and remain dependable.
+            The Swavalambi Siddaganga Oil Mill process favors low intervention: careful sourcing, slow pressing, natural settling, protective packing, and fresh dispatch. It is a practical system for oils that need to taste alive and remain dependable.
           </p>
         </Container>
       </section>
@@ -100,7 +100,7 @@ export default function OurProcess() {
         </Container>
       </section>
 
-      <PageCta eyebrow="Know your oil" title="Choose products made with a slower, cleaner process." text="Shop the Velora range or speak with us about bulk, gifting, and recurring pantry orders." />
+      <PageCta eyebrow="Know your oil" title="Choose products made with a slower, cleaner process." text="Shop the Swavalambi Siddaganga Oil Mill range or speak with us about bulk, gifting, and recurring pantry orders." />
     </>
   );
 }

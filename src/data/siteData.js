@@ -82,8 +82,8 @@ export const megaMenus = {
     banner: {
       href: "/about",
       image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=1300&q=85",
-      eyebrow: "Velora story",
-      title: "A slower oil house for thoughtful kitchens.",
+      eyebrow: "Swavalambi Siddaganga Oil Mill story",
+      title: "A slower oil house for everyday kitchens.",
       description: "Learn about our process, sourcing values, sustainability mindset, and the care behind every bottle.",
     },
   },
@@ -113,10 +113,10 @@ export const processSteps = [
 export const testimonials = [
   { name: "Ananya Rao", role: "Home chef", rating: 5, review: "Verified pantry review", quote: "The groundnut oil has the kind of aroma I remember from my grandmother's kitchen, but the packaging feels beautifully modern." },
   { name: "Ritwik Sharma", role: "Cafe owner", rating: 5, review: "Repeat buyer", quote: "Consistent batches, honest flavor, and an elegant shelf presence. The sesame oil is now part of our signature menu." },
-  { name: "Mira Nair", role: "Nutrition coach", rating: 5, review: "Wellness kitchen review", quote: "I recommend Velora to clients who want cleaner pantry staples without compromising taste or cooking performance." },
+  { name: "Mira Nair", role: "Nutrition coach", rating: 5, review: "Wellness kitchen review", quote: "I recommend Swavalambi Siddaganga Oil Mill to clients who want cleaner pantry staples without compromising taste or cooking performance." },
   { name: "Devika Menon", role: "Family kitchen buyer", rating: 5, review: "Monthly subscriber", quote: "The oils feel fresh from the first pour. Mustard for pickles and groundnut for daily cooking have become our regular pair." },
   { name: "Kabir Sethi", role: "Private chef", rating: 5, review: "Chef tested", quote: "What stands out is balance. The oils carry flavor without overpowering the dish, and the bottles look refined on open shelves." },
-  { name: "Nisha Iyer", role: "New parent", rating: 5, review: "Family review", quote: "I wanted pantry staples that felt trustworthy and simple. Velora made it easy to switch without changing the way we cook." },
+  { name: "Nisha Iyer", role: "New parent", rating: 5, review: "Family review", quote: "I wanted pantry staples that felt trustworthy and simple. Swavalambi Siddaganga Oil Mill made it easy to switch without changing the way we cook." },
 ];
 
 export const faqs = [

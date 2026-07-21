@@ -6,7 +6,7 @@ export const faqGroups = [
     category: "Products",
     items: [
       {
-        q: "Are Velora oils refined?",
+        q: "Are Swavalambi Siddaganga Oil Mill oils refined?",
         a: "No. Our oils are cold pressed, naturally settled, and bottled without refining, bleaching, deodorising, or synthetic additives.",
       },
       {
@@ -28,7 +28,7 @@ export const faqGroups = [
       },
       {
         q: "What is the shelf life?",
-        a: "Most Velora oils are best used within 8 to 12 months. Each bottle should be consumed sooner after opening for the cleanest aroma.",
+        a: "Most Swavalambi Siddaganga Oil Mill oils are best used within 8 to 12 months. Each bottle should be consumed sooner after opening for the cleanest aroma.",
       },
       {
         q: "Can the oil be refrigerated?",
@@ -56,7 +56,7 @@ export const faqGroups = [
 ];
 
 export const storyTimeline = [
-  { year: "2019", title: "A family pantry question", text: "Velora began with a search for oils that tasted honest, looked refined, and could be trusted every day." },
+  { year: "2019", title: "A family pantry question", text: "Swavalambi Siddaganga Oil Mill began with a search for oils that tasted honest, looked refined, and could be trusted every day." },
   { year: "2020", title: "Small-batch pressing", text: "We built relationships with seed suppliers and focused on slow extraction instead of scale-first production." },
   { year: "2022", title: "Amber glass standard", text: "Packaging was redesigned around freshness, shelf presence, and a calmer luxury pantry experience." },
   { year: "2026", title: "Digital-first oil house", text: "The brand now brings cold pressed staples into a complete premium ecommerce experience." },

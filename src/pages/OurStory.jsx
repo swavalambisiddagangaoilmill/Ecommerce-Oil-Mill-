@@ -17,8 +17,8 @@ export default function OurStory() {
       <Breadcrumb items={[{ label: "About", href: "/about" }, { label: "Our Story" }]} />
       <CinematicHero
         eyebrow="Our story"
-        title="A slower oil house for thoughtful kitchens."
-        text="Velora brings traditional cold pressed oils into a refined modern pantry, with patience, clarity, and sensory warmth guiding every bottle."
+        title="A slower oil house for everyday kitchens."
+        text="Swavalambi Siddaganga Oil Mill brings traditional cold pressed oils into a refined modern pantry, with patience, clarity, and sensory warmth guiding every bottle."
         image="https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=1800&q=85"
         video={DEMO_HERO_VIDEO}
         contentVisible={false}
@@ -34,7 +34,7 @@ export default function OurStory() {
           </div>
           <div className="rounded-[2rem] bg-white p-6 shadow-sm sm:p-8">
             <p className="text-lg leading-8 text-ink/65">
-              Velora was shaped around a simple belief: everyday cooking staples can be honest, beautiful, and reliable at the same time. Our work is to preserve the natural character of seeds while making the buying experience feel calm and premium.
+              Swavalambi Siddaganga Oil Mill was shaped around a simple belief: everyday cooking staples can be honest, beautiful, and reliable at the same time. Our work is to preserve the natural character of seeds while making the buying experience feel calm and premium.
             </p>
             <Button to="/shop" className="mt-7">
               Explore Oils <ArrowRight size={18} />
@@ -108,7 +108,7 @@ export default function OurStory() {
         </Container>
       </section>
 
-      <PageCta eyebrow="Bring it home" title="Start with oils that make daily cooking feel considered." text="Explore the Velora range and build a calmer, cleaner pantry around cold pressed staples." />
+      <PageCta eyebrow="Bring it home" title="Start with oils that make daily cooking feel considered." text="Explore the Swavalambi Siddaganga Oil Mill range and build a calmer, cleaner pantry around cold pressed staples." />
     </>
   );
 }

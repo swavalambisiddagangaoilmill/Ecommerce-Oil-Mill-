@@ -16,7 +16,7 @@ export default function About() {
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-clay">Brand story</p>
             <h1 className="mt-4 font-serif text-5xl font-semibold leading-tight lg:text-6xl">A premium oil house built around patience.</h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-ink/65">Velora exists to make traditional cold pressed oils feel reliable, elegant, and deeply useful in modern kitchens. Our mission is to protect taste, our vision is a cleaner pantry standard, and our process is intentionally slow.</p>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-ink/65">Swavalambi Siddaganga Oil Mill exists to make traditional cold pressed oils feel reliable, elegant, and deeply useful in modern kitchens. Our mission is to protect taste, our vision is a cleaner pantry standard, and our process is intentionally slow.</p>
           </div>
           <img src="https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=1400&q=85" alt="Fresh food prepared with oil" className="aspect-[4/3] rounded-3xl object-cover shadow-soft" />
         </Container>
@@ -25,7 +25,7 @@ export default function About() {
       <ExtractionProcess />
       <section className="section-padding bg-surface">
         <Container>
-          <SectionHeading eyebrow="Customer notes" title="Trusted by modern kitchens" text="Real reviews from families, chefs, and wellness-led homes using Velora in everyday cooking." />
+          <SectionHeading eyebrow="Customer notes" title="Trusted by modern kitchens" text="Real reviews from families, chefs, and wellness-led homes using Swavalambi Siddaganga Oil Mill in everyday cooking." />
           <TestimonialCarousel items={testimonials} />
         </Container>
       </section>

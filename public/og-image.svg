@@ -1,6 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#F8FAFC"/>
-  <rect x="80" y="80" width="1040" height="470" rx="42" fill="#0F172A"/>
-  <text x="140" y="290" fill="#FFFFFF" font-size="92" font-family="Georgia">Velora Oils</text>
-  <text x="145" y="360" fill="#E2E8F0" font-size="34" font-family="Arial">Cold pressed edible oils for thoughtful kitchens</text>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#55712F"/>
+  <text x="120" y="280" fill="#FFFFFF" font-size="78" font-family="Georgia">SS Oil Mill</text>
+  <text x="124" y="360" fill="#F7F0E3" font-size="38" font-family="Georgia">Work is Worship</text>
 </svg>

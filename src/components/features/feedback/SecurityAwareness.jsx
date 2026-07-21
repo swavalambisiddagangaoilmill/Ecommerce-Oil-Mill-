@@ -11,7 +11,7 @@ const blockedCombos = [
 ];
 
 function getDeviceId() {
-  const key = "velora_device_id";
+  const key = "ss_oil_mill_device_id";
   let id = localStorage.getItem(key);
   if (!id) {
     id = crypto.randomUUID?.() || `device-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -26,6 +26,7 @@ export default function SecurityAwareness() {
   const [restrictedUntil, setRestrictedUntil] = useState("");
   const localCountRef = useRef(0);
   const lastReportRef = useRef(0);
+  const signalReportRef = useRef({});
 
   useEffect(() => {
     const deviceId = getDeviceId();
@@ -34,8 +35,11 @@ export default function SecurityAwareness() {
       const count = localCountRef.current;
       if (count >= warningThreshold) setWarning(true);
       const now = Date.now();
-      if (count < 3 || now - lastReportRef.current < 1800) return;
+      const lastSignalReport = signalReportRef.current[signal] || 0;
+      const signalCooldown = signal === "devtools_size" ? 30000 : 5000;
+      if (count < 3 || now - lastReportRef.current < 1800 || now - lastSignalReport < signalCooldown) return;
       lastReportRef.current = now;
+      signalReportRef.current[signal] = now;
       const response = await reportSecurityActivity(signal, deviceId).catch(() => null);
       if (response?.warning) setWarning(true);
       if (response?.restricted) {

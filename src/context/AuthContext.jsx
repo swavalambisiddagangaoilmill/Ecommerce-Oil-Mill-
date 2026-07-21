@@ -13,10 +13,10 @@ export function AuthProvider({ children }) {
   const refreshState = useCallback(() => setToken(getAuthToken()), []);
 
   useEffect(() => {
-    window.addEventListener("velora-auth-change", refreshState);
+    window.addEventListener("ss-oil-mill-auth-change", refreshState);
     window.addEventListener("storage", refreshState);
     return () => {
-      window.removeEventListener("velora-auth-change", refreshState);
+      window.removeEventListener("ss-oil-mill-auth-change", refreshState);
       window.removeEventListener("storage", refreshState);
     };
   }, [refreshState]);

@@ -16,7 +16,7 @@ import Container from "../components/ui/Container.jsx";
 export default function Home() {
   return (
     <>
-      <h1 className="sr-only">Velora cold pressed edible oils</h1>
+      <h1 className="sr-only">Swavalambi Siddaganga Oil Mill cold pressed edible oils</h1>
       <Hero />
       <BrandStrip />
       <Categories />

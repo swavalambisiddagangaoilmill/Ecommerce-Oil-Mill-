@@ -6,5 +6,5 @@ import { env } from "./config/env.js";
 await connectDB();
 
 app.listen(env.port, () => {
-  console.log(`Velora API running on port ${env.port}`);
+  console.log(`Swavalambi Siddaganga Oil Mill API running on port ${env.port}`);
 });

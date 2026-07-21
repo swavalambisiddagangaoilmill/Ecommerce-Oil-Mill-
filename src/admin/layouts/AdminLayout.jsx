@@ -44,7 +44,7 @@ function canSee(user, label) {
 function Sidebar({ collapsed, close, user }) {
   const items = navItems.filter((item) => canSee(user, item.label));
   return <aside className={`${collapsed ? "lg:w-20" : "lg:w-64"} flex h-full flex-col border-r border-[var(--admin-border)] bg-[var(--admin-surface)] transition-all`}>
-    <div className="flex h-14 items-center justify-between border-b border-[var(--admin-border)] px-4"><p className="truncate font-serif text-xl font-semibold">{collapsed ? "V" : "Velora Admin"}</p><button type="button" onClick={close} className="grid h-9 w-9 place-items-center rounded-lg hover:bg-linen lg:hidden"><X size={18} /></button></div>
+    <div className="flex h-14 items-center justify-between border-b border-[var(--admin-border)] px-4"><p className="truncate font-serif text-xl font-semibold">{collapsed ? "SS" : "SS Oil Mill Admin"}</p><button type="button" onClick={close} className="grid h-9 w-9 place-items-center rounded-lg hover:bg-linen lg:hidden"><X size={18} /></button></div>
     <nav className="flex-1 space-y-1 overflow-y-auto p-3">{items.map((item, index) => { const Icon = item.icon; const showGroup = item.group && item.group !== items[index - 1]?.group && !collapsed; return <div key={item.to}>{showGroup && <p className="px-3 pb-1 pt-3 text-[11px] font-bold uppercase tracking-[0.16em] text-ink/35">{item.group}</p>}<NavLink end={item.end} to={item.to} onClick={close} className={({ isActive }) => `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-bold transition ${isActive ? "bg-[var(--admin-primary)] text-white" : "text-ink/65 hover:bg-linen hover:text-ink"}`}><Icon size={18} /><span className={collapsed ? "lg:hidden" : ""}>{item.label}</span></NavLink></div>; })}</nav>
   </aside>;
 }

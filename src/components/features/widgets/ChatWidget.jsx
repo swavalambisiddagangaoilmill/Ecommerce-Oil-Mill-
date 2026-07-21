@@ -147,7 +147,7 @@ export default function ChatWidget() {
                 <div className="flex items-center gap-3">
                   <span className="grid h-11 w-11 place-items-center rounded-full bg-white/10"><Bot size={20} /></span>
                   <div>
-                    <p className="font-serif text-2xl font-semibold leading-none">Velora Assist</p>
+                    <p className="font-serif text-2xl font-semibold leading-none">SS Oil Mill Assist</p>
                     <p className="mt-1 text-xs text-white/55">AI unavailable fallback enabled</p>
                   </div>
                 </div>

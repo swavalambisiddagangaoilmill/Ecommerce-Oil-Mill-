@@ -1,11 +1,11 @@
 // Wraps HTTP requests so backend details stay out of UI components.
 import { API_BASE_URL } from "../constants/apiConfig.js";
 
-const TOKEN_KEY = "velora_token";
-const REFRESH_KEY = "velora_refresh_token";
+const TOKEN_KEY = "ss_oil_mill_token";
+const REFRESH_KEY = "ss_oil_mill_refresh_token";
 
 function notifyAuthChange() {
-  window.dispatchEvent(new Event("velora-auth-change"));
+  window.dispatchEvent(new Event("ss-oil-mill-auth-change"));
 }
 
 export function getAuthToken() {

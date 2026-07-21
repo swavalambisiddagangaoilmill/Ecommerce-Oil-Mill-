@@ -27,7 +27,7 @@ export default function StatusPage({ code = "404", title, message, retry = false
   const location = useLocation();
   const [copied, setCopied] = useState(false);
   const [defaultTitle, defaultMessage] = defaults[code] || defaults["404"];
-  const orderId = "VELORA-DEMO-1001";
+  const orderId = "SS-OIL-MILL-DEMO-1001";
 
   const copyOrderId = async () => {
     await navigator.clipboard.writeText(orderId);

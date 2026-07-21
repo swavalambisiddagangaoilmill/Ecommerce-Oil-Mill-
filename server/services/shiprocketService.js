@@ -113,7 +113,7 @@ function buildOrderPayload(order, packageDetails) {
     billing_pincode: address.postalCode,
     billing_state: address.state,
     billing_country: address.country || "India",
-    billing_email: order.user?.email || "support@velora.local",
+    billing_email: order.user?.email || "support@ss-oil-mill.local",
     billing_phone: address.phone || order.user?.phone || "9999999999",
     shipping_is_billing: true,
     order_items: order.products.map((item) => ({
@@ -205,7 +205,7 @@ async function createMockReadyToShipShipment(order) {
   order.shiprocketOrderId = order.shiprocketOrderId || `MOCK-SR-${order._id}`;
   order.shiprocketShipmentId = order.shiprocketShipmentId || `MOCK-SHIP-${order._id}`;
   order.awbCode = order.awbCode || createMockAwb();
-  order.courierName = "Velora Test Courier";
+  order.courierName = "Swavalambi Siddaganga Oil Mill Test Courier";
   order.trackingUrl = getMockTrackingUrl(order._id);
   order.labelUrl = getMockTrackingUrl(order._id);
   order.manifestUrl = getMockTrackingUrl(order._id);

@@ -10,8 +10,8 @@ export default class ErrorBoundary extends Component {
     return { hasError: true };
   }
 
-  componentDidCatch(error) {
-    console.error(error);
+  componentDidCatch(error, info) {
+    reportFrontendError(error, { componentStack: info?.componentStack });
   }
 
   render() {

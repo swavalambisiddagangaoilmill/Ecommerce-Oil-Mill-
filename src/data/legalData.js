@@ -11,7 +11,7 @@ export const legalPages = {
   terms: {
     title: "Terms & Conditions",
     sections: [
-      ["Use of storefront", "By using Velora, customers agree to provide accurate order and account information."],
+      ["Use of storefront", "By using Swavalambi Siddaganga Oil Mill, customers agree to provide accurate order and account information."],
       ["Product information", "Product availability, prices, delivery estimates, and offers may change based on inventory and promotions."],
       ["Account responsibility", "Customers are responsible for maintaining the confidentiality of account credentials and order information."],
     ],

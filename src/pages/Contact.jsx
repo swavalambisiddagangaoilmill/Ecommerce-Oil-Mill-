@@ -45,8 +45,8 @@ export default function Contact() {
             <Button type="submit" className="mt-6" loading={loading}>Send Message</Button>
           </form>
           <div className="space-y-5">
-            <div className="grid min-h-72 place-items-center rounded-3xl bg-linen p-8 text-center"><div><MapPin className="mx-auto text-leaf" size={34} /><p className="mt-4 font-serif text-3xl font-semibold">Visit Velora</p><p className="mt-2 text-ink/60">Indiranagar, Bengaluru</p></div></div>
-            <div className="rounded-3xl bg-white p-6 shadow-sm"><h2 className="font-serif text-3xl font-semibold">Business Details</h2><div className="mt-5 grid gap-4 text-ink/65"><p className="flex gap-3"><Phone size={19} /> Support phone configured in store settings</p><p className="flex gap-3"><Mail size={19} /> Support email configured in store settings</p><p className="flex gap-3"><MapPin size={19} /> Business address configured in store settings</p></div></div>
+            <div className="grid min-h-72 place-items-center rounded-3xl bg-linen p-8 text-center"><div><MapPin className="mx-auto text-leaf" size={34} /><p className="mt-4 font-serif text-3xl font-semibold">Visit Swavalambi Siddaganga Oil Mill</p><p className="mt-2 text-ink/60">SIDDAGANGA OIL MILL, Near Small City Club Road, Sira Gate, TUDA Layout, Tumakuru, Karnataka 572106</p></div></div>
+            <div className="rounded-3xl bg-white p-6 shadow-sm"><h2 className="font-serif text-3xl font-semibold">Business Details</h2><div className="mt-5 grid gap-4 text-ink/65"><p className="flex gap-3"><Phone size={19} /> 09972565174</p><p className="flex gap-3"><Mail size={19} /> support@swavalambisiddagangaoilmill.com</p><p className="flex gap-3"><MapPin size={19} /> SIDDAGANGA OIL MILL, Near Small City Club Road, Sira Gate, TUDA Layout, Tumakuru, Karnataka 572106</p></div></div>
           </div>
         </Container>
       </section>

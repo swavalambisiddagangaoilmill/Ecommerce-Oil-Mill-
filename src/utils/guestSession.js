@@ -1,5 +1,5 @@
 ﻿// Manages versioned 48-hour guest session persistence.
-const SESSION_KEY = "velora_guest_session_v1";
+const SESSION_KEY = "ss_oil_mill_guest_session_v1";
 const SESSION_VERSION = 1;
 const SESSION_TTL = 48 * 60 * 60 * 1000;
 

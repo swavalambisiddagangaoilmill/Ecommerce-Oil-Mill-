@@ -87,11 +87,11 @@ export async function createUpiQrCheckout(userId, payload) {
     headers: { Authorization: razorpayAuthHeader(), "Content-Type": "application/json" },
     body: JSON.stringify({
       type: "upi_qr",
-      name: `Velora checkout ${Date.now()}`,
+      name: `Swavalambi Siddaganga Oil Mill checkout ${Date.now()}`,
       usage: "single_use",
       fixed_amount: true,
       payment_amount: amount,
-      description: "Velora UPI QR checkout",
+      description: "Swavalambi Siddaganga Oil Mill UPI QR checkout",
       close_by: closeBy,
       notes: { userId: String(userId) },
     }),

@@ -1,4 +1,4 @@
-// API-backed page components for the Velora admin panel.
+// API-backed page components for the SS Oil Mill admin panel.
 import { Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminBadge, AdminButton, AdminCard, AdminFilters, AdminInput, AdminModal, AdminPageHeader, AdminSelect, AdminTable, AdminTextarea } from "../components/AdminUi.jsx";

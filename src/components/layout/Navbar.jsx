@@ -96,9 +96,9 @@ export default function Navbar() {
             <div className="flex items-center justify-start">
               <Link
                 to="/"
-                className="font-serif text-3xl font-semibold tracking-tight xl:hidden"
+                className="font-serif text-2xl font-semibold tracking-tight xl:hidden"
               >
-                Velora
+                SS Oil Mill
               </Link>
               <form
                 role="search"
@@ -115,14 +115,18 @@ export default function Navbar() {
                   className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-ink/70 placeholder:text-ink/50 outline-none"
                 />
               </form>
+              {/* <!-- Company Logo Placeholder --> */}
+              <div aria-label="Company logo placeholder" className="ml-3 hidden h-10 w-10 shrink-0 rounded-full border border-ink/10 bg-white/70 xl:block" />
             </div>
             <Link
               to="/"
-              className="hidden font-serif text-4xl font-semibold tracking-tight xl:block"
+              className="hidden font-serif text-3xl font-semibold tracking-tight xl:block"
             >
-              Velora
+              SS Oil Mill
             </Link>
             <div className="flex items-center justify-end gap-3">
+              {/* <!-- Company Logo Placeholder --> */}
+              <div aria-label="Company logo placeholder" className="hidden h-10 w-10 shrink-0 rounded-full border border-ink/10 bg-white/70 xl:block" />
               <IconLink label="Wishlist" badge={wishlistItems.length} className="hidden xl:grid" onClick={() => togglePopup("wishlist")}>
                 <Heart size={19} />
               </IconLink>

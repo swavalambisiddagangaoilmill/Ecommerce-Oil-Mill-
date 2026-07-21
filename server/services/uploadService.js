@@ -29,7 +29,7 @@ export async function uploadImage(file) {
   }
 
   const dataUri = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
-  const result = await cloudinary.uploader.upload(dataUri, { folder: "velora/products", resource_type: "image" });
+  const result = await cloudinary.uploader.upload(dataUri, { folder: "ss-oil-mill/products", resource_type: "image" });
   return { url: result.secure_url, publicId: result.public_id, provider: "cloudinary" };
 }
 
