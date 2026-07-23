@@ -39,7 +39,15 @@ export async function apiRequest(endpoint, options = {}) {
     ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
     ...options.headers,
   };
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, { credentials: "include", ...options, headers });
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, { credentials: "include", ...options, headers });
+  } catch (error) {
+    const networkError = new Error("Service is temporarily unavailable. Please try again shortly.");
+    networkError.status = 0;
+    networkError.cause = error;
+    throw networkError;
+  }
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     const message = payload.message || (response.status === 429 ? "Rate limit reached. Please retry after a short pause." : `API request failed: ${response.status}`);
@@ -51,5 +59,6 @@ export async function apiRequest(endpoint, options = {}) {
   }
   return payload.data ?? payload;
 }
+
 
 

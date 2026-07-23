@@ -1,8 +1,9 @@
-﻿// Floating AI chat widget for storefront guidance.
+// Floating AI chat widget for storefront guidance.
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, Mic, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePopup } from "../../../context/PopupContext.jsx";
+import { useServiceStatus } from "../../../hooks/useServiceStatus.js";
 import { askAssistant } from "../../../services/aiService.js";
 
 const responseMap = {
@@ -33,6 +34,10 @@ const defaultReplies = ["Best cooking oil", "Oils for children", "Cold pressed v
 export default function ChatWidget() {
   const { activePopup, closePopups, togglePopup } = usePopup();
   const open = activePopup === "chat";
+  const serviceStatus = useServiceStatus();
+  const aiService = serviceStatus.services?.ai;
+  const aiAvailable = aiService?.available !== false;
+  const aiUnavailableMessage = aiService?.message || "AI assistant is temporarily unavailable.";
   const [input, setInput] = useState("");
   const panelRef = useRef(null);
   const messagesRef = useRef(null);
@@ -88,6 +93,11 @@ export default function ChatWidget() {
     forceScrollRef.current = true;
     setMessages((current) => [...current, { role: "user", text: cleanText }]);
     setInput("");
+    if (!aiAvailable) {
+      setMessages((current) => [...current, { role: "assistant", text: aiUnavailableMessage }]);
+      setQuickReplies(defaultReplies);
+      return;
+    }
     setTyping(true);
     window.setTimeout(async () => {
       const fallback = responseMap[cleanText] || {
@@ -187,7 +197,7 @@ export default function ChatWidget() {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <button type="button" aria-label="Voice search" className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-linen text-leaf">
+                  <button type="button" aria-label="Voice search" disabled={!aiAvailable} title={aiAvailable ? "" : aiUnavailableMessage} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-linen text-leaf disabled:cursor-not-allowed disabled:opacity-50">
                     <Mic size={17} />
                   </button>
                   <input
@@ -196,10 +206,11 @@ export default function ChatWidget() {
                     onKeyDown={(event) => {
                       if (event.key === "Enter") ask(input);
                     }}
-                    placeholder="Ask about oils"
+                    disabled={!aiAvailable}
+                    placeholder={aiAvailable ? "Ask about oils" : aiUnavailableMessage}
                     className="h-11 min-w-0 flex-1 rounded-full border border-ink/10 px-4 text-sm outline-none focus:border-leaf"
                   />
-                  <button type="button" onClick={() => ask(input || "I need help choosing an oil")} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink text-white">
+                  <button type="button" disabled={!aiAvailable} onClick={() => ask(input || "I need help choosing an oil")} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink text-white disabled:cursor-not-allowed disabled:opacity-50">
                     <Send size={16} />
                   </button>
                 </div>
@@ -207,12 +218,14 @@ export default function ChatWidget() {
           </motion.aside>
         )}
       </AnimatePresence>
-      <button type="button" data-popup-trigger="chat" onClick={() => togglePopup("chat")} className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-[calc(1.25rem+env(safe-area-inset-right))] z-[130] grid h-14 w-14 place-items-center rounded-full bg-ink text-white shadow-soft transition hover:bg-leaf" aria-label="Open chat">
+      <button type="button" data-popup-trigger="chat" disabled={!aiAvailable} title={aiAvailable ? "" : aiUnavailableMessage} onClick={() => togglePopup("chat")} className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-[calc(1.25rem+env(safe-area-inset-right))] z-[130] grid h-14 w-14 place-items-center rounded-full bg-ink text-white shadow-soft transition hover:bg-leaf disabled:cursor-not-allowed disabled:opacity-60" aria-label="Open chat">
         <Bot size={22} />
       </button>
     </>
   );
 }
+
+
 
 
 

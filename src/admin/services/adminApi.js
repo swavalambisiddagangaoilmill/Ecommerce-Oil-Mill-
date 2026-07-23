@@ -2,9 +2,12 @@
 import { apiRequest } from "../../api/apiClient.js";
 
 const base = "/admin-panel";
+const promotionChanged = (request) => request.then((result) => { window.dispatchEvent(new Event("ss-oil-mill-promotions-changed")); return result; });
+
 export const adminApi = {
   search: (q) => apiRequest(`${base}/search?q=${encodeURIComponent(q)}`),
   dashboard: () => apiRequest(`${base}/dashboard`),
+  serviceStatus: () => apiRequest("/service-status"),
   orders: (query = "") => apiRequest(`${base}/orders${query}`),
   orderStatus: (id, status) => apiRequest(`${base}/orders/${id}/status`, { method: "PUT", body: JSON.stringify({ status }) }),
   readyToShip: (id) => apiRequest(`${base}/orders/${id}/ready-to-ship`, { method: "POST" }),
@@ -23,11 +26,13 @@ export const adminApi = {
   categories: () => apiRequest(`${base}/categories`),
   saveCategory: (payload, id) => apiRequest(id ? `${base}/categories/${id}` : `${base}/categories`, { method: id ? "PUT" : "POST", body: JSON.stringify(payload) }),
   offers: () => apiRequest(`${base}/offers`),
-  createOffer: (payload) => apiRequest(`${base}/offers`, { method: "POST", body: JSON.stringify(payload) }),
-  updateOffer: (id, payload) => apiRequest(`${base}/offers/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  createOffer: (payload) => promotionChanged(apiRequest(`${base}/offers`, { method: "POST", body: JSON.stringify(payload) })),
+  updateOffer: (id, payload) => promotionChanged(apiRequest(`${base}/offers/${id}`, { method: "PUT", body: JSON.stringify(payload) })),
+  deleteOffer: (id) => promotionChanged(apiRequest(`${base}/offers/${id}`, { method: "DELETE" })),
   coupons: () => apiRequest(`${base}/coupons`),
-  createCoupon: (payload) => apiRequest(`${base}/coupons`, { method: "POST", body: JSON.stringify(payload) }),
-  updateCoupon: (id, payload) => apiRequest(`${base}/coupons/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  createCoupon: (payload) => promotionChanged(apiRequest(`${base}/coupons`, { method: "POST", body: JSON.stringify(payload) })),
+  updateCoupon: (id, payload) => promotionChanged(apiRequest(`${base}/coupons/${id}`, { method: "PUT", body: JSON.stringify(payload) })),
+  deleteCoupon: (id) => promotionChanged(apiRequest(`${base}/coupons/${id}`, { method: "DELETE" })),
   shipping: () => apiRequest(`${base}/shipping`),
   customers: () => apiRequest(`${base}/customers`),
   payments: () => apiRequest(`${base}/payments`),
@@ -54,9 +59,4 @@ export const adminApi = {
   settings: () => apiRequest(`${base}/settings`),
   saveSettings: (payload) => apiRequest(`${base}/settings`, { method: "PUT", body: JSON.stringify(payload) }),
 };
-
-
-
-
-
 

@@ -3,6 +3,7 @@ import { CheckCircle, Download, ExternalLink, ShoppingBag } from "lucide-react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import Container from "../components/ui/Container.jsx";
 import { formatCurrency } from "../utils/formatCurrency.js";
+import { downloadInvoicePdf } from "../utils/invoicePdf.js";
 
 export default function OrderSuccess() {
   const { state } = useLocation();
@@ -138,7 +139,7 @@ export default function OrderSuccess() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center print:hidden">
             <Link to="/shop" className="inline-flex h-12 items-center justify-center rounded-full bg-ink px-6 text-sm font-bold text-white transition hover:bg-leaf"><ShoppingBag size={17} className="mr-2" /> Continue Shopping</Link>
             <Link to={`/account/orders/${orderId}`} className="inline-flex h-12 items-center justify-center rounded-full bg-linen px-6 text-sm font-bold text-ink transition hover:text-leaf">View Order</Link>
-            <button type="button" onClick={() => window.print()} className="inline-flex h-12 items-center justify-center rounded-full border border-ink/10 px-6 text-sm font-bold text-ink transition hover:border-leaf hover:text-leaf"><Download size={17} className="mr-2" /> Download Invoice</button>
+            <button type="button" onClick={() => downloadInvoicePdf(order)} className="inline-flex h-12 items-center justify-center rounded-full border border-ink/10 px-6 text-sm font-bold text-ink transition hover:border-leaf hover:text-leaf"><Download size={17} className="mr-2" /> Download Invoice</button>
           </div>
         </div>
       </Container>
@@ -158,6 +159,7 @@ function Info({ label, value }) {
 function InvoiceRow({ label, value }) {
   return <div className="flex justify-between text-ink/70"><span>{label}</span><span>{formatCurrency(value)}</span></div>;
 }
+
 
 
 

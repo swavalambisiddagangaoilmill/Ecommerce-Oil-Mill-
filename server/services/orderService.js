@@ -3,6 +3,7 @@ import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import { ApiError } from "../utils/ApiError.js";
 import { createAdminNotification, createInventoryNotifications } from "./adminNotificationService.js";
+import { normalizeCouponCode, validateCouponForItems } from "./couponService.js";
 
 function normalizeOrderProducts(products = []) {
   const merged = new Map();
@@ -34,9 +35,10 @@ export async function createOrder(userId, payload) {
     if (paymentMethod === "cod" && product.codEnabled === false) throw new ApiError(`${product.title} is not eligible for Cash on delivery.`, 400);
     if (paymentMethod !== "cod" && product.onlinePaymentEnabled === false) throw new ApiError(`${product.title} is not eligible for online payment.`, 400);
     const price = product.discountPrice || product.price;
-    return { product: product._id, title: product.title, image: product.images?.[0]?.url, quantity: item.quantity, price };
+    return { product: product._id, category: product.category, title: product.title, image: product.images?.[0]?.url, quantity: item.quantity, price };
   });
 
+  const couponResult = await validateCouponForItems({ code: payload.couponCode, userId, items: orderItems });
   const successfulUpdates = [];
   for (const item of orderItems) {
     const result = await Product.updateOne({ _id: item.product, stock: { $gte: item.quantity }, isActive: true }, { $inc: { stock: -item.quantity } });
@@ -48,8 +50,10 @@ export async function createOrder(userId, payload) {
   }
 
   try {
-    const totalAmount = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const order = await Order.create({ user: userId, products: orderItems, shippingAddress: payload.shippingAddress, paymentMethod, paymentStatus: payload.paymentStatus || "pending", razorpayOrderId: payload.razorpayOrderId, razorpayPaymentId: payload.razorpayPaymentId, razorpaySignature: payload.razorpaySignature, totalAmount });
+    const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const totalAmount = Math.max(0, subtotal - couponResult.discountAmount);
+    const order = await Order.create({ user: userId, products: orderItems, shippingAddress: payload.shippingAddress, paymentMethod, paymentStatus: payload.paymentStatus || "pending", razorpayOrderId: payload.razorpayOrderId, razorpayPaymentId: payload.razorpayPaymentId, razorpaySignature: payload.razorpaySignature, totalAmount, couponCode: normalizeCouponCode(payload.couponCode) || undefined, couponDiscount: couponResult.discountAmount });
+    if (couponResult.coupon) await couponResult.coupon.updateOne({ $inc: { usedCount: 1 } });
     await createAdminNotification({ category: "orders", type: "new_order", title: "New Order", description: `Order ${order._id} was placed for Rs. ${totalAmount}.`, related: { kind: "Order", id: order._id, label: `Order ${order._id}`, path: "/admin/orders" } });
     await Promise.all(productIds.map((id) => Product.findById(id).then((product) => product && createInventoryNotifications(product))));
     return order;

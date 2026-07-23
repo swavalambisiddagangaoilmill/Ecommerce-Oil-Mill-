@@ -43,9 +43,11 @@ router.put("/categories/:id", requireAdminPermission("categories.manage"), contr
 router.get("/offers", requireAdminPermission("offers.read"), controller.offers);
 router.post("/offers", requireAdminPermission("offers.manage"), controller.createOffer);
 router.put("/offers/:id", requireAdminPermission("offers.manage"), controller.updateOffer);
+router.delete("/offers/:id", requireAdminPermission("offers.manage"), controller.deleteOffer);
 router.get("/coupons", requireAdminPermission("coupons.read"), controller.coupons);
 router.post("/coupons", requireAdminPermission("coupons.manage"), controller.createCoupon);
 router.put("/coupons/:id", requireAdminPermission("coupons.manage"), controller.updateCoupon);
+router.delete("/coupons/:id", requireAdminPermission("coupons.manage"), controller.deleteCoupon);
 router.get("/shipping", requireAdminPermission("shipping.read"), controller.shipping);
 router.get("/customers", requireAdminPermission("customers.read"), controller.customers);
 router.get("/payments", requireAdminPermission("payments.read"), controller.payments);
@@ -64,6 +66,7 @@ router.get("/settings", requireAdminPermission("settings.read"), controller.sett
 router.put("/settings", requireAdminPermission("settings.manage"), controller.saveSettings);
 
 export default router;
+
 
 
 

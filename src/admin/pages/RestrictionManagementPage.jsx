@@ -1,5 +1,6 @@
 // Super-admin page for reviewing and managing active visitor/account restrictions.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useToast } from "../../components/features/feedback/ToastProvider.jsx";
 import { AdminBadge, AdminButton, AdminFilters, AdminInput, AdminModal, AdminPageHeader, AdminTable, AdminTextarea } from "../components/AdminUi.jsx";
 import { adminApi } from "../services/adminApi.js";
 
@@ -16,6 +17,7 @@ function statusLabel(value) {
 }
 
 export default function RestrictionManagementPage() {
+  const { showToast } = useToast();
   const [q, setQ] = useState("");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +26,8 @@ export default function RestrictionManagementPage() {
   const [action, setAction] = useState(null);
   const [reason, setReason] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
+  const pendingRef = useRef({});
+  const [pending, setPending] = useState({});
 
   const load = async () => {
     setLoading(true);
@@ -43,10 +47,34 @@ export default function RestrictionManagementPage() {
     return () => window.clearTimeout(timer);
   }, [q]);
 
+  const run = async (key, task, success) => {
+    if (pendingRef.current[key]) return null;
+    pendingRef.current[key] = true;
+    setPending((current) => ({ ...current, [key]: true }));
+    try {
+      const result = await task();
+      showToast(success, "success");
+      return result;
+    } catch (err) {
+      showToast(err.message || "Action failed. Please try again.", "error");
+      return null;
+    } finally {
+      pendingRef.current[key] = false;
+      setPending((current) => ({ ...current, [key]: false }));
+    }
+  };
+
+  const applyRestriction = (restriction) => {
+    setSelected(restriction);
+    setItems((current) => current.map((item) => item._id === restriction._id ? { ...item, ...restriction } : item));
+  };
+
   const openDetails = async (id) => {
-    const data = await adminApi.restriction(id);
-    setSelected(data.restriction);
-    setAction("details");
+    const data = await run(`view:${id}`, () => adminApi.restriction(id), "Restriction details loaded.");
+    if (data?.restriction) {
+      setSelected(data.restriction);
+      setAction("details");
+    }
   };
 
   const close = () => {
@@ -57,11 +85,16 @@ export default function RestrictionManagementPage() {
 
   const submitAction = async () => {
     if (!selected?._id) return;
-    if (action === "remove") await adminApi.removeRestriction(selected._id, reason);
-    if (action === "extend") await adminApi.extendRestriction(selected._id, { expiresAt, reason });
-    if (action === "note") await adminApi.addRestrictionNote(selected._id, reason);
-    close();
-    await load();
+    const key = `${action}:${selected._id}`;
+    const labels = { remove: "Restriction removed.", extend: "Restriction extended.", note: "Restriction note saved." };
+    const task = action === "remove"
+      ? () => adminApi.removeRestriction(selected._id, reason)
+      : action === "extend"
+        ? () => adminApi.extendRestriction(selected._id, { expiresAt, reason })
+        : () => adminApi.addRestrictionNote(selected._id, reason);
+    const result = await run(key, task, labels[action]);
+    if (result?.restriction) applyRestriction(result.restriction);
+    if (result) close();
   };
 
   const rows = items.map((item) => <tr key={item._id}>
@@ -73,7 +106,7 @@ export default function RestrictionManagementPage() {
     <Cell>{formatDate(item.expiresAt)}</Cell>
     <Cell>{formatDate(item.lastActivityAt)}</Cell>
     <Cell>{item.country || "-"}</Cell>
-    <Cell><div className="flex gap-2"><AdminButton variant="secondary" onClick={() => openDetails(item._id)}>View</AdminButton><AdminButton variant="secondary" onClick={() => { setSelected(item); setAction("extend"); }}>Extend</AdminButton><AdminButton variant="danger" disabled={item.status !== "ACTIVE"} onClick={() => { setSelected(item); setAction("remove"); }}>Remove</AdminButton></div></Cell>
+    <Cell><div className="flex gap-2"><AdminButton variant="secondary" loading={pending[`view:${item._id}`]} onClick={() => openDetails(item._id)}>View</AdminButton><AdminButton variant="secondary" onClick={() => { setSelected(item); setAction("extend"); }}>Extend</AdminButton><AdminButton variant="danger" disabled={item.status !== "ACTIVE"} onClick={() => { setSelected(item); setAction("remove"); }}>Remove</AdminButton></div></Cell>
   </tr>);
 
   return <>
@@ -91,16 +124,16 @@ export default function RestrictionManagementPage() {
       </div>}
     </AdminModal>
 
-    <AdminModal title="Confirm Remove Restriction" open={action === "remove"} onClose={close} footer={<><AdminButton variant="secondary" onClick={close}>Cancel</AdminButton><AdminButton variant="danger" disabled={reason.trim().length < 2} onClick={submitAction}>Remove Restriction</AdminButton></>}>
+    <AdminModal title="Confirm Remove Restriction" open={action === "remove"} onClose={close} footer={<><AdminButton variant="secondary" onClick={close}>Cancel</AdminButton><AdminButton variant="danger" disabled={reason.trim().length < 2} loading={pending[`remove:${selected?._id}`]} onClick={submitAction}>Remove Restriction</AdminButton></>}>
       <p className="mb-4 text-sm font-semibold text-ink/65">This removes the restriction immediately. Enter the verified admin reason.</p>
       <AdminTextarea label="Admin reason" value={reason} onChange={(event) => setReason(event.target.value)} />
     </AdminModal>
 
-    <AdminModal title="Extend Restriction" open={action === "extend"} onClose={close} footer={<AdminButton disabled={!expiresAt || reason.trim().length < 2} onClick={submitAction}>Extend Restriction</AdminButton>}>
+    <AdminModal title="Extend Restriction" open={action === "extend"} onClose={close} footer={<AdminButton disabled={!expiresAt || reason.trim().length < 2} loading={pending[`extend:${selected?._id}`]} onClick={submitAction}>Extend Restriction</AdminButton>}>
       <div className="grid gap-4"><AdminInput label="New expiry time" type="datetime-local" value={expiresAt} onChange={(event) => setExpiresAt(event.target.value)} /><AdminTextarea label="Admin reason" value={reason} onChange={(event) => setReason(event.target.value)} /></div>
     </AdminModal>
 
-    <AdminModal title="Add Internal Note" open={action === "note"} onClose={close} footer={<AdminButton disabled={reason.trim().length < 2} onClick={submitAction}>Save Note</AdminButton>}>
+    <AdminModal title="Add Internal Note" open={action === "note"} onClose={close} footer={<AdminButton disabled={reason.trim().length < 2} loading={pending[`note:${selected?._id}`]} onClick={submitAction}>Save Note</AdminButton>}>
       <AdminTextarea label="Internal admin note" value={reason} onChange={(event) => setReason(event.target.value)} />
     </AdminModal>
   </>;

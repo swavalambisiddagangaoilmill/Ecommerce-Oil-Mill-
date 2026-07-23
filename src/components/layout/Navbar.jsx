@@ -102,10 +102,15 @@ export default function Navbar() {
         <div className="border-b border-ink/10">
           <div className="mx-auto grid h-[52px] max-w-screen-2xl grid-cols-[auto_1fr_auto] items-center px-4 sm:px-6 md:h-20 lg:px-8 xl:grid-cols-[1fr_auto_1fr] xl:h-[88px] xl:px-10 2xl:px-12">
             <div className="flex items-center justify-start">
-              <Link to="/" className="xl:hidden" aria-label="SS Oil Mill home">
+              <Link to="/" className="flex items-center gap-2 xl:hidden" aria-label="SS Oil Mill home">
                 <img
                   src={companyLogo}
                   alt="Logo"
+                  className="h-10 w-10 shrink-0 rounded-full bg-white object-cover p-1 shadow-md ring-1 ring-amber-200 sm:h-12 sm:w-12"
+                />
+                <img
+                  src={basavannaLogo}
+                  alt="Basavanna"
                   className="h-10 w-10 shrink-0 rounded-full bg-white object-cover p-1 shadow-md ring-1 ring-amber-200 sm:h-12 sm:w-12"
                 />
               </Link>
@@ -207,3 +212,4 @@ export default function Navbar() {
     </>
   );
 }
+

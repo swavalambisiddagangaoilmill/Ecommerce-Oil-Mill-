@@ -1,6 +1,7 @@
 // Sends transactional emails through the configured production provider.
 import { env } from "../config/env.js";
 import { ApiError } from "../utils/ApiError.js";
+import { logExternalFailure, isServiceAvailable } from "./serviceStatusService.js";
 
 function htmlLayout(title, body) {
   return `<!doctype html><html><body style="margin:0;background:#f7f0e3;font-family:Arial,sans-serif;color:#2f241d"><div style="max-width:560px;margin:0 auto;padding:32px"><h1 style="font-family:Georgia,serif;color:#4f6f2f">${title}</h1><div style="font-size:15px;line-height:1.7">${body}</div><p style="margin-top:28px;font-size:12px;color:#7b6b5d">Swavalambi Siddaganga Oil Mill</p></div></body></html>`;
@@ -19,9 +20,16 @@ async function sendWithResend(message) {
 
 export async function sendMail(message) {
   if (!env.isProduction && !env.email.resendApiKey) return { skipped: true, provider: "development" };
-  if (env.email.provider !== "resend") throw new ApiError("Configured email provider is not supported.", 500);
-  if (!env.email.from || !env.email.resendApiKey) throw new ApiError("Email provider is not configured.", 500);
-  return sendWithResend(message);
+  if (env.email.provider !== "resend" || !isServiceAvailable("resend")) {
+    logExternalFailure("resend", new Error("Email provider is not configured."), { subject: message.subject });
+    return { skipped: true, provider: env.email.provider, reason: "EMAIL_PROVIDER_UNAVAILABLE" };
+  }
+  try {
+    return await sendWithResend(message);
+  } catch (error) {
+    logExternalFailure("resend", error, { subject: message.subject });
+    return { skipped: true, provider: "resend", reason: "EMAIL_PROVIDER_UNAVAILABLE" };
+  }
 }
 
 export function sendWelcomeEmail(user) {
@@ -50,3 +58,4 @@ export function sendContactFormEmail(message) {
   if (!env.email.contactTo) return Promise.resolve({ skipped: true });
   return sendMail({ to: env.email.contactTo, replyTo: message.email, subject: `Swavalambi Siddaganga Oil Mill contact: ${message.subject || "New message"}`, text: `${message.name} <${message.email}>\n${message.phone || ""}\n\n${message.message}` });
 }
+

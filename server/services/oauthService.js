@@ -1,6 +1,7 @@
 // Verifies Google identity tokens for OAuth login.
 import { env } from "../config/env.js";
 import { ApiError } from "../utils/ApiError.js";
+import { isServiceAvailable, logExternalFailure } from "./serviceStatusService.js";
 
 function debugGoogle(stage, details = {}) {
   // DEBUG: Remove after Google OAuth issue is resolved
@@ -34,6 +35,9 @@ export async function verifyGoogleIdToken(idToken) {
     googleClientIdLoaded: Boolean(env.oauth.googleClientId),
   });
 
+  if (!isServiceAvailable("googleOAuth")) {
+    throw attachDebug(new ApiError("Google sign-in is temporarily unavailable.", 503), "verifyGoogleIdToken", "Google OAuth is unavailable");
+  }
   if (!env.oauth.googleClientId) {
     debugGoogle("verifyGoogleIdToken:validation", { decision: "missing_google_client_id" });
     throw attachDebug(new ApiError("Google Sign In is not configured.", 503), "verifyGoogleIdToken", "Google client ID is missing");
@@ -49,8 +53,9 @@ export async function verifyGoogleIdToken(idToken) {
     response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
     debugGoogle("fetch:completed", { status: response.status, ok: response.ok });
   } catch (error) {
+    logExternalFailure("googleOAuth", error, { action: "verify_token" });
     console.error("// DEBUG: Remove after Google OAuth issue is resolved", "Google token verification request failed", { name: error.name, message: error.message, stack: error.stack });
-    throw attachDebug(new ApiError("Google authentication failed.", 502), "fetch", error.message);
+    throw attachDebug(new ApiError("Google sign-in is temporarily unavailable.", 503), "fetch", error.message);
   }
 
   const payload = await response.json().catch((error) => {
@@ -80,3 +85,4 @@ export async function verifyGoogleIdToken(idToken) {
   debugGoogle("verifyGoogleIdToken:success", { emailPresent: true, providerIdPresent: Boolean(payload.sub) });
   return { providerId: payload.sub, email: payload.email, name: payload.name || payload.email.split("@")[0], emailVerified: payload.email_verified === "true" || payload.email_verified === true };
 }
+

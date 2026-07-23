@@ -4,7 +4,7 @@ import { sendSuccess } from "../utils/apiResponse.js";
 import { createPaymentOrder, createUpiQrCheckout, markOrderPayment, processRazorpayWebhook, verifyPaymentAndCreateOrder, verifyUpiQrCheckout } from "../services/paymentService.js";
 
 export const createPaymentIntent = asyncHandler(async (req, res) => {
-  const payment = await createPaymentOrder(req.body);
+  const payment = await createPaymentOrder(req.user._id, req.body);
   sendSuccess(res, 200, "Payment order created successfully", { payment });
 });
 

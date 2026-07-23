@@ -7,51 +7,75 @@ import Product from "../models/Product.js";
 import { createOrder as createStoreOrder } from "./orderService.js";
 import { ApiError } from "../utils/ApiError.js";
 import { createAdminNotification } from "./adminNotificationService.js";
+import { validateCouponForItems } from "./couponService.js";
+import { isServiceAvailable, logExternalFailure } from "./serviceStatusService.js";
 
-async function calculateOrderAmount(productsPayload = []) {
+const PAYMENT_UNAVAILABLE = "Online payments are temporarily unavailable.";
+
+async function calculateOrderAmount(productsPayload = [], userId, couponCode) {
   const productIds = productsPayload.map((item) => item.product);
   const products = await Product.find({ _id: { $in: productIds }, isActive: true });
   const productMap = new Map(products.map((product) => [product._id.toString(), product]));
 
-  return productsPayload.reduce((total, item) => {
+  const items = productsPayload.map((item) => {
     const product = productMap.get(item.product.toString());
     if (!product) throw new ApiError("One or more products are unavailable.", 400);
-    if (product.stock < item.quantity) throw new ApiError(`${product.title} does not have enough stock.`, 400);
+    const quantity = Math.max(1, Number(item.quantity) || 1);
+    if (product.stock < quantity) throw new ApiError(`${product.title} does not have enough stock.`, 400);
     if (product.onlinePaymentEnabled === false) throw new ApiError(`${product.title} is not eligible for online payment.`, 400);
-    return total + (product.discountPrice || product.price) * item.quantity;
-  }, 0);
+    return { product, quantity, price: product.discountPrice || product.price };
+  });
+
+  const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+  const coupon = await validateCouponForItems({ code: couponCode, userId, items, subtotal });
+  return Math.max(0, subtotal - coupon.discountAmount);
 }
 
-export async function createPaymentOrder(payload) {
+function assertRazorpayAvailable() {
+  if (!isServiceAvailable("razorpay")) throw new ApiError(PAYMENT_UNAVAILABLE, 503);
+}
+
+function providerStatus(status) {
+  return status === 429 ? 429 : 503;
+}
+
+export async function createPaymentOrder(userId, payload) {
   const amountSource = payload.order?.products || payload.products;
-  const calculatedAmount = amountSource?.length ? await calculateOrderAmount(amountSource) : 0;
+  const calculatedAmount = amountSource?.length ? await calculateOrderAmount(amountSource, userId, payload.order?.couponCode || payload.couponCode) : 0;
   const amount = Math.round(calculatedAmount * 100);
   if (!amount || amount < 100) throw new ApiError("Valid order products are required.", 400);
-  if (!env.razorpay.keyId || !env.razorpay.keySecret) throw new ApiError("Razorpay credentials are not configured.", 400);
+  assertRazorpayAvailable();
   const auth = Buffer.from(`${env.razorpay.keyId}:${env.razorpay.keySecret}`).toString("base64");
-  const response = await fetch("https://api.razorpay.com/v1/orders", {
-    method: "POST",
-    headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ amount, currency: "INR", receipt: payload.receipt || `receipt_${Date.now()}` }),
-  });
-  if (!response.ok) throw new ApiError("Unable to create Razorpay order.", 502);
-  const data = await response.json();
+  let response;
+  try {
+    response = await fetch("https://api.razorpay.com/v1/orders", {
+      method: "POST",
+      headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ amount, currency: "INR", receipt: payload.receipt || `receipt_${Date.now()}` }),
+    });
+  } catch (error) {
+    logExternalFailure("razorpay", error, { action: "create_order" });
+    throw new ApiError(PAYMENT_UNAVAILABLE, 503);
+  }
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    logExternalFailure("razorpay", new Error(data?.error?.description || data?.message || "Razorpay order creation failed."), { status: response.status, action: "create_order" });
+    throw new ApiError(PAYMENT_UNAVAILABLE, providerStatus(response.status));
+  }
   return { ...data, key: env.razorpay.keyId };
 }
 
 export async function verifyPaymentAndCreateOrder(userId, payload) {
-  if (!env.razorpay.keySecret) throw new ApiError("Razorpay credentials are not configured.", 400);
+  assertRazorpayAvailable();
   if (!payload.razorpayOrderId || !payload.razorpayPaymentId || !payload.razorpaySignature) {
     throw new ApiError("Complete payment verification data is required.", 400);
   }
   const existing = await Order.findOne({ razorpayPaymentId: payload.razorpayPaymentId }).lean();
   if (existing) throw new ApiError("Payment has already been processed.", 409);
-  {
-    const expected = crypto.createHmac("sha256", env.razorpay.keySecret).update(`${payload.razorpayOrderId}|${payload.razorpayPaymentId}`).digest("hex");
-    const received = Buffer.from(payload.razorpaySignature);
-    const expectedBuffer = Buffer.from(expected);
-    if (received.length !== expectedBuffer.length || !crypto.timingSafeEqual(expectedBuffer, received)) throw new ApiError("Payment verification failed.", 400);
-  }
+  const expected = crypto.createHmac("sha256", env.razorpay.keySecret).update(`${payload.razorpayOrderId}|${payload.razorpayPaymentId}`).digest("hex");
+  const received = Buffer.from(payload.razorpaySignature);
+  const expectedBuffer = Buffer.from(expected);
+  if (received.length !== expectedBuffer.length || !crypto.timingSafeEqual(expectedBuffer, received)) throw new ApiError("Payment verification failed.", 400);
   const order = await createStoreOrder(userId, { ...payload.order, paymentMethod: "razorpay", paymentStatus: "paid", razorpayOrderId: payload.razorpayOrderId, razorpayPaymentId: payload.razorpayPaymentId, razorpaySignature: payload.razorpaySignature });
   await createAdminNotification({ category: "payments", type: "payment_successful", title: "Payment Successful", description: `Payment received for order ${order._id}.`, related: { kind: "Order", id: order._id, label: `Order ${order._id}`, path: "/admin/payments" } });
   return order;
@@ -78,26 +102,36 @@ function normalizeRazorpayError(payload, status) {
 }
 
 export async function createUpiQrCheckout(userId, payload) {
-  if (!env.razorpay.keyId || !env.razorpay.keySecret) throw new ApiError("Razorpay credentials are not configured for UPI QR.", 400);
-  const amount = Math.round(await calculateOrderAmount(payload.order?.products || []) * 100);
+  assertRazorpayAvailable();
+  const amount = Math.round(await calculateOrderAmount(payload.order?.products || [], userId, payload.order?.couponCode) * 100);
   if (!amount || amount < 100) throw new ApiError("Valid order products are required.", 400);
   const closeBy = Math.ceil((Date.now() + 15 * 60 * 1000) / 1000);
-  const response = await fetch("https://api.razorpay.com/v1/payments/qr_codes", {
-    method: "POST",
-    headers: { Authorization: razorpayAuthHeader(), "Content-Type": "application/json" },
-    body: JSON.stringify({
-      type: "upi_qr",
-      name: `Swavalambi Siddaganga Oil Mill checkout ${Date.now()}`,
-      usage: "single_use",
-      fixed_amount: true,
-      payment_amount: amount,
-      description: "Swavalambi Siddaganga Oil Mill UPI QR checkout",
-      close_by: closeBy,
-      notes: { userId: String(userId) },
-    }),
-  });
+  let response;
+  try {
+    response = await fetch("https://api.razorpay.com/v1/payments/qr_codes", {
+      method: "POST",
+      headers: { Authorization: razorpayAuthHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "upi_qr",
+        name: `Swavalambi Siddaganga Oil Mill checkout ${Date.now()}`,
+        usage: "single_use",
+        fixed_amount: true,
+        payment_amount: amount,
+        description: "Swavalambi Siddaganga Oil Mill UPI QR checkout",
+        close_by: closeBy,
+        notes: { userId: String(userId) },
+      }),
+    });
+  } catch (error) {
+    logExternalFailure("razorpay", error, { action: "create_upi_qr" });
+    throw new ApiError(PAYMENT_UNAVAILABLE, 503);
+  }
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new ApiError(normalizeRazorpayError(data, response.status), response.status === 404 ? 400 : response.status === 400 ? 400 : 502);
+  if (!response.ok) {
+    const message = normalizeRazorpayError(data, response.status);
+    logExternalFailure("razorpay", new Error(message), { status: response.status, action: "create_upi_qr" });
+    throw new ApiError(response.status === 404 || response.status === 400 ? message : PAYMENT_UNAVAILABLE, response.status === 404 || response.status === 400 ? 400 : providerStatus(response.status));
+  }
   const checkout = await PaymentCheckout.create({
     user: userId,
     type: "upi_qr",
@@ -112,9 +146,19 @@ export async function createUpiQrCheckout(userId, payload) {
 }
 
 async function fetchQrPayments(qrId) {
-  const response = await fetch(`https://api.razorpay.com/v1/payments/qr_codes/${qrId}/payments`, { headers: { Authorization: razorpayAuthHeader() } });
+  let response;
+  try {
+    response = await fetch(`https://api.razorpay.com/v1/payments/qr_codes/${qrId}/payments`, { headers: { Authorization: razorpayAuthHeader() } });
+  } catch (error) {
+    logExternalFailure("razorpay", error, { action: "verify_upi_qr" });
+    throw new ApiError(PAYMENT_UNAVAILABLE, 503);
+  }
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new ApiError(normalizeRazorpayError(data, response.status) || "Unable to verify QR payment.", response.status === 404 ? 400 : response.status === 400 ? 400 : 502);
+  if (!response.ok) {
+    const message = normalizeRazorpayError(data, response.status) || "Unable to verify QR payment.";
+    logExternalFailure("razorpay", new Error(message), { status: response.status, action: "verify_upi_qr" });
+    throw new ApiError(response.status === 404 || response.status === 400 ? message : PAYMENT_UNAVAILABLE, response.status === 404 || response.status === 400 ? 400 : providerStatus(response.status));
+  }
   return data.items || [];
 }
 
@@ -150,14 +194,9 @@ export async function verifyUpiQrCheckout(userId, checkoutId) {
   return { status: "paid", order, checkout };
 }
 
-
-
-
-
-
-
 export async function processRazorpayWebhook(rawBody, signature) {
-  if (!env.razorpay.webhookSecret) throw new ApiError("Razorpay webhook secret is not configured.", 500);
+  assertRazorpayAvailable();
+  if (!env.razorpay.webhookSecret) throw new ApiError("Razorpay webhook secret is not configured.", 503);
   if (!signature) throw new ApiError("Razorpay webhook signature is required.", 400);
   const expected = crypto.createHmac("sha256", env.razorpay.webhookSecret).update(rawBody).digest("hex");
   const received = Buffer.from(signature);

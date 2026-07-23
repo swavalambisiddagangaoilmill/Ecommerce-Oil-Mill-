@@ -1,4 +1,4 @@
-﻿// Renders the ProductDetails page experience.
+// Renders the ProductDetails page experience.
 import { Check, Star } from "lucide-react";
 import { Navigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -21,6 +21,7 @@ export default function ProductDetails() {
   const [missing, setMissing] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalQuantity, setModalQuantity] = useState(1);
 
   useEffect(() => {
     let active = true;
@@ -35,9 +36,10 @@ export default function ProductDetails() {
   if (!loading && missing) return <Navigate to="/404" replace />;
   if (loading || !product) return <section className="section-padding"><Container><p className="rounded-3xl bg-white p-10 text-center text-ink/60">Loading product...</p></Container></section>;
 
-  const handleAdded = () => {
+  const handleAdded = (details) => {
     const session = readGuestSession().data;
     writeGuestSession({ recentlyViewed: [product, ...session.recentlyViewed.filter((item) => item.id !== product.id)].slice(0, 8) });
+    setModalQuantity(details?.quantity || quantity);
     setModalOpen(true);
   };
 
@@ -69,7 +71,9 @@ export default function ProductDetails() {
           <RelatedProducts current={product} />
         </Container>
       </section>
-      <AddToCartModal open={modalOpen} product={product} quantity={quantity} onClose={() => setModalOpen(false)} />
+      <AddToCartModal open={modalOpen} product={product} quantity={modalQuantity} onClose={() => setModalOpen(false)} />
     </>
   );
 }
+
+

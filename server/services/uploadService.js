@@ -1,7 +1,7 @@
-﻿// Upload service prepared for Cloudinary integration.
+// Upload service prepared for Cloudinary integration.
 import cloudinary from "../config/cloudinary.js";
-import { env } from "../config/env.js";
 import { ApiError } from "../utils/ApiError.js";
+import { isServiceAvailable, logExternalFailure } from "./serviceStatusService.js";
 
 function hasValidImageSignature(file) {
   const buffer = file.buffer;
@@ -19,25 +19,25 @@ function hasValidImageSignature(file) {
 
 export async function uploadImage(file) {
   if (!hasValidImageSignature(file)) throw new ApiError("Uploaded file is not a valid image.", 400);
-  if (!env.cloudinary.cloudName || !env.cloudinary.apiKey || !env.cloudinary.apiSecret) {
-    return {
-      url: `/uploads/${file.originalname}`,
-      publicId: null,
-      provider: "local",
-      message: "Cloudinary credentials are not configured; file metadata was accepted locally.",
-    };
-  }
-
+  if (!isServiceAvailable("cloudinary")) throw new ApiError("Image uploads are temporarily unavailable.", 503);
   const dataUri = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
-  const result = await cloudinary.uploader.upload(dataUri, { folder: "ss-oil-mill/products", resource_type: "image" });
-  return { url: result.secure_url, publicId: result.public_id, provider: "cloudinary" };
+  try {
+    const result = await cloudinary.uploader.upload(dataUri, { folder: "ss-oil-mill/products", resource_type: "image" });
+    return { url: result.secure_url, publicId: result.public_id, provider: "cloudinary" };
+  } catch (error) {
+    logExternalFailure("cloudinary", error, { action: "upload_image" });
+    throw new ApiError("Image uploads are temporarily unavailable.", 503);
+  }
 }
 
 export async function deleteImage(publicId) {
   if (!publicId) return { deleted: false };
-  if (!env.cloudinary.cloudName || !env.cloudinary.apiKey || !env.cloudinary.apiSecret) {
-    return { deleted: true, provider: "local" };
+  if (!isServiceAvailable("cloudinary")) return { deleted: false, provider: "cloudinary", reason: "CLOUDINARY_UNAVAILABLE" };
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    return { deleted: result.result === "ok", provider: "cloudinary", result };
+  } catch (error) {
+    logExternalFailure("cloudinary", error, { action: "delete_image" });
+    return { deleted: false, provider: "cloudinary", reason: "CLOUDINARY_UNAVAILABLE" };
   }
-  const result = await cloudinary.uploader.destroy(publicId);
-  return { deleted: result.result === "ok", provider: "cloudinary", result };
 }

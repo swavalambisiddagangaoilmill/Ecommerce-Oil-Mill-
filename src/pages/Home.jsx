@@ -5,6 +5,7 @@ import ExtractionProcess from "../components/features/home/ExtractionProcess.jsx
 import FAQ from "../components/features/home/FAQ.jsx";
 import FeaturedProducts from "../components/features/home/FeaturedProducts.jsx";
 import Hero from "../components/features/home/Hero.jsx";
+import OfferBanner from "../components/features/feedback/OfferBanner.jsx";
 import InstagramGallery from "../components/features/home/InstagramGallery.jsx";
 import StorySection from "../components/features/home/StorySection.jsx";
 import Testimonials from "../components/features/home/Testimonials.jsx";
@@ -16,6 +17,7 @@ export default function Home() {
     <>
       <h1 className="sr-only">Swavalambi Siddaganga Oil Mill cold pressed edible oils</h1>
       <Hero />
+      <Container className="pt-6"><OfferBanner /></Container>
       <BrandStrip />
       <EverydayEssentials />
       <StorySection />
@@ -52,3 +54,4 @@ export default function Home() {
     </>
   );
 }
+

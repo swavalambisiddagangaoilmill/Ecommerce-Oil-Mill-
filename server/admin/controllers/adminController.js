@@ -4,7 +4,7 @@ import { hasPermission } from "../middleware/adminAuth.js";
 import { writeAuditLog } from "../utils/audit.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { sendSuccess } from "../../utils/apiResponse.js";
-import { clearReadNotifications, deleteNotification, getNotificationPreferences, listAdminNotifications, markAllNotificationsRead, markNotification, saveNotificationPreferences } from "../../services/adminNotificationService.js";
+import { clearReadNotifications, createAdminNotification, deleteNotification, getNotificationPreferences, listAdminNotifications, markAllNotificationsRead, markNotification, saveNotificationPreferences } from "../../services/adminNotificationService.js";
 import { listAdminSessions, revokeAdminSessions } from "../../services/adminSessionService.js";
 import { addRestrictionNote, extendRestriction, getRestriction, listRestrictions, removeRestriction } from "../services/restrictionAdminService.js";
 
@@ -22,9 +22,9 @@ export const inventoryUpdate = asyncHandler(async (req, res) => { const product 
 export const categories = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Categories fetched", { items: await admin.listCategories() }));
 export const saveCategory = asyncHandler(async (req, res) => { const category = await admin.saveCategory(req.body, req.params.id); await writeAuditLog(req, { action: "category.save", resourceType: "Category", resourceId: category._id, summary: `${category.name} saved` }); sendSuccess(res, 200, "Category saved", { category }); });
 export const offers = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Offers fetched", { items: await admin.listOffers() }));
-export const createOffer = asyncHandler(async (req, res) => { const offer = await admin.saveOffer(req.body, req.user._id); await writeAuditLog(req, { action: "offer.create", resourceType: "Offer", resourceId: offer._id, summary: `${offer.name} created` }); sendSuccess(res, 201, "Offer created", { offer }); });
+export const createOffer = asyncHandler(async (req, res) => { const offer = await admin.saveOffer(req.body, req.user._id); await writeAuditLog(req, { action: "offer.create", resourceType: "Offer", resourceId: offer._id, summary: `${offer.name} created` }); await createAdminNotification({ category: "system", type: "offer_created", title: "Offer Created", description: `${offer.name} is now available to customers.`, related: { kind: "Offer", id: offer._id, label: offer.name, path: "/admin/offers" } }); sendSuccess(res, 201, "Offer created", { offer }); });
 export const coupons = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Coupons fetched", { items: await admin.listCoupons() }));
-export const createCoupon = asyncHandler(async (req, res) => { const coupon = await admin.saveCoupon(req.body, req.user._id); await writeAuditLog(req, { action: "coupon.create", resourceType: "Coupon", resourceId: coupon._id, summary: `${coupon.code} created` }); sendSuccess(res, 201, "Coupon created", { coupon }); });
+export const createCoupon = asyncHandler(async (req, res) => { const coupon = await admin.saveCoupon(req.body, req.user._id); await writeAuditLog(req, { action: "coupon.create", resourceType: "Coupon", resourceId: coupon._id, summary: `${coupon.code} created` }); await createAdminNotification({ category: "system", type: "coupon_created", title: "Coupon Created", description: `${coupon.code} is ready for checkout.`, related: { kind: "Coupon", id: coupon._id, label: coupon.code, path: "/admin/coupons" } }); sendSuccess(res, 201, "Coupon created", { coupon }); });
 export const shipping = asyncHandler(async (req, res) => sendSuccess(res, 200, "Shipping fetched", await admin.listOrders({ ...req.query, limit: 100 })));
 export const customers = asyncHandler(async (_req, res) => sendSuccess(res, 200, "Customers fetched", { items: await admin.listCustomers() }));
 export const payments = asyncHandler(async (req, res) => sendSuccess(res, 200, "Payments fetched", { items: await admin.listPayments(req.query) }));
@@ -49,6 +49,20 @@ export const updateCoupon = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, "Coupon updated", { coupon });
 });
 
+
+export const deleteOffer = asyncHandler(async (req, res) => {
+  const offer = await admin.deleteOffer(req.params.id);
+  await writeAuditLog(req, { action: "offer.delete", resourceType: "Offer", resourceId: req.params.id, summary: `${offer?.name || "Offer"} deleted` });
+  await createAdminNotification({ category: "system", type: "offer_deleted", title: "Offer Deleted", description: `${offer?.name || "An offer"} was removed from the storefront.`, related: { kind: "Offer", id: req.params.id, label: offer?.name, path: "/admin/offers" } });
+  sendSuccess(res, 200, "Offer deleted", { offer });
+});
+
+export const deleteCoupon = asyncHandler(async (req, res) => {
+  const coupon = await admin.deleteCoupon(req.params.id);
+  await writeAuditLog(req, { action: "coupon.delete", resourceType: "Coupon", resourceId: req.params.id, summary: `${coupon?.code || "Coupon"} deleted` });
+  await createAdminNotification({ category: "system", type: "coupon_deleted", title: "Coupon Deleted", description: `${coupon?.code || "A coupon"} was removed from checkout.`, related: { kind: "Coupon", id: req.params.id, label: coupon?.code, path: "/admin/coupons" } });
+  sendSuccess(res, 200, "Coupon deleted", { coupon });
+});
 export const globalSearch = asyncHandler(async (req, res) => {
   const results = await admin.globalAdminSearch(req.query.q, req.user, hasPermission);
   sendSuccess(res, 200, "Search complete", results);
@@ -88,4 +102,5 @@ export const addRestrictionNoteHandler = asyncHandler(async (req, res) => {
   await writeAuditLog(req, { action: "restriction.note", resourceType: "Restriction", resourceId: req.params.id, summary: `Restriction note added by ${req.user.email}`, after: { reason: req.body.note } });
   sendSuccess(res, 200, "Restriction note saved", { restriction });
 });
+
 

@@ -2,11 +2,13 @@
 import ContactMessage from "../models/ContactMessage.js";
 import NewsletterSubscriber from "../models/NewsletterSubscriber.js";
 import SiteContent from "../models/SiteContent.js";
+import Offer from "../models/Offer.js";
 import { createAdminNotification } from "../services/adminNotificationService.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 import { verifyTurnstile } from "../services/turnstileService.js";
 import { sendContactFormEmail } from "../services/emailService.js";
+import { validateCouponPayload } from "../services/couponService.js";
 
 const faqs = [
   { category: "Products", items: [{ question: "What is cold pressed oil?", answer: "Cold pressed oil is extracted without high heat so the natural aroma and nutrients are better preserved." }] },
@@ -31,6 +33,17 @@ export const subscribeNewsletter = asyncHandler(async (req, res) => {
   const subscription = await NewsletterSubscriber.findOneAndUpdate({ email: req.body.email }, { email: req.body.email, status: "ACTIVE", subscribedAt: new Date() }, { upsert: true, new: true, runValidators: true });
   await createAdminNotification({ category: "customers", type: "newsletter_subscription", title: "Newsletter Subscription", description: `${subscription.email} subscribed to the newsletter.`, related: { kind: "NewsletterSubscriber", id: subscription._id, label: subscription.email, path: "/admin/messages" } });
   sendSuccess(res, 201, "Newsletter subscription saved", { subscription });
+});
+
+export const getActiveOffers = asyncHandler(async (_req, res) => {
+  const now = new Date();
+  const offers = await Offer.find({ isActive: true, startDate: { $lte: now }, endDate: { $gte: now } }).sort({ updatedAt: -1 }).limit(5).lean();
+  sendSuccess(res, 200, "Offers fetched successfully", { offers });
+});
+
+export const validateCoupon = asyncHandler(async (req, res) => {
+  const coupon = await validateCouponPayload({ code: req.body.code, products: req.body.products || [], userId: req.user?._id });
+  sendSuccess(res, 200, "Coupon validated successfully", { coupon });
 });
 
 export const getFaqs = asyncHandler(async (_req, res) => {

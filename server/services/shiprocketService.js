@@ -1,7 +1,8 @@
-﻿// Shiprocket delivery integration and shipment status synchronization.
+// Shiprocket delivery integration and shipment status synchronization.
 import { env } from "../config/env.js";
 import Order from "../models/Order.js";
 import { ApiError } from "../utils/ApiError.js";
+import { logExternalFailure } from "./serviceStatusService.js";
 
 const API_BASE = "https://apiv2.shiprocket.in/v1/external";
 const MOCK_STEPS = [
@@ -25,10 +26,17 @@ function requireConfig() {
 
 async function parseResponse(response) {
   const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (error) {
+    logExternalFailure("shiprocket", error, { action: "parse_response" });
+    throw new ApiError("Shipping integration is temporarily unavailable.", 502);
+  }
   if (!response.ok) {
     const message = data.message || data.error || data.errors?.[0]?.message || "Shiprocket request failed.";
-    throw new ApiError(message, response.status >= 500 ? 502 : response.status, data.errors || []);
+    logExternalFailure("shiprocket", new Error(message), { status: response.status });
+    throw new ApiError(response.status >= 500 ? "Shipping integration is temporarily unavailable." : message, response.status >= 500 ? 502 : response.status, data.errors || []);
   }
   return data;
 }
@@ -36,11 +44,17 @@ async function parseResponse(response) {
 async function authenticate() {
   requireConfig();
   if (authCache.token && Date.now() < authCache.expiresAt) return authCache.token;
-  const response = await fetch(`${API_BASE}/auth/login`, {
+  let response;
+  try {
+    response = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: env.shiprocket.email, password: env.shiprocket.password }),
-  });
+    });
+  } catch (error) {
+    logExternalFailure("shiprocket", error, { action: "authenticate" });
+    throw new ApiError("Shipping integration is temporarily unavailable.", 503);
+  }
   const data = await parseResponse(response);
   if (!data.token) throw new ApiError("Shiprocket authentication did not return a token.", 502);
   authCache = { token: data.token, expiresAt: Date.now() + 9 * 24 * 60 * 60 * 1000 };
@@ -49,11 +63,17 @@ async function authenticate() {
 
 async function shiprocketRequest(path, options = {}) {
   const token = await authenticate();
-  const response = await fetch(`${API_BASE}${path}`, {
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
     method: options.method || "GET",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+    });
+  } catch (error) {
+    logExternalFailure("shiprocket", error, { action: path });
+    throw new ApiError("Shipping integration is temporarily unavailable.", 503);
+  }
   return parseResponse(response);
 }
 
@@ -318,5 +338,6 @@ export async function syncShiprocketWebhook(payload, headers = {}) {
   await order.save();
   return order;
 }
+
 
 

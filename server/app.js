@@ -29,6 +29,7 @@ import shiprocketRoutes from "./routes/shiprocketRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import { razorpayWebhook } from "./controllers/paymentController.js";
+import { getServiceStatus } from "./services/serviceStatusService.js";
 
 const app = express();
 
@@ -71,7 +72,8 @@ app.use(restrictionGuard);
 app.use(morgan(env.isProduction ? "combined" : "dev"));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 150, standardHeaders: true, legacyHeaders: false, message: { success: false, message: "Too many requests.", errors: [] } }));
 
-app.get("/api/health", (req, res) => res.status(200).json({ success: true, message: "API is healthy", data: { uptime: process.uptime() } }));
+app.get("/api/health", (_req, res) => res.status(200).json({ success: true, message: "API is healthy", data: { uptime: process.uptime(), serviceStatus: getServiceStatus() } }));
+app.get("/api/service-status", (_req, res) => res.status(200).json({ success: true, message: "Service status fetched", data: getServiceStatus() }));
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin-panel", adminApiRoutes);
@@ -92,6 +94,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 export default app;
+
 
 
 

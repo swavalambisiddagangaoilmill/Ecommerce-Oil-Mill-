@@ -1,5 +1,6 @@
 // Renders Google Sign In while preserving the existing auth page style.
 import { useEffect, useRef, useState } from "react";
+import { useServiceStatus } from "../../../hooks/useServiceStatus.js";
 
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
@@ -8,12 +9,15 @@ export default function GoogleSignInButton({ onCredential, disabled = false }) {
   const credentialRef = useRef(onCredential);
   const renderedRef = useRef(false);
   const [ready, setReady] = useState(false);
+  const serviceStatus = useServiceStatus();
+  const googleAvailable = serviceStatus.services?.googleOAuth?.available !== false;
+  const unavailableMessage = serviceStatus.services?.googleOAuth?.message || "Google sign-in is temporarily unavailable.";
 
   useEffect(() => {
     credentialRef.current = onCredential;
   }, [onCredential]);
   useEffect(() => {
-    if (!clientId) return undefined;
+    if (!clientId || !googleAvailable) return undefined;
 
     const initialize = () => {
       if (renderedRef.current || !window.google?.accounts?.id || !ref.current)
@@ -54,16 +58,16 @@ export default function GoogleSignInButton({ onCredential, disabled = false }) {
     }, 300);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [googleAvailable]);
 
-  if (!clientId) {
+  if (!clientId || !googleAvailable) {
     return (
       <button
         type="button"
         disabled
         className="h-12 w-full rounded-full border border-ink/10 bg-linen text-sm font-bold text-ink/45"
       >
-        Continue with Google
+                Continue with Google
       </button>
     );
   }
@@ -82,3 +86,5 @@ export default function GoogleSignInButton({ onCredential, disabled = false }) {
     </div>
   );
 }
+
+

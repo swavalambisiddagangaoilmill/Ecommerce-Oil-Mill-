@@ -1,6 +1,6 @@
 // Renders the authenticated My Account customer dashboard.
 import { BarChart3, Boxes, Heart, Home, Lock, LogOut, MapPin, Package, ShieldCheck, ShoppingBag, Tags, UserRound } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Breadcrumb from "../components/common/Breadcrumb.jsx";
 import SafeImage from "../components/common/SafeImage.jsx";
@@ -70,6 +70,10 @@ export default function Account() {
   const { logout } = useAuth();
   const { items: wishlistItems } = useWishlist();
   const [activeTab, setActiveTab] = useState("profile");
+  const contentPanelRef = useRef(null);
+  const mobileNavRef = useRef(null);
+  const pendingScrollRef = useRef(false);
+  const initialScrollCheckedRef = useRef(false);
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
   const [addressForm, setAddressForm] = useState(emptyAddress);
@@ -108,6 +112,44 @@ export default function Account() {
     { label: "Saved", value: wishlistItems.length },
     { label: "Addresses", value: addresses.length },
   ], [orders.length, wishlistItems.length, addresses.length]);
+
+  const updateScrollOffset = useCallback(() => {
+    const headerHeight = document.querySelector("header")?.getBoundingClientRect().height || 0;
+    const mobileNavVisible = mobileNavRef.current && getComputedStyle(mobileNavRef.current).display !== "none";
+    const mobileNavHeight = mobileNavVisible ? mobileNavRef.current.getBoundingClientRect().height : 0;
+    contentPanelRef.current?.style.setProperty("--account-scroll-offset", `${headerHeight + mobileNavHeight + 16}px`);
+  }, []);
+
+  const scrollToActivePanel = useCallback((behavior = "smooth") => {
+    updateScrollOffset();
+    contentPanelRef.current?.scrollIntoView({ behavior, block: "start", inline: "nearest" });
+  }, [updateScrollOffset]);
+
+
+  useEffect(() => {
+    updateScrollOffset();
+    window.addEventListener("resize", updateScrollOffset);
+    return () => window.removeEventListener("resize", updateScrollOffset);
+  }, [updateScrollOffset]);
+
+  useEffect(() => {
+    if (!pendingScrollRef.current || loading) return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      scrollToActivePanel("smooth");
+      pendingScrollRef.current = false;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeTab, loading, scrollToActivePanel]);
+  useEffect(() => {
+    if (loading || initialScrollCheckedRef.current) return undefined;
+    initialScrollCheckedRef.current = true;
+    const frame = window.requestAnimationFrame(() => {
+      updateScrollOffset();
+      const panelTop = contentPanelRef.current ? contentPanelRef.current.getBoundingClientRect().top + window.scrollY : 0;
+      if (window.scrollY > panelTop + 24) scrollToActivePanel("auto");
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [loading, scrollToActivePanel, updateScrollOffset]);
 
   const showMessage = (text) => {
     setMessage(text);
@@ -206,11 +248,20 @@ export default function Account() {
     }
   };
 
-  const handleLogout = async ({ skipConfirm = false } = {}) => {
+  const handleLogout = useCallback(async ({ skipConfirm = false } = {}) => {
     if (!skipConfirm && !window.confirm("Are you sure you want to log out?")) return;
     await logout();
     navigate("/login", { replace: true });
-  };
+  }, [logout, navigate]);
+
+  const selectTab = useCallback((tabId) => {
+    if (tabId === "logout") {
+      handleLogout();
+      return;
+    }
+    pendingScrollRef.current = true;
+    setActiveTab(tabId);
+  }, [handleLogout]);
 
   const updateAddressField = (field, value) => setAddressForm((current) => ({ ...current, [field]: value }));
 
@@ -231,7 +282,7 @@ export default function Account() {
             </div>
           </div>
 
-          <nav className="sticky top-[52px] z-30 -mx-4 mb-6 overflow-x-auto border-y border-ink/10 bg-cream/95 px-4 py-3 backdrop-blur md:top-20 sm:-mx-6 sm:px-6 lg:hidden" aria-label="Mobile account navigation">
+          <nav ref={mobileNavRef} className="sticky top-[52px] z-30 -mx-4 mb-6 overflow-x-auto border-y border-ink/10 bg-cream/95 px-4 py-3 backdrop-blur md:top-20 sm:-mx-6 sm:px-6 lg:hidden" aria-label="Mobile account navigation">
             <div className="flex min-w-max gap-2">
               {tabs.filter((tab) => tab.id !== "logout").map((tab) => {
                 const Icon = tab.icon;
@@ -240,7 +291,7 @@ export default function Account() {
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => selectTab(tab.id)}
                     className={`relative grid min-w-[86px] place-items-center gap-1 rounded-2xl px-3 py-2 text-center text-[11px] font-bold transition ${active ? "bg-white text-leaf shadow-sm" : "text-ink/58 hover:bg-white hover:text-ink"}`}
                   >
                     <Icon size={18} />
@@ -278,7 +329,7 @@ export default function Account() {
             <div className="mt-4 flex flex-wrap gap-2 border-t border-ink/10 pt-4">
               <Link to="/" className="rounded-full border border-ink/10 px-4 py-2 text-sm font-bold transition hover:border-leaf hover:text-leaf">View Store Homepage</Link>
               <Link to="/shop" className="rounded-full border border-ink/10 px-4 py-2 text-sm font-bold transition hover:border-leaf hover:text-leaf">Go to Shop</Link>
-              <button type="button" onClick={() => setActiveTab("orders")} className="rounded-full border border-ink/10 px-4 py-2 text-sm font-bold transition hover:border-leaf hover:text-leaf">View Recent Orders</button>
+              <button type="button" onClick={() => selectTab("orders")} className="rounded-full border border-ink/10 px-4 py-2 text-sm font-bold transition hover:border-leaf hover:text-leaf">View Recent Orders</button>
             </div>
           </section>}
           <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
@@ -287,12 +338,12 @@ export default function Account() {
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   const isLogout = tab.id === "logout";
-                  return <button key={tab.id} type="button" onClick={() => isLogout ? handleLogout() : setActiveTab(tab.id)} className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold transition ${isLogout ? "bg-danger/10 text-danger hover:bg-danger hover:text-white" : activeTab === tab.id ? "bg-ink text-white" : "text-ink/65 hover:bg-linen hover:text-ink"}`}><Icon size={18} />{tab.label}</button>;
+                  return <button key={tab.id} type="button" onClick={() => isLogout ? handleLogout() : selectTab(tab.id)} className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold transition ${isLogout ? "bg-danger/10 text-danger hover:bg-danger hover:text-white" : activeTab === tab.id ? "bg-ink text-white" : "text-ink/65 hover:bg-linen hover:text-ink"}`}><Icon size={18} />{tab.label}</button>;
                 })}
               </nav>
             </aside>
 
-            <div className="min-h-[420px] rounded-[1.5rem] border border-ink/10 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
+            <div ref={contentPanelRef} className="min-h-[420px] scroll-mt-[var(--account-scroll-offset)] rounded-[1.5rem] border border-ink/10 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
               {loading && <div className="grid gap-4"><div className="h-8 w-52 animate-pulse rounded-full bg-linen" /><div className="h-28 animate-pulse rounded-2xl bg-linen" /><div className="h-28 animate-pulse rounded-2xl bg-linen" /></div>}
               {!loading && error && <p className="rounded-2xl bg-linen p-4 text-sm font-semibold text-danger">{error}</p>}
               {!loading && message && <p className="mb-5 rounded-2xl bg-leaf/10 p-4 text-sm font-semibold text-leaf">{message}</p>}
@@ -394,16 +445,12 @@ export default function Account() {
   );
 }
 
-
-
-
-
-
-
-
 function AdminMetric({ label, value }) {
   return <div className="rounded-2xl bg-cream p-4"><p className="text-xs font-bold uppercase tracking-[0.12em] text-ink/40">{label}</p><p className="mt-2 text-lg font-bold">{value ?? <span className="inline-block h-5 w-16 animate-pulse rounded bg-ink/10" />}</p></div>;
 }
+
+
+
 
 
 

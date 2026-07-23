@@ -1,5 +1,5 @@
-﻿// Shared compact UI primitives for the admin prototype.
-import { X } from "lucide-react";
+// Shared compact UI primitives for the admin prototype.
+import { Loader2, X } from "lucide-react";
 
 const statusStyles = {
   Active: "bg-leaf/10 text-leaf",
@@ -21,13 +21,13 @@ const statusStyles = {
   "In Stock": "bg-leaf/10 text-leaf",
 };
 
-export function AdminButton({ children, variant = "primary", className = "", ...props }) {
+export function AdminButton({ children, variant = "primary", className = "", loading = false, disabled, ...props }) {
   const styles = variant === "secondary"
     ? "border border-ink/10 bg-white text-ink hover:border-leaf hover:text-leaf"
     : variant === "danger"
       ? "bg-danger text-white hover:bg-danger/90"
       : "bg-ink text-white hover:bg-leaf";
-  return <button className={`inline-flex h-9 items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${styles} ${className}`} {...props}>{children}</button>;
+  return <button disabled={disabled || loading} className={`inline-flex h-9 items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${styles} ${className}`} {...props}>{loading && <Loader2 size={14} className="animate-spin" />}{children}</button>;
 }
 
 export function AdminBadge({ children }) {

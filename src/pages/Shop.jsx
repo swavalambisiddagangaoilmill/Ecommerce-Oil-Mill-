@@ -6,6 +6,7 @@ import ProductCard from "../components/features/product/ProductCard.jsx";
 import Container from "../components/ui/Container.jsx";
 import Input from "../components/ui/Input.jsx";
 import SectionHeading from "../components/ui/SectionHeading.jsx";
+import OfferBanner from "../components/features/feedback/OfferBanner.jsx";
 import { getCategories, getProducts } from "../services/catalogService.js";
 
 const perPage = 6;
@@ -32,15 +33,18 @@ export default function Shop() {
 
   useEffect(() => {
     if (invalidSearch || !categoriesReady) return undefined;
-    setSearchLoading(true);
-    const timer = window.setTimeout(() => {
+    let active = true;
+    const loadProducts = (showLoading = false) => {
+      if (showLoading) setSearchLoading(true);
       const categoryId = categories.find((item) => item.name === category)?.id;
-      getProducts({ page, limit: perPage, search, category: category === "All" ? undefined : categoryId, sort: sort === "featured" ? "featured" : sort === "price-low" ? "priceAsc" : sort === "price-high" ? "priceDesc" : "newest" })
-        .then((data) => { setProducts(data.products); setPagination(data.pagination || null); })
-        .catch(() => setProducts([]))
-        .finally(() => setSearchLoading(false));
-    }, search ? 300 : 0);
-    return () => window.clearTimeout(timer);
+      return getProducts({ page, limit: perPage, search, category: category === "All" ? undefined : categoryId, sort: sort === "featured" ? "featured" : sort === "price-low" ? "priceAsc" : sort === "price-high" ? "priceDesc" : "newest" })
+        .then((data) => { if (!active) return; setProducts(data.products); setPagination(data.pagination || null); })
+        .catch(() => active && setProducts([]))
+        .finally(() => active && showLoading && setSearchLoading(false));
+    };
+    const timer = window.setTimeout(() => loadProducts(true), search ? 300 : 0);
+    const refreshTimer = window.setInterval(() => loadProducts(false), 20000);
+    return () => { active = false; window.clearTimeout(timer); window.clearInterval(refreshTimer); };
   }, [categories, categoriesReady, category, invalidSearch, page, search, sort]);
 
   useEffect(() => {
@@ -88,6 +92,7 @@ export default function Shop() {
       <section className="section-padding">
         <Container>
           <SectionHeading eyebrow="Shop oils" title="Cold pressed staples for every kitchen" text="Filter by seed, compare flavor styles, and add your pantry favourites in a few calm clicks." />
+          <OfferBanner />
           <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_180px_180px] lg:gap-4">
             <Input inputRef={searchInputRef} placeholder="Search oils" value={search} onChange={(event) => updateSearch(event.target.value)} aria-label="Search products" className="h-11 text-xs sm:h-[52px] sm:text-sm" />
             <select value={category} onChange={(event) => changeCategory(event.target.value)} className="h-11 min-w-0 rounded-xl border border-ink/10 bg-white px-3 text-sm font-semibold outline-none sm:h-[52px] sm:px-4">
@@ -116,3 +121,5 @@ export default function Shop() {
     </>
   );
 }
+
+

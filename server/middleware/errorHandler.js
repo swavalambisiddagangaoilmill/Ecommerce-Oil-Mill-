@@ -44,9 +44,15 @@ export function errorHandler(error, req, res, next) {
     });
   }
 
+  if (statusCode >= 500 && !error.isOperational) {
+    message = "Service is temporarily unavailable. Please try again shortly.";
+    errors = [];
+  }
+
   if (process.env.NODE_ENV !== "production" && statusCode >= 500) {
     console.error(error);
   }
 
   return sendError(res, statusCode, message, errors);
 }
+

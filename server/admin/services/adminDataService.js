@@ -167,11 +167,13 @@ export async function saveCategory(payload, id) { const data = { name: payload.n
 
 export const listOffers = () => Offer.find().populate("category", "name").populate("products", "title").sort({ createdAt: -1 });
 export const saveOffer = (payload, userId, id) => id ? Offer.findByIdAndUpdate(id, payload, { new: true, runValidators: true }) : Offer.create({ ...payload, createdBy: userId });
+export const deleteOffer = (id) => Offer.findByIdAndDelete(id);
 export const listCoupons = () => Coupon.find().populate("categories", "name").populate("products", "title").sort({ createdAt: -1 });
 export const saveCoupon = (payload, userId, id) => {
   const data = { ...payload, code: payload.code?.toUpperCase() };
   return id ? Coupon.findByIdAndUpdate(id, data, { new: true, runValidators: true }) : Coupon.create({ ...data, createdBy: userId });
 };
+export const deleteCoupon = (id) => Coupon.findByIdAndDelete(id);
 export const listMessages = () => ContactMessage.find({ status: { $ne: "ARCHIVED" } }).sort({ createdAt: -1 });
 export const updateMessage = (id, status) => ContactMessage.findByIdAndUpdate(id, { status }, { new: true, runValidators: true });
 export const listAuditLogs = (query) => AdminAuditLog.find(query.search ? { summary: new RegExp(query.search, "i") } : {}).populate("admin", "name email adminRole").sort({ createdAt: -1 }).limit(100);
@@ -208,6 +210,7 @@ export async function globalAdminSearch(term, user, hasPermission) {
   ]);
   return { pages, products, categories, orders, customers };
 }
+
 
 
 

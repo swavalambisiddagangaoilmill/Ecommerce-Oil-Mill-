@@ -3,6 +3,7 @@ import app from "./app.js";
 import { connectDB } from "./config/db.js";
 import { env } from "./config/env.js";
 import { ensureDefaultAdmin } from "./services/defaultAdminService.js";
+import { startServiceStatusMonitor } from "./services/serviceStatusService.js";
 
 // DEBUG: Remove after Google OAuth issue is resolved
 console.log("[Startup Env Debug]", {
@@ -11,6 +12,13 @@ console.log("[Startup Env Debug]", {
   CLIENT_URL: process.env.CLIENT_URL ? "Loaded" : "Missing",
 });
 
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled promise rejection", { message: reason?.message || String(reason), stack: reason?.stack });
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught exception", { message: error.message, stack: error.stack });
+});
 function layerPrefix(layer) {
   // DEBUG: Remove after auth routing issue is resolved
   if (!layer?.regexp?.source) return "";
@@ -40,8 +48,11 @@ function printRegisteredRoutes() {
 
 await connectDB();
 await ensureDefaultAdmin();
+startServiceStatusMonitor();
 printRegisteredRoutes();
 
 app.listen(env.port, () => {
   console.log(`Swavalambi Siddaganga Oil Mill API running on port ${env.port}`);
 });
+
+

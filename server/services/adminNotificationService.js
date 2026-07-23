@@ -11,7 +11,7 @@ export const notificationTypes = {
   inventory: ["low_stock", "out_of_stock", "back_in_stock"],
   customers: ["new_user_registration", "contact_form_submission", "newsletter_subscription"],
   security: ["failed_admin_login", "multiple_failed_login_attempts", "password_changed", "suspicious_activity", "admin_login", "admin_logout", "admin_session_revoked"],
-  system: ["email_delivery_failed", "shipping_api_error", "backup_failed", "critical_server_error"],
+  system: ["email_delivery_failed", "shipping_api_error", "backup_failed", "critical_server_error", "offer_created", "offer_updated", "offer_deleted", "coupon_created", "coupon_updated", "coupon_deleted"],
 };
 
 export function allNotificationTypes() {
@@ -89,3 +89,4 @@ export async function saveNotificationPreferences(adminId, enabledMap = {}) {
   await AdminNotificationPreference.findOneAndUpdate({ admin: adminId }, { admin: adminId, disabledTypes }, { upsert: true, new: true });
   return getNotificationPreferences(adminId);
 }
+

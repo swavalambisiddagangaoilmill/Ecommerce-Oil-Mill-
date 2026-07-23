@@ -6,6 +6,7 @@ import { getAuthToken } from "../../../api/apiClient.js";
 import { checkUpiQrPayment, createOrder, createPaymentIntent, createUpiQrPayment, verifyPayment } from "../../../services/checkoutService.js";
 import { fetchAccountProfile } from "../../../services/accountService.js";
 import { useCart } from "../../../hooks/useCart.jsx";
+import { useServiceStatus } from "../../../hooks/useServiceStatus.js";
 import { formatCurrency } from "../../../utils/formatCurrency.js";
 import { writeGuestSession } from "../../../utils/guestSession.js";
 import Button from "../../ui/Button.jsx";
@@ -37,7 +38,8 @@ function formatOrderForSuccess(order, shippingAddress, items, total) {
 
 export default function CheckoutForm() {
   const navigate = useNavigate();
-  const { items, totals, clearCart } = useCart();
+  const { items, totals, clearCart, appliedCoupon } = useCart();
+  const serviceStatus = useServiceStatus();
   const formRef = useRef(null);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [profile, setProfile] = useState(null);
@@ -49,7 +51,10 @@ export default function CheckoutForm() {
 
   const processing = Boolean(processingStep);
   const codAvailable = items.every((item) => item.codEnabled !== false);
-  const onlineAvailable = items.every((item) => item.onlinePaymentEnabled !== false);
+  const paymentService = serviceStatus.services?.razorpay;
+  const onlineServiceAvailable = paymentService?.available !== false;
+  const onlineUnavailableMessage = paymentService?.message || "Online payments are temporarily unavailable.";
+  const onlineAvailable = onlineServiceAvailable && items.every((item) => item.onlinePaymentEnabled !== false);
 
   useEffect(() => {
     let active = true;
@@ -64,6 +69,9 @@ export default function CheckoutForm() {
   }, []);
 
 
+  useEffect(() => {
+    if (!onlineAvailable && paymentMethod !== "cod") setPaymentMethod(codAvailable ? "cod" : "online");
+  }, [codAvailable, onlineAvailable, paymentMethod]);
   useEffect(() => {
     if (!qrCheckout?.expiresAt || qrCheckout.status === "paid") return undefined;
     const update = () => {
@@ -124,6 +132,7 @@ export default function CheckoutForm() {
         products: items.map((item) => ({ product: item._id || item.id, quantity: item.quantity })),
         shippingAddress,
         paymentMethod: paymentMethod === "cod" ? "cod" : "upi",
+        couponCode: appliedCoupon?.code,
       },
       customer: {
         name: shippingAddress.fullName || profile?.name || "",
@@ -212,7 +221,7 @@ export default function CheckoutForm() {
       return;
     }
     if (paymentMethod === 'cod' && !codAvailable) { setError('Cash on delivery is not available for one or more products in your cart.'); return; }
-    if (paymentMethod !== 'cod' && !onlineAvailable) { setError('Online payment is not available for one or more products in your cart.'); return; }
+    if (paymentMethod !== 'cod' && !onlineAvailable) { setError(onlineServiceAvailable ? 'Online payment is not available for one or more products in your cart.' : onlineUnavailableMessage); return; }
     const orderPayload = getOrderPayload(event.currentTarget);
     setError("");
     try {
@@ -236,6 +245,7 @@ export default function CheckoutForm() {
       <h1 className="font-serif text-4xl font-semibold">Checkout</h1>
       <p className="mt-3 text-sm font-semibold text-ink/55">Order total: {formatCurrency(totals.total)}</p>
       {error && <p className="mt-5 rounded-2xl bg-linen p-4 text-sm font-semibold text-danger">{error}</p>}
+      {!onlineServiceAvailable && <p className="mt-5 rounded-2xl bg-linen p-4 text-sm font-semibold text-ink/65">{onlineUnavailableMessage} Cash on delivery continues to work normally.</p>}
       {savedAddresses.length > 0 && (
         <div className="mt-6 rounded-2xl bg-linen p-4">
           <p className="text-sm font-bold text-ink/65">Use a saved address</p>
@@ -291,6 +301,9 @@ export default function CheckoutForm() {
     </form>
   );
 }
+
+
+
 
 
 
