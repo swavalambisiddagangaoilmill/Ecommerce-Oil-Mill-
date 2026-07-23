@@ -1,13 +1,11 @@
-﻿// Renders the Home page experience.
+// Renders the Home page experience.
 import BrandStrip from "../components/features/home/BrandStrip.jsx";
-import Categories from "../components/features/home/Categories.jsx";
 import EverydayEssentials from "../components/features/home/EverydayEssentials.jsx";
 import ExtractionProcess from "../components/features/home/ExtractionProcess.jsx";
 import FAQ from "../components/features/home/FAQ.jsx";
 import FeaturedProducts from "../components/features/home/FeaturedProducts.jsx";
 import Hero from "../components/features/home/Hero.jsx";
 import InstagramGallery from "../components/features/home/InstagramGallery.jsx";
-import Newsletter from "../components/features/home/Newsletter.jsx";
 import StorySection from "../components/features/home/StorySection.jsx";
 import Testimonials from "../components/features/home/Testimonials.jsx";
 import Button from "../components/ui/Button.jsx";
@@ -19,7 +17,6 @@ export default function Home() {
       <h1 className="sr-only">Swavalambi Siddaganga Oil Mill cold pressed edible oils</h1>
       <Hero />
       <BrandStrip />
-      <Categories />
       <EverydayEssentials />
       <StorySection />
       <ExtractionProcess />
@@ -51,10 +48,7 @@ export default function Home() {
       </section>
       <Testimonials />
       <FAQ />
-      <Newsletter />
       <InstagramGallery />
     </>
   );
 }
-
-

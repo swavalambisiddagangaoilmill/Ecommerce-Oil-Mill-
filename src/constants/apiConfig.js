@@ -43,7 +43,6 @@ export const API_ENDPOINTS = {
   paymentUpiQr: "/payments/upi-qr",
   paymentUpiQrStatus: (id) => `/payments/upi-qr/${id}`,
   contact: "/contact",
-  newsletter: "/newsletter",
   faqs: "/content/faqs",
   pageContent: (slug) => `/content/pages/${slug}`,
 };

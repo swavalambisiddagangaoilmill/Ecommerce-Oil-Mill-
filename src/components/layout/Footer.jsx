@@ -5,54 +5,13 @@ import {
   Mail,
   MapPin,
   Phone,
-  Send,
+  ShieldCheck,
   Youtube,
 } from "lucide-react";
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import TurnstileWidget from "../features/auth/TurnstileWidget.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 import Container from "../ui/Container.jsx";
-import { subscribeToNewsletter } from "../../services/contactService.js";
 import gloraLogo from "/glora-black.webp";
-const footerColumns = [
-  {
-    title: "Navigation",
-    links: [
-      { label: "Home", href: "/" },
-      { label: "Shop Oils", href: "/shop" },
-      { label: "Best Sellers", href: "/shop" },
-      { label: "Contact", href: "/contact" },
-    ],
-  },
-  {
-    title: "About",
-    links: [
-      { label: "Our Story", href: "/about/story" },
-      { label: "Our Process", href: "/about/process" },
-      { label: "FAQ", href: "/about/faq" },
-      { label: "Sustainability", href: "/about" },
-    ],
-  },
-  {
-    title: "Support",
-    links: [
-      { label: "Care Guide", href: "/about/faq" },
-      { label: "Shipping", href: "/legal/shipping" },
-      { label: "Bulk Orders", href: "/contact" },
-      { label: "Account", href: "/login" },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { label: "Privacy Policy", href: "/legal/privacy" },
-      { label: "Terms & Conditions", href: "/legal/terms" },
-      { label: "Shipping Policy", href: "/legal/shipping" },
-      { label: "Refund Policy", href: "/legal/refund" },
-      { label: "Cookie Policy", href: "/legal/cookies" },
-    ],
-  },
-];
 
 const socialLinks = [
   { label: "Instagram", icon: Instagram, href: "/contact" },
@@ -61,25 +20,46 @@ const socialLinks = [
 ];
 
 export default function Footer() {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState("");
-
-  const handleNewsletterSubmit = async (event) => {
-    event.preventDefault();
-    const email = new FormData(event.currentTarget).get("email");
-    setLoading(true);
-    setMessage("");
-    try {
-      await subscribeToNewsletter({ email, turnstileToken });
-      setMessage("Subscribed successfully.");
-      event.currentTarget.reset();
-    } catch (err) {
-      setMessage(err.message || "Unable to subscribe. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { authenticated } = useAuth();
+  const accountHref = authenticated ? "/account" : "/login";
+  const footerColumns = [
+    {
+      title: "Navigation",
+      links: [
+        { label: "Home", href: "/" },
+        { label: "Shop Oils", href: "/shop" },
+        { label: "Essential Oils", href: "/shop?q=Essential%20Oils&focus=search" },
+        { label: "Contact", href: "/contact" },
+      ],
+    },
+    {
+      title: "About",
+      links: [
+        { label: "About", href: "/about" },
+        { label: "Our Story", href: "/about/story" },
+        { label: "FAQ", href: "/about/faq" },
+      ],
+    },
+    {
+      title: "Support",
+      links: [
+        { label: "Care Guide", href: "/about/faq" },
+        { label: "Shipping", href: "/legal/shipping" },
+        { label: "Returns", href: "/legal/returns" },
+        { label: "Account", href: accountHref },
+      ],
+    },
+    {
+      title: "Legal",
+      links: [
+        { label: "Privacy Policy", href: "/legal/privacy" },
+        { label: "Terms & Conditions", href: "/legal/terms" },
+        { label: "Refund Policy", href: "/legal/refund" },
+        { label: "Cancellation Policy", href: "/legal/cancellation" },
+        { label: "Cookie Policy", href: "/legal/cookies" },
+      ],
+    },
+  ];
 
   return (
     <footer className="bg-ink text-white">
@@ -92,7 +72,6 @@ export default function Footer() {
             <span className="text-xs font-bold uppercase tracking-[0.28em] text-clay">
               Primary brand logo
             </span>
-            {/* <!-- Company Logo Placeholder --> */}
             <span className="mt-4 block font-serif text-5xl font-semibold leading-tight sm:text-6xl lg:text-7xl">
               Swavalambi Siddaganga Oil Mill
             </span>
@@ -107,7 +86,6 @@ export default function Footer() {
             <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/40">
               Made by Team
             </span>
-
             <img
               src={gloraLogo}
               alt="Glora Studio Logo"
@@ -143,51 +121,27 @@ export default function Footer() {
 
           <div className="grid gap-5">
             <div className="rounded-[2rem] bg-cream p-6 text-ink shadow-soft sm:p-8">
-              <h3 className="font-serif text-3xl font-semibold">
-                Join the pantry letter
+              <div className="inline-grid h-12 w-12 place-items-center rounded-full bg-leaf/10 text-leaf">
+                <ShieldCheck size={20} />
+              </div>
+              <h3 className="mt-5 font-serif text-3xl font-semibold">
+                Customer care, handled with attention
               </h3>
               <p className="mt-3 leading-7 text-ink/62">
-                Seasonal recipes, batch notes, and quiet guides for caring for
-                cold pressed oils.
+                For order questions, bulk enquiries, delivery support, or product guidance, our team is ready to help through the contact page.
               </p>
-              <form
-                className="mt-6 grid gap-3 sm:grid-cols-[1fr_150px]"
-                onSubmit={handleNewsletterSubmit}
+              <Link
+                to="/contact"
+                className="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-ink px-6 text-sm font-semibold text-white transition hover:bg-leaf"
               >
-                <label className="sr-only" htmlFor="footer-email">
-                  Email address
-                </label>
-                <input
-                  id="footer-email"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="Email address"
-                  className="h-12 min-w-0 rounded-full border border-ink/10 bg-white px-5 text-sm outline-none placeholder:text-ink/35 focus:border-leaf"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-ink px-6 text-sm font-semibold text-white transition hover:bg-leaf disabled:cursor-wait disabled:opacity-70"
-                >
-                  <Send size={16} /> Subscribe
-                </button>
-                <TurnstileWidget
-                  onVerify={setTurnstileToken}
-                  className="sm:col-span-2"
-                />
-                {message && (
-                  <p className="text-sm font-semibold text-ink/65 sm:col-span-2">
-                    {message}
-                  </p>
-                )}
-              </form>
+                Contact Support
+              </Link>
             </div>
 
             <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 sm:p-8">
               <div className="grid gap-3 text-sm font-semibold text-white/62">
                 <span className="flex items-start gap-3">
-                  <MapPin size={18} className="mt-0.5 shrink-0 text-clay" />{" "}
+                  <MapPin size={18} className="mt-0.5 shrink-0 text-clay" />
                   SIDDAGANGA OIL MILL, Near Small City Club Road, Sira Gate,
                   TUDA Layout, Tumakuru, Karnataka 572106
                 </span>
@@ -195,7 +149,7 @@ export default function Footer() {
                   <Phone size={18} className="text-clay" /> 09972565174
                 </span>
                 <span className="flex items-center gap-3">
-                  <Mail size={18} className="text-clay" />{" "}
+                  <Mail size={18} className="text-clay" />
                   support@swavalambisiddagangaoilmill.com
                 </span>
               </div>

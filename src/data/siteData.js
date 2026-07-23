@@ -1,4 +1,4 @@
-﻿// Static site navigation and marketing content used across layout sections.
+// Static site navigation and marketing content used across layout sections.
 import { Leaf, ShieldCheck, Sprout, Truck, Wheat, BadgeCheck } from "lucide-react";
 
 export const announcementMessages = [
@@ -35,9 +35,8 @@ export const essentialOilLinks = [
 ];
 
 export const aboutMenuLinks = [
+  { label: "About", href: "/about" },
   { label: "Our Story", href: "/about/story" },
-  { label: "Our Process", href: "/about/process" },
-  { label: "Sustainability", href: "/about" },
   { label: "FAQ", href: "/about/faq" },
   { label: "Contact", href: "/contact" },
 ];
@@ -47,7 +46,7 @@ export const megaMenus = {
     variant: "shop",
     links: oilMenuLinks,
     banner: {
-      href: "/shop",
+      href: "/shop?q=Cooking%20Oils&focus=search",
       image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=1300&q=85",
       eyebrow: "Signature collection",
       title: "Pure oils for everyday cooking rituals.",
@@ -58,7 +57,7 @@ export const megaMenus = {
     variant: "compact",
     links: oilMenuLinks,
     banner: {
-      href: "/shop",
+      href: "/shop?q=Cold%20Pressed%20Oils&focus=search",
       image: "https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1300&q=85",
       eyebrow: "Cold pressed oils",
       title: "Wooden ghani extracted oils with natural character.",
@@ -69,7 +68,7 @@ export const megaMenus = {
     variant: "compact",
     links: essentialOilLinks,
     banner: {
-      href: "/shop",
+      href: "/shop?q=Essential%20Oils&focus=search",
       image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=1300&q=85",
       eyebrow: "Essential oils",
       title: "Aromatic oils for calming everyday rituals.",
@@ -80,21 +79,14 @@ export const megaMenus = {
     variant: "compact",
     links: aboutMenuLinks,
     banner: {
-      href: "/about",
+      href: "/about/story",
       image: "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=1300&q=85",
       eyebrow: "Swavalambi Siddaganga Oil Mill story",
       title: "A slower oil house for everyday kitchens.",
-      description: "Learn about our process, sourcing values, sustainability mindset, and the care behind every bottle.",
+      description: "Learn about our sourcing values, family kitchen roots, and the care behind every bottle.",
     },
   },
 };
-
-export const categoryTiles = [
-  { name: "Daily Cooking", image: "https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=900&q=80" },
-  { name: "Wellness Oils", image: "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?auto=format&fit=crop&w=900&q=80" },
-  { name: "Traditional Oils", image: "https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=900&q=80" },
-  { name: "Gift Bundles", image: "https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?auto=format&fit=crop&w=900&q=80" },
-];
 
 export const benefits = [
   { icon: Leaf, title: "Cold Pressed", text: "Pressed slowly below heat-intensive thresholds to preserve aroma and nutrients." },
@@ -134,11 +126,11 @@ export const trustStats = [
 ];
 
 export const instagramImages = [
-  "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=600&q=80",
-  "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1501430654243-c934cec2e1c0?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1536304993881-ff6e9eefa2a6?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80",
 ];
 
 export const brandValues = [
@@ -147,5 +139,4 @@ export const brandValues = [
   { icon: Leaf, label: "Naturally settled" },
   { icon: ShieldCheck, label: "Purity checked" },
 ];
-
 

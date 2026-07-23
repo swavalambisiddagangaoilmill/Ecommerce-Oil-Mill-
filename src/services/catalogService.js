@@ -72,9 +72,14 @@ export async function getEverydayEssentials() {
   return productListFrom(data).slice(0, 5);
 }
 
-export async function getBestSellerProducts() {
-  const data = await apiRequest(API_ENDPOINTS.featuredProducts);
-  return productListFrom(data).slice(0, 10);
+export async function getEssentialOilProducts() {
+  const categories = await getCategories().catch(() => []);
+  const essential = categories.find((item) => item.name?.toLowerCase() === "essential oils" || item.slug === "essential-oils");
+  const data = essential
+    ? await getProducts({ limit: 5, category: essential.id, sort: "featured" })
+    : await getProducts({ limit: 5, search: "Essential Oils", sort: "featured" });
+  if (data.products.length >= 5) return data.products.slice(0, 5);
+  const fallback = await getProducts({ limit: 5, sort: "featured" }).catch(() => ({ products: [] }));
+  return [...data.products, ...fallback.products.filter((item) => !data.products.some((existing) => existing.id === item.id))].slice(0, 5);
 }
-
 

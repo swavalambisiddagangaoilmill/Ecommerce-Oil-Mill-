@@ -1,6 +1,6 @@
 // Defines all public storefront routes.
 import { lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "../components/features/auth/ProtectedRoute.jsx";
 import PageLoader from "../components/features/feedback/PageLoader.jsx";
 import About from "../pages/About.jsx";
@@ -24,7 +24,6 @@ const VerifyEmail = lazy(() => import("../pages/VerifyEmail.jsx"));
 const OrderDetails = lazy(() => import("../pages/OrderDetails.jsx"));
 const OrderSuccess = lazy(() => import("../pages/OrderSuccess.jsx"));
 const NotFound = lazy(() => import("../pages/NotFound.jsx"));
-const OurProcess = lazy(() => import("../pages/OurProcess.jsx"));
 const OurStory = lazy(() => import("../pages/OurStory.jsx"));
 const ProductDetails = lazy(() => import("../pages/ProductDetails.jsx"));
 const Shop = lazy(() => import("../pages/Shop.jsx"));
@@ -45,7 +44,7 @@ export default function AppRoutes() {
         <Route path="/about" element={<About />} />
         <Route path="/about/faq" element={<FAQ />} />
         <Route path="/about/story" element={<OurStory />} />
-        <Route path="/about/process" element={<OurProcess />} />
+        <Route path="/about/process" element={<Navigate to="/about/story" replace />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
@@ -74,17 +73,3 @@ export default function AppRoutes() {
     </Suspense>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

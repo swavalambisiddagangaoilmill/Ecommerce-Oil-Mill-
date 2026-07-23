@@ -1,7 +1,7 @@
 // Renders the MegaMenu layout element.
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 function shortcutHref(link) {
   return link.href === "/shop" ? `/shop?q=${encodeURIComponent(link.label)}&focus=search` : link.href;
@@ -10,6 +10,7 @@ function shortcutHref(link) {
 export default function MegaMenu({ menu, open, onNavigate }) {
   const data = menu?.data;
   const isShop = data?.variant === "shop";
+  const isAbout = menu?.label === "About";
 
   return (
     <motion.div
@@ -22,25 +23,52 @@ export default function MegaMenu({ menu, open, onNavigate }) {
       aria-hidden={!open}
     >
       {data && (
-        <div className="grid gap-6 p-6 xl:grid-cols-[24%_1fr] 2xl:p-7">
+        <div className="grid gap-6 p-6 xl:grid-cols-[26%_1fr] 2xl:p-7">
           <nav
             aria-label={`${menu.label} links`}
-            className={isShop ? "grid content-start gap-2" : "grid content-start gap-2"}
+            className={isAbout ? "grid content-start gap-3" : "grid content-start gap-2"}
           >
-            {data.links.map((link) => (
-              <Link
-                key={link.label}
-                to={shortcutHref(link)}
-                onClick={onNavigate}
-                className={
-                  isShop
-                    ? "flex h-12 items-center rounded-2xl px-5 text-base font-semibold text-ink/75 transition duration-200 hover:bg-linen hover:text-leaf focus-visible:bg-linen focus-visible:text-leaf focus-visible:outline-none"
-                    : "flex h-12 items-center rounded-2xl px-5 text-base font-semibold text-ink/75 transition duration-200 hover:bg-linen hover:translate-x-1 hover:text-leaf focus-visible:bg-linen focus-visible:translate-x-1 focus-visible:text-leaf focus-visible:outline-none"
-                }
-              >
-                {link.label}
-              </Link>
-            ))}
+            {data.links.map((link) => {
+              const href = shortcutHref(link);
+              if (isAbout) {
+                return (
+                  <NavLink
+                    key={link.label}
+                    to={href}
+                    end={href === "/about"}
+                    onClick={onNavigate}
+                    className={({ isActive }) =>
+                      `group relative flex h-12 items-center rounded-2xl px-5 text-base font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf ${
+                        isActive
+                          ? "bg-linen text-leaf"
+                          : "text-ink/75 hover:bg-linen hover:text-leaf"
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <span className={`absolute left-3 h-6 w-1 rounded-full bg-leaf transition duration-200 ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-60"}`} />
+                        <span className="pl-3">{link.label}</span>
+                      </>
+                    )}
+                  </NavLink>
+                );
+              }
+              return (
+                <Link
+                  key={link.label}
+                  to={href}
+                  onClick={onNavigate}
+                  className={
+                    isShop
+                      ? "flex h-12 items-center rounded-2xl px-5 text-base font-semibold text-ink/75 transition duration-200 hover:bg-linen hover:text-leaf focus-visible:bg-linen focus-visible:text-leaf focus-visible:outline-none"
+                      : "flex h-12 items-center rounded-2xl px-5 text-base font-semibold text-ink/75 transition duration-200 hover:bg-linen hover:translate-x-1 hover:text-leaf focus-visible:bg-linen focus-visible:translate-x-1 focus-visible:text-leaf focus-visible:outline-none"
+                  }
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
           <Link to={data.banner.href} onClick={onNavigate} className="group grid max-h-[300px] overflow-hidden rounded-3xl bg-linen lg:grid-cols-[0.9fr_1.1fr]">
             <div className="max-h-[300px] overflow-hidden">
