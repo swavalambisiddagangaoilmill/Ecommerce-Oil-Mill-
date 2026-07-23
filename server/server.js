@@ -2,6 +2,7 @@
 import app from "./app.js";
 import { connectDB } from "./config/db.js";
 import { env } from "./config/env.js";
+import { ensureDefaultAdmin } from "./services/defaultAdminService.js";
 
 // DEBUG: Remove after Google OAuth issue is resolved
 console.log("[Startup Env Debug]", {
@@ -11,6 +12,7 @@ console.log("[Startup Env Debug]", {
 });
 
 await connectDB();
+await ensureDefaultAdmin();
 
 app.listen(env.port, () => {
   console.log(`Swavalambi Siddaganga Oil Mill API running on port ${env.port}`);
