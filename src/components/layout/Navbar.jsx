@@ -1,5 +1,5 @@
 // Renders the Navbar layout element.
-import { Heart, Menu, Search, ShoppingBag, UserRound } from "lucide-react";
+import { Heart, LogOut, Menu, Search, ShoppingBag, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -56,11 +56,17 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { items } = useCart();
   const { items: wishlistItems } = useWishlist();
-  const { authenticated, user } = useAuth();
+  const { authenticated, user, logout } = useAuth();
   const { togglePopup } = usePopup();
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
   const accountPath = authenticated ? "/account" : "/login";
   const isAdmin = user?.role === "admin";
+
+  const handleLogout = async () => {
+    if (!window.confirm("Are you sure you want to log out?")) return;
+    await logout();
+    navigate("/login", { replace: true });
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -166,6 +172,16 @@ export default function Navbar() {
                     Admin
                   </span>
                 )}
+                {authenticated && (
+                  <button
+                    type="button"
+                    aria-label="Logout"
+                    onClick={handleLogout}
+                    className="grid h-11 w-11 place-items-center rounded-full bg-danger/10 text-danger shadow-sm transition duration-200 hover:scale-105 hover:bg-danger hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/30"
+                  >
+                    <LogOut size={18} />
+                  </button>
+                )}
               </div>
               <IconLink
                 to="/cart"
@@ -195,6 +211,7 @@ export default function Navbar() {
         accountPath={accountPath}
         authenticated={authenticated}
         isAdmin={isAdmin}
+        onLogout={handleLogout}
       />
     </>
   );

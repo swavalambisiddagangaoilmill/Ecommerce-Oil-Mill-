@@ -206,7 +206,8 @@ export default function Account() {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async ({ skipConfirm = false } = {}) => {
+    if (!skipConfirm && !window.confirm("Are you sure you want to log out?")) return;
     await logout();
     navigate("/login", { replace: true });
   };
@@ -268,7 +269,8 @@ export default function Account() {
               <nav className="hidden gap-2 lg:grid" aria-label="Account navigation">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
-                  return <button key={tab.id} type="button" onClick={() => tab.id === "logout" ? handleLogout() : setActiveTab(tab.id)} className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold transition ${activeTab === tab.id ? "bg-ink text-white" : "text-ink/65 hover:bg-linen hover:text-ink"}`}><Icon size={18} />{tab.label}</button>;
+                  const isLogout = tab.id === "logout";
+                  return <button key={tab.id} type="button" onClick={() => isLogout ? handleLogout() : setActiveTab(tab.id)} className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold transition ${isLogout ? "bg-danger/10 text-danger hover:bg-danger hover:text-white" : activeTab === tab.id ? "bg-ink text-white" : "text-ink/65 hover:bg-linen hover:text-ink"}`}><Icon size={18} />{tab.label}</button>;
                 })}
               </nav>
             </aside>
@@ -293,6 +295,7 @@ export default function Account() {
                       <p className="mt-4 font-semibold">{user.name}</p>
                       <p className="mt-1 text-sm text-ink/55">{user.email}</p>
                       <p className="mt-4 text-sm leading-6 text-ink/60">Only supported profile fields are editable here. Role and internal security fields are never exposed.</p>
+                      <button type="button" onClick={() => handleLogout()} className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-danger/10 px-5 text-sm font-bold text-danger transition hover:bg-danger hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/30"><LogOut size={16} />Logout</button>
                     </div>
                   </div>
                 </section>
@@ -356,14 +359,14 @@ export default function Account() {
                 </section>
               )}
 
-              {!loading && activeTab === "security" && <AccountSecurityPanel onLogout={handleLogout} />}
+              {!loading && activeTab === "security" && <AccountSecurityPanel onLogout={() => handleLogout({ skipConfirm: true })} />}
 
               {!loading && activeTab === "logout" && (
                 <section className="grid place-items-center py-12 text-center">
                   <LogOut className="text-leaf" size={32} />
                   <h2 className="mt-4 font-serif text-3xl font-semibold">Ready to logout?</h2>
                   <p className="mt-3 max-w-md text-ink/60">You can sign back in anytime to view your orders and saved pantry details.</p>
-                  <Button type="button" className="mt-6" onClick={handleLogout}>Logout</Button>
+                  <button type="button" className="mt-6 inline-flex h-12 items-center gap-2 rounded-full bg-danger/10 px-7 text-sm font-bold text-danger transition hover:bg-danger hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/30" onClick={() => handleLogout()}><LogOut size={17} />Logout</button>
                 </section>
               )}
             </div>
@@ -384,3 +387,4 @@ export default function Account() {
 function AdminMetric({ label, value }) {
   return <div className="rounded-2xl bg-cream p-4"><p className="text-xs font-bold uppercase tracking-[0.12em] text-ink/40">{label}</p><p className="mt-2 text-lg font-bold">{value ?? <span className="inline-block h-5 w-16 animate-pulse rounded bg-ink/10" />}</p></div>;
 }
+

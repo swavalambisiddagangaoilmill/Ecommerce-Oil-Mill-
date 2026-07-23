@@ -1,6 +1,6 @@
 // Renders the MobileDrawer layout element.
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, Search, ShoppingBag, UserRound, X } from "lucide-react";
+import { Heart, LogOut, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { aboutMenuLinks, categoryMenuLinks, essentialOilLinks, oilMenuLinks } from "../../data/siteData.js";
@@ -8,7 +8,7 @@ import { useCart } from "../../hooks/useCart.jsx";
 import Button from "../ui/Button.jsx";
 import AccordionMenu from "./AccordionMenu.jsx";
 
-export default function MobileDrawer({ open, onClose, onWishlist, accountPath = "/login", authenticated = false, isAdmin = false }) {
+export default function MobileDrawer({ open, onClose, onWishlist, onLogout, accountPath = "/login", authenticated = false, isAdmin = false }) {
   const { items } = useCart();
   const count = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -90,6 +90,12 @@ export default function MobileDrawer({ open, onClose, onWishlist, accountPath = 
                 </span>
                 {count > 0 && <span className="rounded-full bg-leaf px-2 py-1 text-xs font-bold text-white">{count}</span>}
               </Link>
+              {authenticated && (
+                <button type="button" onClick={() => { onClose(); onLogout?.(); }} className="flex items-center gap-3 rounded-2xl bg-danger/10 p-4 text-left font-semibold text-danger shadow-sm transition hover:bg-danger hover:text-white">
+                  <LogOut size={19} />
+                  Logout
+                </button>
+              )}
             </div>
             <div className="mt-auto pt-4">
               <Button to="/shop" className="w-full" onClick={onClose}>

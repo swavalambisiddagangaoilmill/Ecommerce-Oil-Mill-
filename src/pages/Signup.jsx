@@ -9,16 +9,34 @@ import { useAuth } from "../context/AuthContext.jsx";
 import Container from "../components/ui/Container.jsx";
 import Input from "../components/ui/Input.jsx";
 
+function normalizeIndianMobile(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  if (digits.length === 11 && digits.startsWith("0")) return digits.slice(1);
+  return digits;
+}
+
+function mapBackendFieldErrors(error) {
+  return (error.errors || error.payload?.errors || []).reduce((acc, item) => {
+    const field = item.field || item.param || item.path;
+    if (field && item.message) acc[field] = item.message;
+    return acc;
+  }, {});
+}
+
 export default function Signup() {
   const navigate = useNavigate();
   const location = useLocation();
   const { register, loginWithGoogle } = useAuth();
   const firstFieldRef = useRef(null);
+  const phoneRef = useRef(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [serverErrors, setServerErrors] = useState({});
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
 
   const strength = useMemo(() => {
@@ -30,29 +48,70 @@ export default function Signup() {
     return score;
   }, [form.password]);
 
-  const errors = {
-    name: form.name && form.name.length < 2 ? "Enter your full name." : "",
-    email: form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) ? "Enter a valid email." : "",
-    password: form.password && strength < 3 ? "Use at least 8 characters with uppercase and a number." : "",
-    confirm: form.confirm && form.confirm !== form.password ? "Passwords do not match." : "",
-  };
+  const validationErrors = useMemo(() => {
+    const phone = normalizeIndianMobile(form.phone);
+    return {
+      name: !form.name.trim() ? "Full name is required." : form.name.trim().length < 2 ? "Enter your full name." : "",
+      email: !form.email.trim() ? "Email is required." : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) ? "Enter a valid email." : "",
+      phone: !form.phone.trim() ? "Phone number is required." : !/^[6-9]\d{9}$/.test(phone) ? "Enter a valid 10-digit mobile number." : "",
+      password: !form.password ? "Password is required." : strength < 3 ? "Use at least 8 characters with uppercase and a number." : "",
+      confirm: !form.confirm ? "Confirm password is required." : form.confirm !== form.password ? "Passwords do not match." : "",
+    };
+  }, [form, strength]);
 
-  const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
+  const visibleErrors = useMemo(() => {
+    const errors = { ...serverErrors };
+    if (!submitted) {
+      Object.entries(validationErrors).forEach(([field, message]) => {
+        if (form[field] && message) errors[field] = message;
+      });
+      return errors;
+    }
+    Object.entries(validationErrors).forEach(([field, message]) => {
+      if (message) errors[field] = message;
+    });
+    return errors;
+  }, [form, serverErrors, submitted, validationErrors]);
+
+  const fieldClass = (field) => visibleErrors[field] ? "border-danger focus:border-danger focus:ring-danger/10" : "";
+  const update = (key) => (event) => {
+    const value = event.target.value;
+    setForm((current) => ({ ...current, [key]: value }));
+    setServerErrors((current) => ({ ...current, [key]: "" }));
+  };
   const handleTurnstile = useCallback((token) => setTurnstileToken(token), []);
   const afterSignup = () => navigate(location.state?.from || "/account", { replace: true });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (loading || Object.values(errors).some(Boolean) || strength < 3) return;
-    setLoading(true);
+    if (loading) return;
+    setSubmitted(true);
+    setServerErrors({});
     setSubmitError("");
+
+    const nextErrors = validationErrors;
+    if (Object.values(nextErrors).some(Boolean)) {
+      if (nextErrors.phone) phoneRef.current?.focus();
+      else firstFieldRef.current?.focus();
+      return;
+    }
+
+    setLoading(true);
     try {
-      await register({ name: form.name, email: form.email, phone: form.phone, password: form.password, turnstileToken });
+      await register({
+        name: form.name.trim(),
+        email: form.email.trim().toLowerCase(),
+        phone: normalizeIndianMobile(form.phone),
+        password: form.password,
+        turnstileToken,
+      });
       setSuccess(true);
       afterSignup();
     } catch (err) {
+      const fieldErrors = mapBackendFieldErrors(err);
       setSuccess(false);
-      setSubmitError(err.message || "Unable to create account. Please try again.");
+      setServerErrors(fieldErrors);
+      setSubmitError(Object.keys(fieldErrors).length ? "" : err.message || "Unable to create account. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -85,21 +144,22 @@ export default function Signup() {
           {success && <p className="mt-5 rounded-2xl bg-linen p-4 text-sm font-semibold text-leaf">Account created successfully. Please verify your email.</p>}
           {submitError && <p className="mt-5 rounded-2xl bg-linen p-4 text-sm font-semibold text-danger">{submitError}</p>}
           <div className="mt-7 grid gap-5">
-            <Input inputRef={firstFieldRef} label="Full Name" value={form.name} onChange={update("name")} required autoFocus aria-invalid={!!errors.name} />
-            {errors.name && <p className="-mt-3 text-sm font-semibold text-danger">{errors.name}</p>}
-            <Input label="Email" type="email" value={form.email} onChange={update("email")} required aria-invalid={!!errors.email} />
-            {errors.email && <p className="-mt-3 text-sm font-semibold text-danger">{errors.email}</p>}
-            <Input label="Phone (optional)" type="tel" value={form.phone} onChange={update("phone")} />
+            <Input inputRef={firstFieldRef} label="Full Name" value={form.name} onChange={update("name")} required autoFocus aria-invalid={!!visibleErrors.name} className={fieldClass("name")} />
+            {visibleErrors.name && <p className="-mt-3 text-sm font-semibold text-danger">{visibleErrors.name}</p>}
+            <Input label="Email" type="email" value={form.email} onChange={update("email")} required aria-invalid={!!visibleErrors.email} className={fieldClass("email")} />
+            {visibleErrors.email && <p className="-mt-3 text-sm font-semibold text-danger">{visibleErrors.email}</p>}
+            <Input inputRef={phoneRef} label="Phone Number" type="tel" inputMode="numeric" autoComplete="tel" value={form.phone} onChange={update("phone")} required aria-invalid={!!visibleErrors.phone} className={fieldClass("phone")} />
+            {visibleErrors.phone && <p className="-mt-3 text-sm font-semibold text-danger">{visibleErrors.phone}</p>}
             <div>
               <div className="relative">
-                <Input label="Password" type={showPassword ? "text" : "password"} value={form.password} onChange={update("password")} required />
+                <Input label="Password" type={showPassword ? "text" : "password"} value={form.password} onChange={update("password")} required aria-invalid={!!visibleErrors.password} className={fieldClass("password")} />
                 <button type="button" aria-label="Show or hide password" onClick={() => setShowPassword((current) => !current)} className="absolute bottom-2 right-2 grid h-9 w-9 place-items-center rounded-full bg-linen text-ink">{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button>
               </div>
               <div className="mt-3 grid grid-cols-4 gap-2" aria-label="Password strength">{Array.from({ length: 4 }).map((_, index) => <span key={index} className={`h-1.5 rounded-full ${index < strength ? "bg-leaf" : "bg-ink/10"}`} />)}</div>
-              {errors.password && <p className="mt-2 text-sm font-semibold text-danger">{errors.password}</p>}
+              {visibleErrors.password && <p className="mt-2 text-sm font-semibold text-danger">{visibleErrors.password}</p>}
             </div>
-            <Input label="Confirm Password" type={showPassword ? "text" : "password"} value={form.confirm} onChange={update("confirm")} required aria-invalid={!!errors.confirm} />
-            {errors.confirm && <p className="-mt-3 text-sm font-semibold text-danger">{errors.confirm}</p>}
+            <Input label="Confirm Password" type={showPassword ? "text" : "password"} value={form.confirm} onChange={update("confirm")} required aria-invalid={!!visibleErrors.confirm} className={fieldClass("confirm")} />
+            {visibleErrors.confirm && <p className="-mt-3 text-sm font-semibold text-danger">{visibleErrors.confirm}</p>}
             <TurnstileWidget onVerify={handleTurnstile} className="min-h-[65px]" />
           </div>
           <Button type="submit" className="mt-7 w-full" loading={loading}>Create Account</Button>
